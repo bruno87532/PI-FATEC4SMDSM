@@ -7,11 +7,12 @@ import { ShoppingCart, User } from "lucide-react"
 
 export const SiteHeader = () => {
   return (
-    <header className="w-full border-b">
+    <header className="w-full border-b max-w-6xl mx-auto">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center">
+          <Link href="/" className="flex items-center font-extrabold text-lg">
+            PI4DSM
           </Link>
 
           {/* Location Selector */}
