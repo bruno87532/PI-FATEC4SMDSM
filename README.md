@@ -56,5 +56,5 @@ npm run start:dev  # Isso fará com que o projeto rode na porta 3001
 
 ## Membros da equipe:
 - [Bruno Henrique Guinerio](https://github.com/bruno87532) 
-- [Stephan Mendes](https://github.com/)
+- [Stephan Mendes](https://github.com/StephanMendes)
 - [Miguel](https://github.com/)
