@@ -7,6 +7,7 @@ import { EmailModule } from 'src/email/email.module';
 @Module({
   providers: [UsersService],
   controllers: [UsersController],
-  imports: [PrismaModule, EmailModule]
+  imports: [PrismaModule, EmailModule],
+  exports: [UsersService]
 })
 export class UsersModule {}

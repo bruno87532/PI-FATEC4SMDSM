@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException, HttpException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { EmailService } from 'src/email/email.service';
 import { randomInt } from 'crypto';
@@ -19,25 +19,26 @@ export class UsersService {
                 data: { ...data, randomCode, randomCodeExpiration }
             })
 
-            await this.sendWelcomeEmail( { name: data.name, email: data.email, code: randomCode } )
+            await this.sendWelcomeEmail({ name: data.name, email: data.email, code: randomCode })
             return user;
         } catch (error) {
-            console.error("An error ocurred while creating the user: " + error)
+            console.error("An error ocurred while creating the user:", error)
+            if (error.code === "P2002") throw new BadRequestException("Email already registered") // Code que retorna pelo supabase quando dado já existe
             throw new InternalServerErrorException("An error ocurred while creating the user")
         }
     }
 
-    public generateRandomCode(): string {
+    generateRandomCode(): string {
         return randomInt(100000, 1000000).toString()
     }
 
-    public generateExpirationTime(): Date {
+    generateExpirationTime(): Date {
         const expirationTime: Date = new Date()
         expirationTime.setHours(expirationTime.getHours() + 1)
         return expirationTime
     }
 
-    public async sendWelcomeEmail(data: { name: string, email: string, code: string } ): Promise<void> {
+    async sendWelcomeEmail(data: { name: string, email: string, code: string }): Promise<void> {
         const { name, email, code } = data
         return this.emailService.sendEmail(
             {
@@ -63,7 +64,22 @@ export class UsersService {
             return user
         } catch (error) {
             console.error(`An error ocurred while fetching the user with id ${id}:`, error)
+            if (error instanceof HttpException) throw error
             throw new InternalServerErrorException("An error ocurred while fetching the user")
+        }
+    }
+
+    async updateUser(id: string, data: Record<string, any>) {
+        try {
+            const user = await this.prismaService.user.update({
+                where: { id },
+                data
+            })
+
+            return user
+        } catch (error) {
+            console.error(`An error ocurred while updating the user with id ${id}:`, error)
+            throw new InternalServerErrorException("An error ocurred while updating the user")
         }
     }
 }
