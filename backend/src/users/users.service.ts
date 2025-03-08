@@ -3,6 +3,14 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { EmailService } from 'src/email/email.service';
 import { randomInt } from 'crypto';
 import { User } from '@prisma/client';
+import * as bcrypt from 'bcryptjs';
+
+interface DataUpdateUser {
+    password?: string;
+    randomCode?: string;
+    randomCodeExpiration?: Date;
+    isActivate?: Date;
+};
 
 @Injectable()
 export class UsersService {
@@ -10,6 +18,8 @@ export class UsersService {
         private readonly prismaService: PrismaService,
         private readonly emailService: EmailService
     ) { }
+
+    // ---- Código para lógica de criar usuário ---- //
 
     async createUser(data: { name: string; email: string }): Promise<User> {
         try {
@@ -54,6 +64,9 @@ export class UsersService {
         )
     }
 
+    // ---- Fim do código da lógica de criar usuário ---- //
+    // ---- Código para obter usuário por id ---- //
+
     async getUserById(id: string) {
         try {
             const user = await this.prismaService.user.findUnique({ where: { id } })
@@ -69,17 +82,67 @@ export class UsersService {
         }
     }
 
-    async updateUser(id: string, data: Record<string, any>) {
+    // ---- Fim do código que obtém o usuário por id ---- //
+    // ---- Código para obter usuário por email ---- //
+    
+    async getUserByEmail(email: string) {
         try {
+            const user = await this.prismaService.user.findUnique({ where: { email } })
+            if (!user) {
+                throw new NotFoundException("User not found")
+            }
+
+            return user
+        } catch (error) {
+            console.error("An error ocurred while fetching the user by email", error)
+            if (error instanceof HttpException) throw error
+            throw new InternalServerErrorException("An error ocurred while fetching the user by email") 
+        }
+    }
+
+    // ---- Fim do código que obtém o usuário por email ---- //
+    // ---- Código da lógica de atualização de usuário ---- //
+
+    async updateUser(id: string, data: DataUpdateUser) {
+        try {
+            const dataUpdated = this.workflowTransformer(data);
+            const newObject = Object.entries(dataUpdated)
+                .filter(([key, value]) => value !== undefined)
+                .reduce((acc, [key, value]) => {
+                    acc[key] = value;
+                    return acc;
+                }, {});
             const user = await this.prismaService.user.update({
                 where: { id },
-                data
+                data: newObject
             })
-
             return user
         } catch (error) {
             console.error(`An error ocurred while updating the user with id ${id}:`, error)
             throw new InternalServerErrorException("An error ocurred while updating the user")
         }
     }
+
+    private workflowTransformer(data: DataUpdateUser) {
+        const password = this.hashPassowrd(data.password ? data.password : undefined)
+        const dataUpdated = {
+            password,
+            ...Object.fromEntries(
+                Object.entries(data).filter(
+                    ([key]) => key !== "password"
+                )
+            )
+        }
+        return dataUpdated
+    }
+
+    private hashPassowrd(password: string | undefined): string | undefined {
+        if (password) {
+            password = bcrypt.hashSync(password, 10)
+        }
+        return password
+    }
+
+    // ---- Fim do código da lógica de atualização de usuário ---- //
+
 }

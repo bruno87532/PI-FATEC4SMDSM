@@ -22,4 +22,13 @@ model User {
   randomCode String? @db.VarChar(6)
   randomCodeExpiration DateTime 
   isActivate DateTime?
+  recoverPasswords RecoverPassword[]
+}
+
+model RecoverPassword {
+  id String @id @default(uuid())
+  randomCode String @unique
+  user User @relation(fields: [userId], references: [id])
+  userId String
+  isActivate DateTime?
 }

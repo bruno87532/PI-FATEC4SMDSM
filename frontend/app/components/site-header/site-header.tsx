@@ -1,11 +1,18 @@
+"use client"
+
 import Link from "next/link"
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Mic } from "lucide-react"
 import { ShoppingCart, User } from "lucide-react"
+import { useState } from "react"
+import { useAuthContext, AuthContext } from "../auth/auth-context"
+import { Auth } from "../auth/auth"
 
 export const SiteHeader = () => {
+  const [isOpen, setIsOpen] = useState<boolean>(false)
+
   return (
     <header className="w-full border-b max-w-6xl mx-auto">
       <div className="container mx-auto px-4 py-3">
@@ -41,11 +48,13 @@ export const SiteHeader = () => {
             </Button>
           </div>
 
-          {/* User Actions */}
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon">
-              <User className="h-5 w-5" />
-            </Button>
+            <AuthContext.Provider value={{setIsOpen, isOpen}}>
+              <Button onClick={() => setIsOpen(true)} variant="ghost" size="icon">
+                <User className="h-5 w-5" />
+                <Auth />
+              </Button>
+            </AuthContext.Provider>
             <Button variant="ghost" size="icon">
               <ShoppingCart className="h-5 w-5" />
             </Button>

@@ -1,16 +1,6 @@
-type subCategories = Record<string, string>;
-export type categories = {
-    "Bebidas alcóolicas": subCategories;
-    "Bebidas não alcóolicas": subCategories;
-    "Carnes": subCategories;
-    "Frios e embutidos": subCategories;
-    "Padaria": subCategories;
-    "Mercearia": subCategories;
-    "Limpeza": subCategories;
-    "Hortifruti": subCategories;
-}
+type category = Record<string, Record<string, string>>[]
 
-export const mainContent = [
+export const mainContent: category = [
     {
         "Bebidas alcóolicas": {
             "Cervejas e Chopes": "/",
@@ -76,4 +66,4 @@ export const mainContent = [
             "Orgânicos": "/"
         }
     }
-];
+]

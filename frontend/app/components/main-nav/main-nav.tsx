@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { mainContent, categories } from "./content"
+import { mainContent } from "./content"
 
 export const MainNav = () => {
   const categories = ["Queijos Especiais", "Vinhos", "Bovinos", "Iogurtes", "Café", "Leites", "Azeite", "Aves"]
@@ -32,8 +32,8 @@ export const MainNav = () => {
                 <DropdownMenuSeparator />
 
                 {mainContent.map((item, index) => {
-                  const categoryName: categories = Object.keys(item)[0];
-                  const subCategories = item[categoryName];
+                  const categoryName: string = Object.keys(item)[0];
+                  const subCategories: Record<string, string> = item[categoryName];
 
                   return (
                     <DropdownMenu key={index}>
@@ -59,7 +59,6 @@ export const MainNav = () => {
 
           </div>
 
-          {/* Categorias centralizadas */}
           <div className="flex-1 flex items-center justify-center gap-6">
             {categories.map((category) => (
               <Link
@@ -72,7 +71,6 @@ export const MainNav = () => {
             ))}
           </div>
 
-          {/* Botões direita */}
           <div className="flex-none flex items-center gap-4">
             <Button variant="ghost" className="flex items-center gap-2">
               <span className="text-sm">Montar Compra</span>

@@ -15,11 +15,8 @@ export class EmailService {
         context: Record<string, string>,
     ): Promise<void> {
         try {
-            const { to, subject, template } = dataEmail
             this.mailerService.sendMail({
-                to,
-                subject,
-                template,
+                ...dataEmail,
                 context
             })
         } catch (error) {
