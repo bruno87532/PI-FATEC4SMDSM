@@ -1,20 +1,19 @@
-import { Controller, Patch, Body, UsePipes, ValidationPipe, Param, Post } from '@nestjs/common';
+import { Controller, Body, UsePipes, ValidationPipe, Param, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { VerifyCodeDto } from './dto/verify-code.dto';
 import { RecoverPasswordDto } from './dto/recover-password.dto'
 import { HttpCode } from '@nestjs/common';
 import { VerifyRecoverPasswordDto } from './dto/verify-recover-password.dto';
-import { plainToInstance } from 'class-transformer';
-import { VerifyRecoverPasswordResponseDto } from './dto/verify-recover-password-response.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Controller('auth')
 export class AuthController {
     constructor(private readonly authService: AuthService) { }
 
-    @Patch("/verify-code/:id")
+    @Post("/verify-code")
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-    async verifyCode(@Param("id") id: string, @Body() data: VerifyCodeDto) {
-        return await this.authService.verifyCode(id, data)
+    async verifyCode(@Body() data: VerifyCodeDto) {
+        return await this.authService.verifyCode(data)
     }
 
     @Post("/recover-password")
@@ -28,7 +27,14 @@ export class AuthController {
     @HttpCode(200)
     @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
     async verifyRecoverPassword(@Body() data: VerifyRecoverPasswordDto) {
-        return plainToInstance(VerifyRecoverPasswordResponseDto, await this.authService.verifyRecoverPassword(data))
+        return await this.authService.verifyRecoverPassword(data)
+    }
+
+    @Post("/change-password")
+    @HttpCode(200)
+    @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+    async changePassword(@Body() data: ChangePasswordDto) {
+        return await this.authService.changePassword(data)
     }
 }
 

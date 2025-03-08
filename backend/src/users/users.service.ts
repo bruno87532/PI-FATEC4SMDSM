@@ -44,7 +44,7 @@ export class UsersService {
 
     generateExpirationTime(): Date {
         const expirationTime: Date = new Date()
-        expirationTime.setHours(expirationTime.getHours() + 1)
+        expirationTime.setMinutes(expirationTime.getMinutes() + 5)
         return expirationTime
     }
 
