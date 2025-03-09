@@ -1,10 +1,11 @@
-import { Controller, Body, UsePipes, ValidationPipe, Param, Post } from '@nestjs/common';
+import { Controller, Body, UsePipes, ValidationPipe, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { VerifyCodeDto } from './dto/verify-code.dto';
-import { RecoverPasswordDto } from './dto/recover-password.dto'
+import { RecoverDto } from './dto/recover.dto'
 import { HttpCode } from '@nestjs/common';
-import { VerifyRecoverPasswordDto } from './dto/verify-recover-password.dto';
-import { ChangePasswordDto } from './dto/change-password.dto';
+import { VerifyRecoverDto } from './dto/verify-recover.dto';
+import { ChangeDto } from './dto/change.dto';
+import { NewPasswordDto } from './dto/new-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -16,25 +17,31 @@ export class AuthController {
         return await this.authService.verifyCode(data)
     }
 
-    @Post("/recover-password")
+    @Post("/new-password")
+    @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+    async newPassword(@Body() data: NewPasswordDto) {
+        return await this.authService.newPassword(data)
+    }
+
+    @Post("/recover")
     @HttpCode(200)
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-    async recoverPassword(@Body() data: RecoverPasswordDto) {
-        return await this.authService.sendPasswordChangeEmail(data)
+    async recoverPassword(@Body() data: RecoverDto) {
+        return await this.authService.sendChangeEmail(data)
     }
 
-    @Post("/verify-recover-password")
+    @Post("/verify-recover")
     @HttpCode(200)
     @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
-    async verifyRecoverPassword(@Body() data: VerifyRecoverPasswordDto) {
-        return await this.authService.verifyRecoverPassword(data)
+    async verifyRecoverPassword(@Body() data: VerifyRecoverDto) {
+        return await this.authService.verifyRecover(data)
     }
 
-    @Post("/change-password")
+    @Post("/change")
     @HttpCode(200)
     @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
-    async changePassword(@Body() data: ChangePasswordDto) {
-        return await this.authService.changePassword(data)
+    async changePassword(@Body() data: ChangeDto) {
+        return await this.authService.changeEmailOrPassword(data)
     }
 }
 

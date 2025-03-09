@@ -6,7 +6,7 @@ export class VerifyCodeDto {
     @Length(6, 6, { message: "The randomCode must be 6 characters long" })
     randomCode: string
 
-    @IsString({ message: "The id must be a string" })
-    @IsNotEmpty({ message: "The id is required" })
-    id: string
+    @IsString({ message: "The idUser must be a string" })
+    @IsNotEmpty({ message: "The idUser is required" })
+    idUser: string
 }

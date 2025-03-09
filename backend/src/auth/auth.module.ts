@@ -2,12 +2,12 @@ import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UsersModule } from 'src/users/users.module';
-import { RecoverPasswordsModule } from 'src/recover-passwords/recover-passwords.module';
+import { RecoverModule } from 'src/recover/recover.module';
 import { EmailModule } from 'src/email/email.module';
 
 @Module({
   providers: [AuthService],
   controllers: [AuthController],
-  imports: [UsersModule, RecoverPasswordsModule, EmailModule]
+  imports: [UsersModule, RecoverModule, EmailModule]
 })
 export class AuthModule {}
