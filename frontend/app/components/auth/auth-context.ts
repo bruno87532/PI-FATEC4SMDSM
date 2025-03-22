@@ -1,8 +1,8 @@
-import { createContext, useContext } from "react";
+import React, { createContext, useContext } from "react";
 
 interface ContextProps {
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  isOpen: boolean;
+  activeTab: "login" | "recover" | "register";
+  setActiveTab: React.Dispatch<React.SetStateAction<"login" | "recover" | "register">>
 }
 
 export const AuthContext = createContext<ContextProps | undefined>(undefined)
@@ -12,5 +12,6 @@ export const useAuthContext = () => {
   if (!context) {
     throw new Error("The context must be used with a provider")
   }
+
   return context
 }
