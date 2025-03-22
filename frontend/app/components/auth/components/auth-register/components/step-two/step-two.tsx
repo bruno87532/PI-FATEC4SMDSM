@@ -4,7 +4,11 @@ import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
-import { useAuthRegisterContext } from "../auth-register-context"
+import { useAuthRegisterContext } from "../../auth-register-context"
+import { authService } from "@/services/auth"
+import { ApiError } from "@/type/error"
+import { Loader2 } from "lucide-react"
+import { useState } from "react"
 
 const StepTwoSchema = z.object({
     otp: z.string().length(6, "O código deve ter 6 dígitos.")
@@ -13,7 +17,8 @@ const StepTwoSchema = z.object({
 type StepTwo = z.infer<typeof StepTwoSchema>
 
 export const StepTwo = () => {
-    const { setRegisterStep } = useAuthRegisterContext()
+    const { setRegisterStep, idUser, setRandomCode } = useAuthRegisterContext()
+    const [isLoading, setIsLoading] = useState<boolean>(false) 
 
     const resetRegister = () => {
         stepTwoForm.reset({ otp: "" })
@@ -27,8 +32,27 @@ export const StepTwo = () => {
         }
     })
     
-    const handleSubmit = (data: StepTwo) => {
-        setRegisterStep(3)
+    const handleSubmit = async (data: StepTwo) => {
+        try {
+            setIsLoading(true)
+            await authService.verifyCode({ idUser, otp: data.otp })
+            setRandomCode(data.otp)
+            setRegisterStep(3)
+        } catch (error) {
+            if (error instanceof ApiError && error.message === "Invalid code") {
+                stepTwoForm.setError("otp", {
+                    type: "manual",
+                    message: "Código de verificação inválido." 
+                })
+            }
+            if (error instanceof ApiError && error.message === "Expired code") {
+                stepTwoForm.setError("otp", {
+                    type: "manual", 
+                    message: "Código de verificação expirado. Foi encaminhado um novo código para o seu email."
+                })
+            }
+            setIsLoading(false)
+        }
     }
     
     return (
@@ -68,7 +92,9 @@ export const StepTwo = () => {
                         Voltar
                     </Button>
                     <Button type="submit" className="flex-1">
-                        Verificar
+                        {
+                            isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : "Continuar"
+                        }
                     </Button>
                 </div>
             </form>

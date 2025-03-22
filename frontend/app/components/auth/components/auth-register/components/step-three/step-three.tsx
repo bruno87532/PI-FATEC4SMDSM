@@ -8,21 +8,31 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Input } from "@/components/ui/input"
 import React from "react"
 import { useState } from "react"
-import { Eye, EyeOff } from "lucide-react"
-import { useAuthRegisterContext } from "../auth-register-context"
-import { useAuthContext } from "../../../auth-context"
+import { Eye, EyeOff, Loader2 } from "lucide-react"
+import { useAuthRegisterContext } from "../../auth-register-context"
+import { useAuthContext } from "@/app/components/auth/auth-context"
+import { authService } from "@/services/auth"
 
 const StepThreeSchema = z.object({
-  password: z.string(),
+  password: z.string()
+  .min(8, "A senha deve conter pelo menos 8 caracteres")
+  .regex(/(?=.*[A-Z])/, "A senha deve conter pelo menos uma letra maiúscula")
+  .regex(/(?=.*[a-z])/, "A senha deve conter pelo menos uma letra minúscula")
+  .regex(/(?=.*\W)/, "A senha deve conter pelo menos um caracter especial")
+  .regex(/(?=(.*\d){5,})/, "A senha deve conter pelo menos cinco números"),
   confirmPassword: z.string()
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "As senhas devem ser iguais",
+  path: ["confirmPassword"]
 })
 
 type StepThree = z.infer<typeof StepThreeSchema>
 
 export const StepThree = () => {
-  const { setRegisterStep } = useAuthRegisterContext()
+  const { setRegisterStep, idUser, randomCode } = useAuthRegisterContext()
   const { setActiveTab } = useAuthContext()
 
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [showPassword, setShowPassword] = useState<boolean>(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false)
   
@@ -34,17 +44,25 @@ export const StepThree = () => {
     }
   })
 
-  const handleSubmit = (data: StepThree) => {
-
+  const handleSubmit = async (data: StepThree) => {
+    try {
+      setIsLoading(true)
+      await authService.newPassword({ 
+        idUser,
+        randomCode,
+        password: data.password
+      })
+      setRegisterStep(1)
+      setActiveTab("login")
+    } catch (error) {
+      setIsLoading(false)
+    }
   }
 
   return (
     <Form {...stepThreeForm}>
       <form
-        onSubmit={stepThreeForm.handleSubmit((data) => {
-          setRegisterStep(1)
-          setActiveTab("login")
-        })}
+        onSubmit={stepThreeForm.handleSubmit(handleSubmit)}
         className="space-y-4"
       >
         <FormField
@@ -104,7 +122,9 @@ export const StepThree = () => {
             Voltar
           </Button>
           <Button type="submit" className="flex-1">
-            Cadastrar
+            {
+              isLoading ? <Loader2 className="h-6 w-6 animate-spin"/> : "Cadastrar"
+            }
           </Button>
         </div>
       </form>
