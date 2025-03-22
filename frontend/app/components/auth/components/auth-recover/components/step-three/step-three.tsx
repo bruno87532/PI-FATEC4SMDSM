@@ -11,19 +11,32 @@ import { useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
 import { useAuthRecoverContext } from "../../auth-recover-context"
 import { useAuthContext } from "@/app/components/auth/auth-context"
+import { ApiError } from "@/type/error"
+import { authService } from "@/services/auth"
+import { Loader2 } from "lucide-react"
 
 const StepThreeSchema = z.object({
-  password: z.string(),
+  password: z.string()
+  .min(8, "A senha deve conter pelo menos 8 caracteres")
+  .regex(/(?=.*[A-Z])/, "A senha deve conter pelo menos uma letra maiúscula")
+  .regex(/(?=.*[a-z])/, "A senha deve conter pelo menos uma letra minúscula")
+  .regex(/(?=.*\W)/, "A senha deve conter pelo menos um caracter especial")
+  .regex(/(?=(.*\d){5,})/, "A senha deve conter pelo menos cinco números"),
   confirmPassword: z.string()
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "As senhas devem ser iguais",
+  path: ["confirmPassword"]
 })
 
 type StepThree = z.infer<typeof StepThreeSchema>
 
 export const StepThree = () => {
   const { setActiveTab } = useAuthContext()
-  const { setRecoverStep } = useAuthRecoverContext()
+  const { setRecoverStep, idUser, randomCode } = useAuthRecoverContext()
+
   const [showPassword, setShowPassword] = useState<boolean>(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const resetPassword = () => {
     stepThreeForm.reset({
@@ -41,8 +54,19 @@ export const StepThree = () => {
     }
   })
 
-  const handleSubmit = (data: StepThree) => {
-    setActiveTab("login")
+  const handleSubmit = async (data: StepThree) => {
+    try {
+      setIsLoading(true)
+      await authService.changeEmailOrPassword({
+        password: data.password,
+        idUser,
+        type: "PASSWORD"
+      })
+      setRecoverStep(1)
+      setActiveTab("login")
+    } catch (error) {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -105,7 +129,9 @@ export const StepThree = () => {
             Voltar
           </Button>
           <Button type="submit" className="flex-1">
-            Alterar Senha
+            {
+              isLoading ? <Loader2 className="h-6 w-6 animate-spin"/> : "Alterar senha"
+            }
           </Button>
         </div>
       </form>

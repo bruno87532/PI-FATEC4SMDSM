@@ -6,9 +6,11 @@ import { AuthRecoverContext } from "./auth-recover-context"
 
 export const AuthRecover = () => {
   const [recoverStep, setRecoverStep] = useState<number>(1)
+  const [idUser, setIdUser] = useState<string>("")
+  const [randomCode, setRandomCode] = useState<string>("")
 
   return (
-    <AuthRecoverContext.Provider value={{ recoverStep, setRecoverStep }}>
+    <AuthRecoverContext.Provider value={{ recoverStep, setRecoverStep, idUser, setIdUser, randomCode, setRandomCode }}>
       {recoverStep === 1 && (
         <>
           <StepOne />
