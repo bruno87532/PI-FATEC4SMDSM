@@ -7,6 +7,6 @@ export class CreateUserDto {
 
     @IsNotEmpty({ message: "The name is required" })
     @IsString({ message: "The name must be a string" })
-    @Length(3, 200, { message: "The name must be between 3 and 200 characters long" })
+    @Length(1, 200, { message: "The name must be between 1 and 200 characters long" })
     name: string
 }

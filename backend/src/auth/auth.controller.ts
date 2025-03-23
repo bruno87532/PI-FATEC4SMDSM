@@ -1,4 +1,4 @@
-import { Controller, Body, UsePipes, ValidationPipe, Post } from '@nestjs/common';
+import { Controller, Body, UsePipes, ValidationPipe, Post, UseGuards, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { VerifyCodeDto } from './dto/verify-code.dto';
 import { RecoverDto } from './dto/recover.dto'
@@ -6,6 +6,8 @@ import { HttpCode } from '@nestjs/common';
 import { VerifyRecoverDto } from './dto/verify-recover.dto';
 import { ChangeDto } from './dto/change.dto';
 import { NewPasswordDto } from './dto/new-password.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { User } from './interfaces/user.interface';
 
 @Controller('auth')
 export class AuthController {
@@ -33,7 +35,7 @@ export class AuthController {
     @Post("/verify-recover")
     @HttpCode(200)
     @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
-    async verifyRecoverPassword(@Body() data: VerifyRecoverDto) {
+    async verifyRecover(@Body() data: VerifyRecoverDto) {
         return await this.authService.verifyRecover(data)
     }
 
@@ -42,6 +44,12 @@ export class AuthController {
     @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
     async changePassword(@Body() data: ChangeDto) {
         return await this.authService.changeEmailOrPassword(data)
+    }
+
+    @Post("/login")
+    @UseGuards(AuthGuard("local"))
+    async login(@Req() req: Request & { user: User }) {
+        return await this.authService.createJwt(req.user)
     }
 }
 

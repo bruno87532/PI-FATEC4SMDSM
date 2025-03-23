@@ -19,7 +19,7 @@
 **Nome:**
 - Deve ser uma string contendo entre 3 e 200 caracteres.
 - **Mensagens de erro:**
-  - `"The name must be between 3 and 200 characters long"`
+  - `"The name must be between 1 and 200 characters long"`
   - `"The name must be a string"`
   - `"The name is required"`
 
@@ -188,5 +188,57 @@ Após a criação bem-sucedida, um código de verificação (`randomCode`) será
     "statusCode": 200
 }
 ```
+### Validações Internas:
+- **Email não cadastrado:**
+```json
+{
+    "message": "User not found",
+    "error": "Not found",
+    "statusCode": 404
+}
+```
+- **Usuário não verificado:**
+```json
+{
+    "message": "User is not verified",
+    "error": "Unauthorized",
+    "statusCode": 401
+}
+```
 
----
+--- 
+
+## 5. Verificação de código de senha ou email
+
+- **Tipo de Requisição:** `POST`
+- **Endpoint:** `/auth/verify-recover`
+- **Parâmetros Obrigatórios:** `randomCode`, `idUser`, `type`
+
+### Validações:
+
+**Email (`randomCode`):**
+- Deve ser uma string contendo exatamente 6 caracteres.
+- **Mensagens de erro:**
+  - `"The randomCode must be 6 characters long"`
+  - `"The randomCode is required"`
+  - `"The random code must be a string"`
+
+**ID do Usuário (`idUser`):**
+- Deve ser uma string válida e não pode estar vazia.
+- **Mensagens de erro:**
+  - `"The idUser is required"`
+  - `"The idUser must be a string"`
+
+**Email:**
+- Deve ser um endereço de email válido e não pode estar vazio.
+- **Mensagens de erro:**
+  - `"The email is required"`
+  - `"The email must be a valid email"`
+
+### Resposta de Sucesso:
+```json
+{
+    "message": "randomCode verified successfully",
+    "statusCode": 200
+}
+```

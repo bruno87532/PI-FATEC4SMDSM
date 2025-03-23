@@ -1,4 +1,4 @@
-import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { VerifyCodeDto } from './dto/verify-code.dto';
@@ -7,9 +7,12 @@ import { RecoverService } from 'src/recover/recover.service';
 import { RecoverDto } from './dto/recover.dto';
 import { VerifyRecoverDto } from './dto/verify-recover.dto';
 import { ChangeDto } from './dto/change.dto';
-import { ResponseMessage } from './response-message.interface';
+import { ResponseMessage, ResponseMessageIdUser } from './response-message.interface';
 import { RecoverTypeEnum } from 'src/recover/enum/recover-type.enum';
 import { NewPasswordDto } from './dto/new-password.dto';
+import { compareSync } from 'bcryptjs';
+import { JwtService } from '@nestjs/jwt';
+import { User } from './interfaces/user.interface';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +20,7 @@ export class AuthService {
         private readonly usersService: UsersService,
         private readonly emailService: EmailService,
         private readonly recoverService: RecoverService,
+        private readonly jwtService: JwtService,
     ) { }
 
     // ---- Código da lógica de verificação de código de usuário ---- //
@@ -40,7 +44,7 @@ export class AuthService {
             await this.handleVerifiedCode(data.idUser)
             return { message: "Code verified successfully", statusCode: 200 }
         } catch (error) {
-            console.error(`An error ocurred while checked the user code with id ${data.idUser}:`, error)
+            console.error("An error ocurred while checked the user:", error)
             if (error instanceof HttpException) throw error
             throw new InternalServerErrorException("An error ocurred while checked the user code with id")
         }
@@ -62,7 +66,7 @@ export class AuthService {
             await this.usersService.updateUser(data.id, updateData)
             await this.usersService.sendWelcomeEmail({ name: data.name, email: data.email, code: newRandomCode })
         } catch (error) {
-            console.error(`An error ocurred while updating the user code with id ${data.id}:`, error)
+            console.error("An error ocurred while updating the user code:", error)
             throw new InternalServerErrorException("An error ocurred while updating the user code with id")
         }
     }
@@ -83,7 +87,7 @@ export class AuthService {
             await this.usersService.updateUser(data.idUser, { password: data.password })
             return { message: "User updated succesfully", statusCode: 200 }
         } catch (error) {
-            console.error(`An error ocurred while updating new password from user with id ${data.idUser}`, error)
+            console.error("An error ocurred while updating new password from user", error)
             if (error instanceof HttpException) throw error
             throw new InternalServerErrorException("An error ocurred while updating new password from user")
         }
@@ -92,7 +96,7 @@ export class AuthService {
     // ---- Fim do código da lógica de nova senha de conta nova ---- //
     // ---- Código da lógica de enviar email para alterar senha/email ---- //
 
-    async sendChangeEmail(data: RecoverDto): Promise<ResponseMessage> {
+    async sendChangeEmail(data: RecoverDto): Promise<ResponseMessageIdUser> {
         try {
             const { email, type } = data
 
@@ -119,7 +123,7 @@ export class AuthService {
                     year: new Date().getFullYear().toString()
                 }
             )
-            return { message: "An email was sent", statusCode: 200 }
+            return { message: "An email was sent", statusCode: 200, idUser: user.id }
         } catch (error) {
             console.error("An error ocurred while sendind the email: ", error)
             if (error instanceof HttpException) throw error
@@ -147,7 +151,6 @@ export class AuthService {
             }
 
             this.recoverService.updateRecoverById(recover.id, { isActivate: new Date() })
-
             return { message: "randomCode verified successfully", statusCode: 200 }
         } catch (error) {
             console.error("An error ocurrend while checked the randomCode")
@@ -174,12 +177,40 @@ export class AuthService {
 
             return { message: "User updated successfully", statusCode: 200 }
         } catch (error) {
-            console.error(`An error ocurred while changing password of the user with id ${data.idUser}`, error)
+            console.error("An error ocurred while changing password of the user", error)
             if (error instanceof HttpException) throw error
             throw new InternalServerErrorException("An error ocurred while changing password of the user")
         }
     }
 
     // ---- Fim do código da lógica para alter senha do usuário ---- //
+    // ---- Início do código da lógica de validar senha ---- //
+
+    async validateLogin(email: string, password: string) {
+        try {
+            const user = await this.usersService.getUserByEmail(email)
+            if (!user || !user.password) return null
+
+            const isPasswordValid = compareSync(password, user.password)
+            if (!isPasswordValid) return null
+
+            return user
+        } catch (error) {
+            return null
+        }
+    }
+
+    async createJwt(user: User) {
+        const payload = { 
+            sub: user.id,
+            email: user.email
+        }
+
+        return {
+            token: this.jwtService.sign(payload)
+        }
+    }
+
+    // ---- Fim do código da lógica de validar senha ---- //
 }
 

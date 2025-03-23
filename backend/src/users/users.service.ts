@@ -91,7 +91,6 @@ export class UsersService {
             if (!user) {
                 throw new NotFoundException("User not found")
             }
-
             return user
         } catch (error) {
             console.error("An error ocurred while fetching the user by email", error)

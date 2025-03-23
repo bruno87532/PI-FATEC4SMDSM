@@ -1,0 +1,4 @@
+- Permitir outro cadastro de conta não verificada e/ou sem senha, porém bloquear para conta já cadastrada.
+- Quando gerar um token, verificar se já existe, se sim, gerar outro
+- Trocar o id do usuário por um JWT durante todos os processos de autenticação
+- Reenviar email de recuperar senha/email quando ele expirar

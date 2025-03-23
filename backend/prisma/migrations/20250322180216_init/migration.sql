@@ -1,17 +1,19 @@
-/*
-  Warnings:
-
-  - You are about to drop the `RecoverPassword` table. If the table is not empty, all the data it contains will be lost.
-
-*/
 -- CreateEnum
-CREATE TYPE "typeRecover" AS ENUM ('email', 'password');
+CREATE TYPE "typeRecover" AS ENUM ('EMAIL', 'PASSWORD');
 
--- DropForeignKey
-ALTER TABLE "RecoverPassword" DROP CONSTRAINT "RecoverPassword_userId_fkey";
+-- CreateTable
+CREATE TABLE "User" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "phone" VARCHAR(11),
+    "password" TEXT,
+    "randomCode" VARCHAR(6),
+    "randomCodeExpiration" TIMESTAMP(3) NOT NULL,
+    "isActivate" TIMESTAMP(3),
 
--- DropTable
-DROP TABLE "RecoverPassword";
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "Recover" (
@@ -24,6 +26,9 @@ CREATE TABLE "Recover" (
 
     CONSTRAINT "Recover_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Recover_randomCode_key" ON "Recover"("randomCode");
