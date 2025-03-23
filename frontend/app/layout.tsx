@@ -35,9 +35,11 @@ export default function RootLayout({
           <SiteHeader />
           <MainNav />
           <CategoryIcons />
-        </div>
+        
         {children}
+        </div>
         <SiteFooter />
+        
       </body>
     </html>
   );
