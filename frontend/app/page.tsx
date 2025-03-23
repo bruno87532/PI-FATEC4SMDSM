@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { CategoryNav } from "@/components/category-nav"
 import { MainBanner } from "@/components/main-banner"
+import { ProductSection } from "@/components/product-section"
 
 
 
@@ -13,6 +14,9 @@ export default function Home() {
       
       {/* Banner Principal */}
       <MainBanner />
+
+      {/* Seção de Produtos */}
+      <ProductSection />      
 
     </main>
   )
