@@ -37,7 +37,7 @@ export class AuthService {
                 throw new BadRequestException("Invalid code")
             }
             if (new Date().getTime() > user.randomCodeExpiration.getTime()) {
-                await this.handleExpiredCode({ id: data.idUser, name: user.name, email: user.email })
+                await this.handleExpiredVerifyCode({ id: data.idUser, name: user.name, email: user.email })
                 throw new BadRequestException("Expired code")
             }
 
@@ -55,7 +55,7 @@ export class AuthService {
         await this.usersService.updateUser(id, data)
     }
 
-    private async handleExpiredCode(data: { id: string, name: string, email: string }): Promise<void> {
+    private async handleExpiredVerifyCode(data: { id: string, name: string, email: string }): Promise<void> {
         try {
             const newRandomCode = this.usersService.generateRandomCode()
             const newRandomCodeExpiration = this.usersService.generateExpirationTime()
@@ -135,18 +135,22 @@ export class AuthService {
     // ---- Início do código da lógica de verificar código de alterar senha ---- //
 
     async verifyRecover(data: VerifyRecoverDto): Promise<ResponseMessage> {
+        const { idUser, type, randomCode } = data
         try {
-            const recover = await this.recoverService.getRecoverByRandomCode(data.randomCode)
-            if (recover.userId !== data.idUser) {
+            const recover = await this.recoverService.getRecoverByRandomCode(randomCode)
+            if (recover.userId !== idUser) {
                 throw new BadRequestException("Invalid code")
             }
-            if (recover.type !== data.type) {
+            if (recover.type !== type) {
                 throw new BadRequestException("Invalid code type")
             }
             if (recover.isActivate) {
                 throw new BadRequestException("randomCode already verified")
             }
             if (new Date().getTime() > recover.expiredCode.getTime()) {
+                const user = await this.usersService.getUserById(idUser)
+                const email = user.email
+                this.sendChangeEmail({ email, type })
                 throw new BadRequestException("Expired code")
             }
 
@@ -201,10 +205,10 @@ export class AuthService {
     }
 
     async createJwt(user: User) {
-        const payload = { 
-            sub: user.id,
-            email: user.email
-        }
+        const payload = Object.fromEntries(
+            Object.entries(user)
+                .filter(([key, value]) => value !== undefined)
+        )
 
         return {
             token: this.jwtService.sign(payload)

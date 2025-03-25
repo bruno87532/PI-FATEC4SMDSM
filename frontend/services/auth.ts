@@ -138,4 +138,31 @@ export class authService {
       throw error
     }
   }
+
+  static async login(data: {
+    email: string,
+    password: string
+  }) {
+    try {
+      const res = await fetch(this.pathBackend + "/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password
+        })
+      })
+
+      if (!res.ok) {
+        const error = await res.json()
+        throw new ApiError(error.message || "An error ocurred while logging")
+      }
+
+      return await res.json()
+    } catch (error) {
+      throw error
+    }
+  }
 }

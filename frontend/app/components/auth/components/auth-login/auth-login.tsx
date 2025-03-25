@@ -7,18 +7,21 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import React, { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { useAuthContext } from "../../auth-context"
+import { authService } from "@/services/auth"
+import { ApiError } from "@/type/error"
 
 const LoginSchema = z.object({
-  email: z.string(),
-  password: z.string(),
+  email: z.string().email("Informe um email válido"),
+  password: z.string().min(1, "A senha é obrigatória"),
 })
 
 type LoginSchema = z.infer<typeof LoginSchema>
 
 export const AuthLogin = () => {
-  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const { setActiveTab } = useAuthContext()
 
   const loginForm = useForm<LoginSchema>({
@@ -29,8 +32,20 @@ export const AuthLogin = () => {
     }
   })
 
-  const handleSubmit = (data: LoginSchema) => {
-
+  const handleSubmit = async (data: LoginSchema) => {
+    try {
+      setIsLoading(true)
+      await authService.login(data)
+      alert("Login feito com sucesso!! Este alert é temporário, só até criar uma tela.")
+    } catch (error) {
+      if (error instanceof ApiError && error.message === "Invalid email or password") {
+        loginForm.setError("password", {
+          type: "manual",
+          message: "Email ou senha inválido."
+        })
+      }
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -85,7 +100,9 @@ export const AuthLogin = () => {
           Esqueci minha senha
         </Button>
         <Button type="submit" className="w-full">
-          Entrar
+          {
+            isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : "Entrar"
+          }
         </Button>
         <div className="text-center text-sm">
           Não possui uma conta?{" "}

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UsersModule } from 'src/users/users.module';
@@ -13,7 +13,7 @@ import { LocalStrategy } from './strategies/local.strategy';
   providers: [AuthService, LocalStrategy],
   controllers: [AuthController],
   imports: [
-    UsersModule,
+    forwardRef(() => UsersModule),
     RecoverModule,
     EmailModule,
     ConfigModule.forRoot(),
@@ -24,6 +24,7 @@ import { LocalStrategy } from './strategies/local.strategy';
         expiresIn: '360s'
       }
     })
-  ]
+  ],
+  exports: [AuthService]
 })
 export class AuthModule { }

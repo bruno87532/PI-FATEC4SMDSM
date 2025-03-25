@@ -16,7 +16,7 @@ interface DataUpdateUser {
 export class UsersService {
     constructor(
         private readonly prismaService: PrismaService,
-        private readonly emailService: EmailService
+        private readonly emailService: EmailService,
     ) { }
 
     // ---- Código para lógica de criar usuário ---- //
