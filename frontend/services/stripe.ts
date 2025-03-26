@@ -1,21 +1,17 @@
 export class StripeService {
-    static async createEmbbeded() {
-        const url = process.env.NEXT_PUBLIC_BACKEND + "/stripe/create-checkout";
-
-        console.log("URL: ", url);  
-        const res = await fetch(url, {
-            body: JSON.stringify({ product: "BASIC_MONTHLY" }),
+    private static pathBackend = process.env.NEXT_PUBLIC_BACKEND;
+    
+    static async createCheckout() {
+        const res = await fetch(this.pathBackend + "/stripe/create-checkout", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             }
         });
-
         if (!res.ok) {
             throw new Error("Failed to create checkout");
         }
         const data = await res.json();
-
-        return data;
+        return data.client_secret;
     }
 }

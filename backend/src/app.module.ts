@@ -6,9 +6,10 @@ import { PrismaModule } from './prisma/prisma.module';
 import { EmailModule } from './email/email.module';
 import { AuthModule } from './auth/auth.module';
 import { RecoverModule } from './recover/recover.module';
+import { StripeModule } from './stripe/stripe.module';
 
 @Module({
-  imports: [UsersModule, PrismaModule, EmailModule, AuthModule, RecoverModule],
+  imports: [UsersModule, PrismaModule, EmailModule, AuthModule, RecoverModule, StripeModule],
   controllers: [AppController],
   providers: [AppService],
 })

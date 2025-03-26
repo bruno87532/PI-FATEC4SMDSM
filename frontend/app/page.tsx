@@ -1,12 +1,7 @@
-import Image from "next/image"
-import { Search } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { CategoryNav } from "@/components/category-nav"
 import { MainBanner } from "@/components/main-banner"
 import { ProductSection } from "@/components/product-section"
 import { CombosSection } from "@/components/combos-sections"
-
+import { Stripe } from "./components/stripe/stripe"
 
 
 export default function Home() {
@@ -21,6 +16,9 @@ export default function Home() {
       
       {/* Seção de Combos Especiais */}
       <CombosSection />
+
+      {/* Cria o checkout da stripe */}
+      <Stripe />
 
     </main>
   )
