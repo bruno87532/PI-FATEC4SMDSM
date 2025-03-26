@@ -11,7 +11,7 @@ const products = [
 
 export function ProductSection() {
     return (
-        <div className="container mx-auto py-8">
+        <div className="container mx-auto py-8 max-w-6xl">
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                     <ShoppingCart className="text-gray-600" />

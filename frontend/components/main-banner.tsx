@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 
 export function MainBanner() {
     return (
-        <div className="container mx-auto py-2 relative">
+        <div className="container mx-auto py-2 relative max-w-6xl">
             <div className="relative rounded-lg overflow-hidden">
                 <div className="flex items-center bg-gradient-to-r from-purple-800 to-orange-400 rounded-lg">
                     <div className="w-1/2 p-8 flex flex-col items-center">
