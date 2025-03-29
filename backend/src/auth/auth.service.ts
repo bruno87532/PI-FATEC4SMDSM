@@ -205,9 +205,10 @@ export class AuthService {
     }
 
     async createJwt(user: User) {
+        const allowedFields = ["id", "name", "email", "phone"];
         const payload = Object.fromEntries(
             Object.entries(user)
-                .filter(([key, value]) => value !== undefined)
+                .filter(([key]) => allowedFields.includes(key))
         )
 
         return {

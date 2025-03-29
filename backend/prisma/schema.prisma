@@ -9,6 +9,11 @@ enum typeRecover {
   PASSWORD
 }
 
+enum typeUser {
+  ADVERTISER
+  COMMON
+}
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -27,7 +32,19 @@ model User {
   randomCode           String?          @db.VarChar(6)
   randomCodeExpiration DateTime
   isActivate           DateTime?
+  typeUser typeUser @default(COMMON)
+  subscriptions Subscription[]
   recoverPasswords     Recover? @relation
+}
+
+model Subscription {
+  id String @id @default(uuid())
+  idPlan String
+  idUser String
+  expirationDate DateTime
+  isActivate Boolean @default(true)
+  user User @relation(fields: [idUser], references: [id])
+  plan Plan @relation(fields: [idPlan], references: [id])
 }
 
 model Recover {
@@ -38,4 +55,11 @@ model Recover {
   expiredCode DateTime
   type typeRecover
   isActivate  DateTime?
+}
+
+model Plan {
+  id String @id @default(uuid())
+  name String
+  idPrice String @unique 
+  subscriptions Subscription[]
 }

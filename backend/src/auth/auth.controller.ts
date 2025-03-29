@@ -48,8 +48,9 @@ export class AuthController {
 
     @Post("/login")
     @UseGuards(AuthGuard("local"))
+    @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
     async login(@Req() req: Request & { user: User }) {
-        return await this.authService.createJwt(req.user)
+        return await this.authService.createJwt(req.user)   
     }
 }
 

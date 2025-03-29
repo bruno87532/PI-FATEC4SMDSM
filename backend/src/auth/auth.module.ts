@@ -8,9 +8,10 @@ import { PassportModule } from '@nestjs/passport';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { LocalStrategy } from './strategies/local.strategy';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
-  providers: [AuthService, LocalStrategy],
+  providers: [AuthService, LocalStrategy, JwtStrategy],
   controllers: [AuthController],
   imports: [
     forwardRef(() => UsersModule),
@@ -21,7 +22,7 @@ import { LocalStrategy } from './strategies/local.strategy';
     JwtModule.register({
       privateKey: process.env.JWT_SECRET_KEY,
       signOptions: {
-        expiresIn: '360s'
+        expiresIn: '1d'
       }
     })
   ],
