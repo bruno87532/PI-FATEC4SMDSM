@@ -1,13 +1,16 @@
 import { Injectable, Inject, InternalServerErrorException, RawBody } from '@nestjs/common';
 import Stripe from 'stripe';
+import { User } from 'src/auth/interfaces/user.interface';
 
 @Injectable()
 export class StripeService {
-  constructor(@Inject("STRIPE_CLIENT") private readonly stripe: Stripe) { }
+  constructor(
+    @Inject("STRIPE_CLIENT") private readonly stripe: Stripe,
+  ) { }
 
   // ---- Início da lógica de criação de checkout ---- //
 
-  async createCheckout(price: string) {
+  async createCheckout(price: string, user: User) {
     try {
       const session = await this.stripe.checkout.sessions.create({
         payment_method_types: ["card"],
@@ -31,15 +34,17 @@ export class StripeService {
   // ---- Fim da lógica de criação de checkout ---- //
   // ---- Início da lógica de processar pagamento ---- //
 
-  async paymentSucessfully(data: string, signature: string) {
+  async paymentSucessfully(data: Buffer, signature: string, id: string) {
     const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET ?? ""
+    const dataToString = data.toString()
 
     try {
       const event = this.stripe.webhooks.constructEvent(
-        data,
+        dataToString,
         signature, 
         endpointSecret
       )
+      console.log(id)
 
       switch (event.type) {
         case "checkout.session.completed":

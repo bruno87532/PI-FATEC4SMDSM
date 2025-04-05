@@ -4,6 +4,7 @@ export class StripeService {
     static async createCheckout(price: string) {
         const res = await fetch(this.pathBackend + "/stripe/create-checkout", {
             method: "POST",
+            credentials: "include",
             headers: {
                 "Content-Type": "application/json"
             },

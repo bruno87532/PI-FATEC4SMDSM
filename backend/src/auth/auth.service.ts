@@ -1,4 +1,5 @@
-import { BadRequestException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable, Request, Res } from '@nestjs/common';
+import { Response } from 'express';
 import { UsersService } from 'src/users/users.service';
 import { InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { VerifyCodeDto } from './dto/verify-code.dto';
@@ -10,8 +11,8 @@ import { ChangeDto } from './dto/change.dto';
 import { ResponseMessage, ResponseMessageIdUser } from './response-message.interface';
 import { RecoverTypeEnum } from 'src/recover/enum/recover-type.enum';
 import { NewPasswordDto } from './dto/new-password.dto';
-import { compareSync } from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from "bcrypt";
 import { User } from './interfaces/user.interface';
 
 @Injectable()
@@ -190,30 +191,38 @@ export class AuthService {
     // ---- Fim do código da lógica para alter senha do usuário ---- //
     // ---- Início do código da lógica de validar senha ---- //
 
-    async validateLogin(email: string, password: string) {
+    async validateUser(email: string, password: string) {
         try {
-            const user = await this.usersService.getUserByEmail(email)
-            if (!user || !user.password) return null
+            const user = await this.usersService.getUserByEmail(email);
 
-            const isPasswordValid = compareSync(password, user.password)
-            if (!isPasswordValid) return null
+            if (user && user.password && await bcrypt.compare(password, user.password)) {
+                const { password, ...result } = user
+                return result
+            }
 
-            return user
+            return null
         } catch (error) {
             return null
         }
     }
 
-    async createJwt(user: User) {
-        const allowedFields = ["id", "name", "email", "phone"];
+    async login(@Request() req: Request & { user: User }, @Res({ passthrough: true }) res: Response) {
+        const allowedFields = ["id", "name"]
+        const user = req.user
         const payload = Object.fromEntries(
-            Object.entries(user)
-                .filter(([key]) => allowedFields.includes(key))
+            Object.entries(user).filter(([key, value]) => value !== undefined && allowedFields.includes(key))
         )
 
-        return {
-            token: this.jwtService.sign(payload)
-        }
+        const token = this.jwtService.sign(payload)
+        
+        res.cookie("access_token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 1000 * 60 * 60 * 24
+        })
+
+        return { message: "Login successfully" }
     }
 
     // ---- Fim do código da lógica de validar senha ---- //

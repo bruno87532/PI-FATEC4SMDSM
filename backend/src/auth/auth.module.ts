@@ -4,9 +4,8 @@ import { AuthController } from './auth.controller';
 import { UsersModule } from 'src/users/users.module';
 import { RecoverModule } from 'src/recover/recover.module';
 import { EmailModule } from 'src/email/email.module';
-import { PassportModule } from '@nestjs/passport';
-import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
@@ -17,14 +16,11 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     forwardRef(() => UsersModule),
     RecoverModule,
     EmailModule,
-    ConfigModule.forRoot(),
     PassportModule,
     JwtModule.register({
-      privateKey: process.env.JWT_SECRET_KEY,
-      signOptions: {
-        expiresIn: '1d'
-      }
-    })
+      secret: process.env.JWT_SECRET_KEY,
+      signOptions: { expiresIn: "1d" }
+    }),
   ],
   exports: [AuthService]
 })

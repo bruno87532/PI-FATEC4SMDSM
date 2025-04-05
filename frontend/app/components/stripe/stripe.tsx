@@ -11,11 +11,13 @@ export const Stripe = () => {
   const yearly = ["Plano básico anual", "Plano médio anual", "Plano avançado anual"]
   const [plans, setPlans] = useState<Record<string, string>[] | undefined>(undefined)
 
+
   useEffect(() => {
     const fetchPlans = async () => {
       try {
         const plans = await planService.getPlan()
         setPlans(plans)
+        console.log(plans)
       } catch (error) {
         throw error
       }
