@@ -10,6 +10,7 @@ interface DataUpdateUser {
     randomCode?: string;
     randomCodeExpiration?: Date;
     isActivate?: Date;
+    typeUser?: "COMMON" | "ADVERTISER"
 };
 
 @Injectable()
@@ -117,7 +118,7 @@ export class UsersService {
             })
             return user
         } catch (error) {
-            console.error(`An error ocurred while updating the user with id ${id}:`, error)
+            console.error("An error ocurred while updating the user:", error)
             throw new InternalServerErrorException("An error ocurred while updating the user")
         }
     }

@@ -3,9 +3,12 @@ import { StripeService } from './stripe.service';
 import { StripeController } from './stripe.controller';
 import Stripe from 'stripe';
 import { AuthModule } from 'src/auth/auth.module';
+import { SubscriptionModule } from 'src/subscription/subscription.module';
+import { PlanModule } from 'src/plan/plan.module';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, SubscriptionModule, PlanModule, UsersModule],
   providers: [
     StripeService,
     {

@@ -11,17 +11,15 @@ export class StripeController {
   @Post("/create-checkout")
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   async createCheckout(@Body() data: CreateCheckoutDto, @Request() req) {
-    const user = req.user
-    return await this.stripeService.createCheckout(data.price, user)
+    return await this.stripeService.createCheckout(data.price, req.user)
   }
 
   @Post("/payment-successfully") 
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   async paymentSucessfully(
-    @Request() req,
     @Headers("stripe-signature") signature: string,
     @Body() data: Buffer
   ) {
-    return await this.stripeService.paymentSucessfully(data, signature, req.user.id)
+    return await this.stripeService.paymentSucessfully(data, signature)
   }
 }
