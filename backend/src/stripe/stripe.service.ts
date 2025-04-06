@@ -1,4 +1,4 @@
-import { Injectable, Inject, InternalServerErrorException, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, InternalServerErrorException, BadRequestException, HttpException } from '@nestjs/common';
 import Stripe from 'stripe';
 import { SubscriptionService } from 'src/subscription/subscription.service';
 import { PlanService } from 'src/plan/plan.service';
@@ -56,9 +56,12 @@ export class StripeService {
       switch (event.type) {
         case "checkout.session.completed":
           const session: Stripe.Checkout.Session = event.data.object
-          this.handleCheckoutSessionCompleted(session)
+          await this.handleCheckoutSessionCompleted(session)
           break
-      }
+        case "invoice.payment_succeeded":
+          const invoice: Stripe.Invoice = event.data.object 
+          await this.handleInvoicePaymentSucceeded(invoice)
+        }
     } catch (error) {
       console.error("An error ocurred while handling the webhook stripe", error)
       throw new InternalServerErrorException("An error ocurred while handling the webhook stripe")
@@ -67,25 +70,46 @@ export class StripeService {
 
   private async handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
     try {
-      let subscription: Stripe.Subscription | null = null
-      if (typeof session.subscription === "string") {
-        subscription = await this.stripe.subscriptions.retrieve(session.subscription)
-      }
-
+      if (typeof session.subscription !== "string") throw new BadRequestException("The subscription must be a string")
+        
+      const subscription: Stripe.Subscription = await this.stripe.subscriptions.retrieve(session.subscription)
+      const idStripe = subscription!.id
       const idPrice = subscription!.items.data[0].plan.id
       const idPlan = (await this.planService.getPlanByIdPrice(idPrice)).id
 
       const idUser = session.metadata!.id
 
-      const dateUnix = (subscription!.current_period_end + 24 * 60 * 60) * 1000
+      const dateUnix = (subscription!.current_period_end + 24 * 60 * 60) * 1000;
       const expirationDate = new Date(dateUnix)
-      const data = { idPlan, idUser, expirationDate }
+      const data = { idPlan, idUser, expirationDate, idStripe }
 
       this.usersService.updateUser(idUser, { typeUser: "ADVERTISER" })
       this.subscriptionService.createSubscription(data)
     } catch (error) {
       console.error("Error while processing the checkout session", error)
       throw new InternalServerErrorException("Error while processing the checkout session")
+    }
+  }
+
+  private async handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
+    try {
+      if (invoice.billing_reason !== "subscription_cycle") return null
+
+      const idStripe = invoice.subscription
+      if (typeof idStripe !== "string") throw new BadRequestException("The idStripe must be a string")
+      const { id, idUser } = await this.subscriptionService.getSubscriptionByIdStripe(idStripe) 
+      const subscription = await this.stripe.subscriptions.retrieve(idStripe)
+
+      const dateUnix = (subscription.current_period_end + 24 * 60 * 60) * 1000
+      const expirationDate = new Date(dateUnix)
+
+      await this.subscriptionService.updateSubscription(id, expirationDate)
+      const data: { typeUser: "COMMON" } | { typeUser: "ADVERTISER" } = { typeUser: "ADVERTISER" }
+      await this.usersService.updateUser(idUser, data)
+    } catch (error) {
+      console.error("Error while processing the invoice payment succeeded", error)
+      if (error instanceof HttpException) throw error
+      throw new InternalServerErrorException("Error while processing the invoice payment succeeded")
     }
   }
   // ---- Fim da lógica de processar pagamento ---- //
