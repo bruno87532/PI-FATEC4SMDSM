@@ -11,7 +11,7 @@ export class StripeController {
   @Post("/create-checkout")
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   async createCheckout(@Body() data: CreateCheckoutDto, @Request() req) {
-    return await this.stripeService.createCheckout(data.price, req.user)
+    return await this.stripeService.createCheckout(data.price, req.user.userId)
   }
 
   @Post("/payment-successfully") 
@@ -21,5 +21,11 @@ export class StripeController {
     @Body() data: Buffer
   ) {
     return await this.stripeService.paymentSucessfully(data, signature)
+  }
+
+  @UseGuards(AuthGuard("jwt"))
+  @Post("/cancel-subscription")
+  async cancelSubscription(@Request() req) {
+    return await this.stripeService.cancelSubscription(req.user.userId)
   }
 }

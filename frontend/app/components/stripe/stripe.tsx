@@ -5,6 +5,8 @@ import { planService } from "@/services/plan";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@radix-ui/react-tabs";
 import { DialogPrice } from "./components/dialog-price/dialog-price";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { StripeService } from "@/services/stripe";
 
 export const Stripe = () => {
   const monthly = ["Plano básico mensal", "Plano médio mensal", "Plano avançado mensal"]
@@ -26,30 +28,42 @@ export const Stripe = () => {
     fetchPlans()
   }, [])
 
+  const cancelSubscription = async () => {
+    try {
+      await StripeService.cancelSubscription()
+      alert("Assinatura cancelada com sucesso")
+    } catch (error) {
+
+    }
+  }
+
   return (
-    <Tabs defaultValue="monthly" className="max-w-5xl mx-auto">
-      <TabsList className="grid w-full grid-cols-2 mb-8">
-        <TabsTrigger value="monthly">Mensal</TabsTrigger>
-        <TabsTrigger value="annual">Anual</TabsTrigger>
-      </TabsList>
-      <TabsContent value="monthly" className="grid md:grid-cols-3 gap-8">
-        {monthly.map((planMonthly, index) => {
-          const plan = plans?.find((p) => p.name === planMonthly);
-          if (!plan) return null
-          return (
-            <DialogPrice key={index} price={plan.idPrice} />
-          )
-        })}
-      </TabsContent>
-      <TabsContent value="annual" className="grid md:grid-cols-3 gap-8">
-        {yearly.map((planYearly, index) => {
-          const plan = plans?.find((p) => p.name === planYearly);
-          if (!plan) return null
-          return (
-            <DialogPrice key={index} price={plan.idPrice} />
-          )
-        })}
-      </TabsContent>
-    </Tabs>
+    <div>
+      <Tabs defaultValue="monthly" className="max-w-5xl mx-auto">
+        <TabsList className="grid w-full grid-cols-2 mb-8">
+          <TabsTrigger value="monthly">Mensal</TabsTrigger>
+          <TabsTrigger value="annual">Anual</TabsTrigger>
+        </TabsList>
+        <TabsContent value="monthly" className="grid md:grid-cols-3 gap-8">
+          {monthly.map((planMonthly, index) => {
+            const plan = plans?.find((p) => p.name === planMonthly);
+            if (!plan) return null
+            return (
+              <DialogPrice key={index} price={plan.idPrice} />
+            )
+          })}
+        </TabsContent>
+        <TabsContent value="annual" className="grid md:grid-cols-3 gap-8">
+          {yearly.map((planYearly, index) => {
+            const plan = plans?.find((p) => p.name === planYearly);
+            if (!plan) return null
+            return (
+              <DialogPrice key={index} price={plan.idPrice} />
+            )
+          })}
+        </TabsContent>
+      </Tabs>
+      <Button onClick={cancelSubscription}>Cancelar assinatura</Button>
+    </div>
   )
 }

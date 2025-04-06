@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import { SubscriptionService } from 'src/subscription/subscription.service';
 import { PlanService } from 'src/plan/plan.service';
 import { UsersService } from 'src/users/users.service';
+import { Subscription } from '@prisma/client';
 
 @Injectable()
 export class StripeService {
@@ -15,7 +16,7 @@ export class StripeService {
 
   // ---- Início da lógica de criação de checkout ---- //
 
-  async createCheckout(price: string, user: { userId: string }) {
+  async createCheckout(price: string, userId: string) {
     try {
       const session = await this.stripe.checkout.sessions.create({
         payment_method_types: ["card"],
@@ -27,7 +28,7 @@ export class StripeService {
           }
         ],
         metadata: {
-          id: user.userId
+          id: userId
         },
         ui_mode: "embedded",
         return_url: "http://localhost:3000?payment-confirmation?session_id={CHECKOUT_SESSION_ID}"
@@ -61,6 +62,11 @@ export class StripeService {
         case "invoice.payment_succeeded":
           const invoice: Stripe.Invoice = event.data.object 
           await this.handleInvoicePaymentSucceeded(invoice)
+          break
+          case "customer.subscription.deleted":
+            const subscription: Stripe.Subscription = event.data.object
+            await this.handleCustomerSubscriptionDeleted(subscription)
+
         }
     } catch (error) {
       console.error("An error ocurred while handling the webhook stripe", error)
@@ -103,7 +109,7 @@ export class StripeService {
       const dateUnix = (subscription.current_period_end + 24 * 60 * 60) * 1000
       const expirationDate = new Date(dateUnix)
 
-      await this.subscriptionService.updateSubscription(id, expirationDate)
+      await this.subscriptionService.updateSubscription(id, { expirationDate })
       const data: { typeUser: "COMMON" } | { typeUser: "ADVERTISER" } = { typeUser: "ADVERTISER" }
       await this.usersService.updateUser(idUser, data)
     } catch (error) {
@@ -112,5 +118,39 @@ export class StripeService {
       throw new InternalServerErrorException("Error while processing the invoice payment succeeded")
     }
   }
+
+  private async handleCustomerSubscriptionDeleted(subscription: Stripe.Subscription) {
+    try {
+      const idStripe = subscription.id
+      const id = (await this.subscriptionService.getSubscriptionByIdStripe(idStripe)).id
+      await this.subscriptionService.updateSubscription(id, { isActivate: false })
+    } catch (error) {
+      console.error("Error while processing the customer subscription deleted", error)
+      throw new InternalServerErrorException("Error while processing the customer subscription deleted")
+    }
+  }
   // ---- Fim da lógica de processar pagamento ---- //
+  // ---- Início da lógica de solicitação de cancelamento de assinatura ---- //
+
+  async cancelSubscription(userId: string) {
+    try {
+      const arraySubscription = await this.subscriptionService.getSubscriptionsByIdUser(userId)
+      let subscriptionActivate: Subscription | null = null
+      for (const subscription of arraySubscription) {
+        if (subscription.isActivate === true) {
+          subscriptionActivate = subscription
+        }
+      }
+      if (typeof subscriptionActivate?.idStripe !== "string") throw new BadRequestException("idStripe must be a string")
+      await this.stripe.subscriptions.cancel(subscriptionActivate.idStripe)
+
+      return { message: "subscription canceled successfully" }
+    } catch (error) {
+      console.error("An error ocurred while canceling subscription", error)
+      if (error instanceof HttpException) throw error
+      throw new InternalServerErrorException("An error ocurred while canceling subscription")
+    }
+  }
+
+  // ---- Fim da lógica de solicitação de cancelamento de assinatura ---- //
 }
