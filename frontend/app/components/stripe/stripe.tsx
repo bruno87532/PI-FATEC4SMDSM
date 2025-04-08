@@ -7,8 +7,11 @@ import { DialogPrice } from "./components/dialog-price/dialog-price";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { StripeService } from "@/services/stripe";
+import { useRouter } from "next/navigation";
 
 export const Stripe = () => {
+  const router = useRouter()
+
   const monthly = ["Plano básico mensal", "Plano médio mensal", "Plano avançado mensal"]
   const yearly = ["Plano básico anual", "Plano médio anual", "Plano avançado anual"]
   const [plans, setPlans] = useState<Record<string, string>[] | undefined>(undefined)
@@ -31,7 +34,7 @@ export const Stripe = () => {
   const cancelSubscription = async () => {
     try {
       await StripeService.cancelSubscription()
-      alert("Assinatura cancelada com sucesso")
+      router.push("/subscription-canceled")
     } catch (error) {
 
     }

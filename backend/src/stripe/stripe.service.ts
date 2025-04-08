@@ -31,7 +31,7 @@ export class StripeService {
           id: userId
         },
         ui_mode: "embedded",
-        return_url: "http://localhost:3000?payment-confirmation?session_id={CHECKOUT_SESSION_ID}"
+        return_url: (process.env.PATH_FRONTEND ?? "") + "/purchase-confirmation?payment-confirmation&session_id={CHECKOUT_SESSION_ID}"
       })
       return session
     } catch (error) {
@@ -80,6 +80,7 @@ export class StripeService {
         
       const subscription: Stripe.Subscription = await this.stripe.subscriptions.retrieve(session.subscription)
       const idStripe = subscription!.id
+      console.log(idStripe)
       const idPrice = subscription!.items.data[0].plan.id
       const idPlan = (await this.planService.getPlanByIdPrice(idPrice)).id
 
