@@ -33,6 +33,7 @@ export class StripeService {
         ui_mode: "embedded",
         return_url: (process.env.PATH_FRONTEND ?? "") + "/purchase-confirmation?payment-confirmation&session_id={CHECKOUT_SESSION_ID}"
       })
+      console.log("teste")
       return session
     } catch (error) {
       console.error("An error ocurred while creating checkout stripe", error)

@@ -1,7 +1,6 @@
 
 export class planService {
   private static pathBackend = process.env.NEXT_PUBLIC_BACKEND
-
   static async getPlan() {
     try {
       const res = await fetch(this.pathBackend + "/plan", {
@@ -10,11 +9,11 @@ export class planService {
           "Content-Type": "application/json"
         },
       })
-
       if (!res.ok) {
         const error = await res.json()
         throw new Error(error)
       }
+      console.log("aqui foi")
 
       return await res.json()
     } catch (error) {
