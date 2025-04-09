@@ -16,6 +16,7 @@ export const Stripe = () => {
       try {
         const plans = await planService.getPlan()
         setPlans(plans)
+        console.log(plans)
       } catch (error) {
         throw error
       }
