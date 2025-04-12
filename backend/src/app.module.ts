@@ -9,9 +9,11 @@ import { RecoverModule } from './recover/recover.module';
 import { StripeModule } from './stripe/stripe.module';
 import { PlanModule } from './plan/plan.module';
 import { SubscriptionModule } from './subscription/subscription.module';
+import { ProductModule } from './product/product.module';
+import { MulterModule } from './multer/multer.module';
 
 @Module({
-  imports: [UsersModule, PrismaModule, EmailModule, AuthModule, RecoverModule, StripeModule, PlanModule, SubscriptionModule],
+  imports: [UsersModule, PrismaModule, EmailModule, AuthModule, RecoverModule, StripeModule, PlanModule, SubscriptionModule, ProductModule, MulterModule],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -34,6 +34,7 @@ model User {
   isActivate           DateTime?
   typeUser typeUser @default(COMMON)
   subscriptions Subscription[]
+  products Product[]
   recoverPasswords     Recover? @relation
 }
 
@@ -63,4 +64,35 @@ model Plan {
   name String
   idPrice String @unique 
   subscriptions Subscription[]
+}
+
+
+model Subcategory {
+  id String @id @default(uuid())
+  name String 
+  idCategory String
+  category Category @relation(fields: [idCategory], references: [id])
+  products Product[] @relation("ProductSubCategorys")
+}
+
+model Category {
+  id String @id @default(uuid())
+  name String
+  subcateogry Subcategory[]
+  products Product[] @relation("ProductCategorys")
+}
+
+model Product {
+  id String @id @default(uuid())
+  name String
+  description String?
+  regularPrice Int
+  promotionalPrice Int?
+  promotionExpiration DateTime?
+  imagePath String
+  stock Int
+  idUser String
+  userId User @relation(fields: [idUser], references: [id])
+  categorys Category[] @relation("ProductCategorys")
+  subCategorys Subcategory[] @relation("ProductSubCategorys")
 }
