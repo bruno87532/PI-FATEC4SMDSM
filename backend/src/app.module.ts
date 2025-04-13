@@ -10,10 +10,10 @@ import { StripeModule } from './stripe/stripe.module';
 import { PlanModule } from './plan/plan.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { ProductModule } from './product/product.module';
-import { MulterModule } from './multer/multer.module';
+import { GoogleDriveModule } from './google-drive/google-drive.module';
 
 @Module({
-  imports: [UsersModule, PrismaModule, EmailModule, AuthModule, RecoverModule, StripeModule, PlanModule, SubscriptionModule, ProductModule, MulterModule],
+  imports: [UsersModule, PrismaModule, EmailModule, AuthModule, RecoverModule, StripeModule, PlanModule, SubscriptionModule, ProductModule, GoogleDriveModule],
   controllers: [AppController],
   providers: [AppService],
 })

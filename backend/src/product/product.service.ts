@@ -1,13 +1,20 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { GoogleDriveService } from 'src/google-drive/google-drive.service';
 
 @Injectable()
 export class ProductService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly googleDriveService: GoogleDriveService
+  ) {}
 
-  async createProduct(data: CreateProductDto, idUser: string, imagePath: string) {
+  async createProduct(data: CreateProductDto, idUser: string, file: Express.Multer.File) {
     try {
+      const idDrive = (await this.googleDriveService.uploadFile(file)).data.id!
+      await this.googleDriveService.makePublicFile(idDrive)
+
       const { category, subCategory, ...newData } = data
       const productData = {
         ...newData,
@@ -18,10 +25,10 @@ export class ProductService {
         categorys: {
           connect: category.map(id => ({ id }))
         },
-        imagePath
+        idDrive
       }
 
-      const product = await this.prismaService.product.create({
+      return await this.prismaService.product.create({
         data: productData
       })
     } catch (error) {

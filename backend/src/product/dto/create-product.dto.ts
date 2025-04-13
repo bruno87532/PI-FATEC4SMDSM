@@ -10,8 +10,9 @@ import {
   IsOptional, 
   Min, 
   Max,
-  IsDate
+  IsDate,
 } from "class-validator";
+import { Transform } from "class-transformer";
 
 export class CreateProductDto {
   @IsNotEmpty({ message: "The name is required" })
@@ -30,17 +31,25 @@ export class CreateProductDto {
   @IsInt({ message: "The price must be an integer" })
   @Min(1, { message: "The price must be at least 1" })
   @Max(100000000, { message: "The price must be less than or equal to 100.000.000" })
+  @Transform(({ value }) => Number(value))
   regularPrice: number;
 
   @IsOptional()
   @IsInt({ message: "The promotional price must be an integer" })
   @Min(1, { message: "The promotional price must be at least 1" })
   @Max(100000000, { message: "The promotional price must be less than or equal to 100.000.000" })
+  @Transform(({ value }) => Number(value))
   promotionalPrice?: number;
 
   @IsOptional()
   @IsDate({ message: "The promotionalExpiration must be a date" })
+  @Transform(({ value }) => new Date(value))
   promotionExpiration: Date
+
+  @IsOptional()
+  @IsDate({ message: "The promotionalExpiration must be a date" })
+  @Transform(({ value }) => new Date(value))
+  promotionStart: Date
 
   @IsArray({ message: "The subcategory must be an array" })
   @ArrayMinSize(1, { message: "The subcategory array must have at least 1 element" })
@@ -56,5 +65,6 @@ export class CreateProductDto {
   @IsInt({ message: "The stock must be an integer" })
   @Min(1, { message: "The stock must be at least 1" })
   @Max(10000000, { message: "The stock must be less than or equal to 100.000.000" })
+  @Transform(({ value }) => Number(value))
   stock: number;
 }

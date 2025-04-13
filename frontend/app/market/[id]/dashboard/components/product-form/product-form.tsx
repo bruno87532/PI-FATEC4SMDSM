@@ -1,15 +1,14 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { CalendarIcon, ImageIcon, Loader2, X } from "lucide-react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-
+import { useRef } from "react"
+import { MultiSelect } from "@/components/ui/multi-select"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -17,115 +16,151 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
+import { maskPrice } from "@/utils/mask-price"
 
-const productFormSchema = z.object({
-  name: z.string().min(3, {
-    message: "O nome do produto deve ter pelo menos 3 caracteres",
-  }),
-  description: z.string().min(10, {
-    message: "A descrição deve ter pelo menos 10 caracteres",
-  }),
-  price: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
-    message: "O preço deve ser um número positivo",
-  }),
-  category: z.string({
-    required_error: "Selecione uma categoria",
-  }),
-  inventory: z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
-    message: "O estoque deve ser um número não negativo",
-  }),
-  hasPromotion: z.boolean().default(false),
-  promotionPrice: z.string().optional(),
-  promotionStart: z.date().optional(),
-  promotionEnd: z.date().optional(),
-})
-
-type ProductFormValues = z.infer<typeof productFormSchema>
-
-const defaultValues: Partial<ProductFormValues> = {
-  name: "",
-  description: "",
-  price: "",
-  category: "",
-  inventory: "",
-  hasPromotion: false,
-  promotionPrice: "",
-}
-
-interface ProductFormProps {
-  productId?: string
-}
-
-export const ProductForm = ({ productId }: ProductFormProps) => {
-  const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
+export const ProductForm = () => {
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isPromotional, setIsPromotional] = useState<boolean>(false)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
-  // Mock data for editing - in a real app, you would fetch this from an API
-  const mockProduct = productId
-    ? {
-        id: productId,
-        name: "Produto de Exemplo",
-        description: "Esta é uma descrição detalhada do produto de exemplo.",
-        price: "29.99",
-        category: "alimentos",
-        inventory: "50",
-        hasPromotion: true,
-        promotionPrice: "24.99",
-        promotionStart: new Date(),
-        promotionEnd: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-        image: "/placeholder.svg?height=200&width=200",
-      }
-    : null
-
-  const form = useForm<ProductFormValues>({
-    resolver: zodResolver(productFormSchema),
-    defaultValues: mockProduct || defaultValues,
+  const ProductSchema = z.object({
+    name: z.string()
+      .min(2, { message: "O nome do produto deve ter pelo menos 2 caracteres" })
+      .max(100, { message: "O nome do produto deve ter no máximo 100 caracteres" }),
+    description: z.string()
+      .optional()
+      .refine((value) => {
+        if (value) {
+          if (value.length < 2) {
+            return false
+          }
+        }
+        return true
+      }, {
+        message: "A descrição do produto deve ter pelo menos 2 caracteres",
+      })
+      .refine((value) => {
+        if (value) {
+          if (value.length > 256) {
+            return false
+          }
+        }
+        return true
+      }, {
+        message: "A descrição do produto deve ter no máximo 256 caracteres"
+      }),
+    regularPrice: z.string()
+      .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
+        message: "O preço deve ser um número positivo"
+      }),
+    promotionalPrice: z.string()
+      .refine((val) => {
+        if (isPromotional && !val) return false
+        return true
+      }, { message: "O preço promocional é obrigatório" }),
+    promotionalExpiration: z.date()
+      .refine((value) => {
+        const now = new Date()
+        if (now > value && isPromotional) return false
+        return true
+      }, {
+        message: "A data de expiração da promoção deve ser uma data futura"
+      }),
+    promotionStart: z.date()
+      .refine((value) => {
+        const now = new Date()
+        if (now > value && isPromotional) return false
+        return true
+      }, {
+        message: "A data de início da promoção deve ser uma data futura"
+      }),
+    subCategory: z.array(z.string())
+      .min(1, { message: "Pelo menos uma subcategoria deve ser selecionada" })
+      .max(5, { message: "No máximo 5 subcategorias podem ser selecionadas" }),
+    category: z.array(z.string())
+      .min(1, { message: "Pelo menos uma categoria deve ser selecionada" })
+      .max(5, { message: "No máximo 5 categorias podem ser selecionadas" }),
+    stock: z.string()
+      .refine((val) => !isNaN(Number(val)) && Number(val) > 10, {
+        message: "O estoque deve ser um número positivo"
+      }),
+    image: z
+      .instanceof(File, { message: "A imagem não pode estar vazia" })
+      .refine((file) => file.type.startsWith('image/'), { message: 'O arquivo deve ser uma imagem.' })
   })
 
-  const hasPromotion = form.watch("hasPromotion")
+  type Product = z.infer<typeof ProductSchema>
 
-  function onSubmit(data: ProductFormValues) {
-    setIsLoading(true)
+  const productForm = useForm<Product>({
+    resolver: zodResolver(ProductSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      regularPrice: "00.00",
+      promotionalPrice: "00.00",
+      promotionalExpiration: new Date(),
+      promotionStart: new Date(),
+      subCategory: [],
+      category: [],
+      stock: ""
+    }
+  })
 
-    // Simulate API call
-    setTimeout(() => {
-      console.log(data)
-      setIsLoading(false)
-      router.push("/dashboard/produtos")
-    }, 1000)
-  }
-
-  function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
     if (file) {
       const reader = new FileReader()
-      reader.onload = (e) => {
-        setImagePreview(e.target?.result as string)
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string)
       }
       reader.readAsDataURL(file)
     }
   }
 
-  function clearImage() {
+  const clearImage = () => {
     setImagePreview(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+
+    productForm.resetField("image")
   }
 
+  const handleSubmit = async (data: Product) => {
+    try {
+    } catch (error) {
+
+    }
+  }
+
+  const options = [
+    { value: 'alimentos', label: 'Alimentos' },
+    { value: 'bebidas', label: 'Bebidas' },
+    { value: 'limpeza', label: 'Produtos de Limpeza' },
+    { value: 'higiene', label: 'Higiene Pessoal' },
+    { value: 'hortifruti', label: 'Hortifruti' },
+    { value: 'padaria', label: 'Padaria' },
+    { value: 'congelados', label: 'Congelados' },
+    { value: 'outros', label: 'Outros' },
+  ]
+
+  const [selectedCategorys, setSelectedCategorys] = useState<string[]>([])
+
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+    <Form {...productForm}>
+      <form onSubmit={productForm.handleSubmit(handleSubmit)} className="space-y-8">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
           <Card>
             <CardContent className="pt-6">
               <div className="space-y-4">
                 <FormField
-                  control={form.control}
+                  control={productForm.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
@@ -139,7 +174,7 @@ export const ProductForm = ({ productId }: ProductFormProps) => {
                 />
 
                 <FormField
-                  control={form.control}
+                  control={productForm.control}
                   name="description"
                   render={({ field }) => (
                     <FormItem>
@@ -154,13 +189,16 @@ export const ProductForm = ({ productId }: ProductFormProps) => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
-                    control={form.control}
-                    name="price"
+                    control={productForm.control}
+                    name="regularPrice"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Preço (R$)</FormLabel>
                         <FormControl>
-                          <Input placeholder="0.00" {...field} />
+                          <Input placeholder="00.00"
+                            onChange={(e) => field.onChange(maskPrice(e.target.value))}
+                            value={field.value}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -168,8 +206,8 @@ export const ProductForm = ({ productId }: ProductFormProps) => {
                   />
 
                   <FormField
-                    control={form.control}
-                    name="inventory"
+                    control={productForm.control}
+                    name="stock"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Estoque</FormLabel>
@@ -183,28 +221,43 @@ export const ProductForm = ({ productId }: ProductFormProps) => {
                 </div>
 
                 <FormField
-                  control={form.control}
+                  control={productForm.control}
                   name="category"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Categoria</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione uma categoria" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="alimentos">Alimentos</SelectItem>
-                          <SelectItem value="bebidas">Bebidas</SelectItem>
-                          <SelectItem value="limpeza">Produtos de Limpeza</SelectItem>
-                          <SelectItem value="higiene">Higiene Pessoal</SelectItem>
-                          <SelectItem value="hortifruti">Hortifruti</SelectItem>
-                          <SelectItem value="padaria">Padaria</SelectItem>
-                          <SelectItem value="congelados">Congelados</SelectItem>
-                          <SelectItem value="outros">Outros</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <MultiSelect
+                          options={options}
+                          onValueChange={(value) => field.onChange(value)}
+                          placeholder="Categorias do produto"
+                          variant="inverted"
+                          animation={2}
+                          maxCount={1}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={productForm.control}
+                  name="subCategory"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Categoria</FormLabel>
+                      <FormControl>
+                        <MultiSelect
+                          options={options}
+                          onValueChange={(value) => field.onChange(value)}
+                          placeholder="Sub categorias do produto"
+                          variant="inverted"
+                          animation={2}
+                          maxCount={1}
+                          {...field}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -220,10 +273,10 @@ export const ProductForm = ({ productId }: ProductFormProps) => {
                   <Label>Imagem do Produto</Label>
                   <div className="flex flex-col items-center justify-center gap-4">
                     <div className="relative flex h-40 w-full items-center justify-center rounded-md border border-dashed">
-                      {imagePreview || mockProduct?.image ? (
+                      {imagePreview ? (
                         <div className="relative h-full w-full">
                           <Image
-                            src={imagePreview || mockProduct?.image || ""}
+                            src={imagePreview}
                             alt="Preview"
                             fill
                             className="object-contain p-2"
@@ -236,7 +289,6 @@ export const ProductForm = ({ productId }: ProductFormProps) => {
                             onClick={clearImage}
                           >
                             <X className="h-4 w-4" />
-                            <span className="sr-only">Remover imagem</span>
                           </Button>
                         </div>
                       ) : (
@@ -248,16 +300,38 @@ export const ProductForm = ({ productId }: ProductFormProps) => {
                         </div>
                       )}
                     </div>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      id="product-image"
-                      onChange={handleImageUpload}
+                    <FormField
+                      control={productForm.control}
+                      name="image"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col justify-center items-center">
+                          <FormControl>
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              id="product-image"
+                              ref={(el) => {
+                                fileInputRef.current = el;
+                                field.ref(el);
+                              }}
+                              onChange={(e) => {
+                                const file = e.target.files?.[0]
+                                if (file) {
+                                  field.onChange(file);
+                                } else {
+                                  field.onChange(undefined)
+                                }
+                                handleImageUpload(e);
+                              }}
+                            />
+
+                          </FormControl>
+                          <FormLabel htmlFor="product-image" className="cursor-pointer text-sm text-primary hover:underline">Selecionar imagem</FormLabel>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                    <Label htmlFor="product-image" className="cursor-pointer text-sm text-primary hover:underline">
-                      Selecionar imagem
-                    </Label>
                   </div>
                 </div>
               </CardContent>
@@ -267,33 +341,29 @@ export const ProductForm = ({ productId }: ProductFormProps) => {
               <CardContent className="pt-6">
                 <div className="space-y-4">
                   <div className="flex items-center space-x-2">
-                    <FormField
-                      control={form.control}
-                      name="hasPromotion"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                          <FormControl>
-                            <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>Produto em promoção</FormLabel>
-                            <FormDescription>Marque esta opção para definir um preço promocional</FormDescription>
-                          </div>
-                        </FormItem>
-                      )}
+                    <Checkbox
+                      checked={isPromotional}
+                      onCheckedChange={() => setIsPromotional(!isPromotional)}
                     />
+                    <div className="space-y-1 leading-none">
+                      <Label>Produto em promoção</Label>
+                      <p className="mt-2 text-sm text-muted-foreground">Marque esta opção para definir um preço promocional</p>
+                    </div>
                   </div>
 
-                  {hasPromotion && (
+                  {isPromotional && (
                     <div className="space-y-4 pt-4">
                       <FormField
-                        control={form.control}
-                        name="promotionPrice"
+                        control={productForm.control}
+                        name="promotionalPrice"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Preço Promocional (R$)</FormLabel>
                             <FormControl>
-                              <Input placeholder="0.00" {...field} />
+                              <Input placeholder="0.00"
+                                onChange={(e) => field.onChange(maskPrice(e.target.value))}
+                                value={field.value}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -302,7 +372,7 @@ export const ProductForm = ({ productId }: ProductFormProps) => {
 
                       <div className="grid grid-cols-2 gap-4">
                         <FormField
-                          control={form.control}
+                          control={productForm.control}
                           name="promotionStart"
                           render={({ field }) => (
                             <FormItem className="flex flex-col">
@@ -341,8 +411,8 @@ export const ProductForm = ({ productId }: ProductFormProps) => {
                         />
 
                         <FormField
-                          control={form.control}
-                          name="promotionEnd"
+                          control={productForm.control}
+                          name="promotionalExpiration"
                           render={({ field }) => (
                             <FormItem className="flex flex-col">
                               <FormLabel>Fim da Promoção</FormLabel>
@@ -388,12 +458,12 @@ export const ProductForm = ({ productId }: ProductFormProps) => {
         </div>
 
         <div className="flex justify-end gap-4">
-          <Button type="button" variant="outline" onClick={() => router.push("/dashboard/produtos")}>
+          <Button type="button" variant="outline">
             Cancelar
           </Button>
           <Button type="submit" disabled={isLoading}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {productId ? "Atualizar Produto" : "Criar Produto"}
+            Criar produto
           </Button>
         </div>
       </form>

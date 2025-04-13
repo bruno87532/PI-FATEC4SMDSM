@@ -84,12 +84,13 @@ model Category {
 
 model Product {
   id String @id @default(uuid())
+  idDrive String @unique
   name String
   description String?
   regularPrice Int
   promotionalPrice Int?
   promotionExpiration DateTime?
-  imagePath String
+  promotionStart DateTime?
   stock Int
   idUser String
   userId User @relation(fields: [idUser], references: [id])

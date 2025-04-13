@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { ProductController } from './product.controller';
 import { ProductService } from './product.service';
 import { PrismaModule } from 'src/prisma/prisma.module';
-import { MulterService } from 'src/multer/multer.service';
+import { GoogleDriveModule } from 'src/google-drive/google-drive.module';
 
 @Module({
-  imports: [PrismaModule, MulterService],
+  imports: [PrismaModule, GoogleDriveModule],
   controllers: [ProductController],
   providers: [ProductService]
 })
