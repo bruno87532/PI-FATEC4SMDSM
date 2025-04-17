@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { maskPrice } from "@/utils/mask-price"
+import { productService } from "@/services/product"
 
 export const ProductForm = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -80,17 +81,17 @@ export const ProductForm = () => {
       }, {
         message: "A data de início da promoção deve ser uma data futura"
       }),
-    subCategory: z.array(z.string())
+    subCategorys: z.array(z.string())
       .min(1, { message: "Pelo menos uma subcategoria deve ser selecionada" })
       .max(5, { message: "No máximo 5 subcategorias podem ser selecionadas" }),
-    category: z.array(z.string())
+    categorys: z.array(z.string())
       .min(1, { message: "Pelo menos uma categoria deve ser selecionada" })
       .max(5, { message: "No máximo 5 categorias podem ser selecionadas" }),
     stock: z.string()
       .refine((val) => !isNaN(Number(val)) && Number(val) > 10, {
         message: "O estoque deve ser um número positivo"
       }),
-    image: z
+    file: z
       .instanceof(File, { message: "A imagem não pode estar vazia" })
       .refine((file) => file.type.startsWith('image/'), { message: 'O arquivo deve ser uma imagem.' })
   })
@@ -106,8 +107,8 @@ export const ProductForm = () => {
       promotionalPrice: "00.00",
       promotionalExpiration: new Date(),
       promotionStart: new Date(),
-      subCategory: [],
-      category: [],
+      subCategorys: [],
+      categorys: [],
       stock: ""
     }
   })
@@ -129,11 +130,19 @@ export const ProductForm = () => {
       fileInputRef.current.value = ""
     }
 
-    productForm.resetField("image")
+    productForm.resetField("file")
   }
 
   const handleSubmit = async (data: Product) => {
     try {
+      data.regularPrice = (parseFloat(data.regularPrice) * 100).toString()
+      if (parseFloat(data.promotionalPrice) === 0) {
+        const { promotionalPrice, ...dataToSend } = data
+        await productService.createProduct(dataToSend)
+      } else {
+        data.promotionalPrice = (parseFloat(data.promotionalPrice) * 100).toString()
+        await productService.createProduct(data)
+      }
     } catch (error) {
 
     }
@@ -222,7 +231,7 @@ export const ProductForm = () => {
 
                 <FormField
                   control={productForm.control}
-                  name="category"
+                  name="categorys"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Categoria</FormLabel>
@@ -243,7 +252,7 @@ export const ProductForm = () => {
                 />
                 <FormField
                   control={productForm.control}
-                  name="subCategory"
+                  name="subCategorys"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Categoria</FormLabel>
@@ -302,7 +311,7 @@ export const ProductForm = () => {
                     </div>
                     <FormField
                       control={productForm.control}
-                      name="image"
+                      name="file"
                       render={({ field }) => (
                         <FormItem className="flex flex-col justify-center items-center">
                           <FormControl>
@@ -461,7 +470,7 @@ export const ProductForm = () => {
           <Button type="button" variant="outline">
             Cancelar
           </Button>
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading} >
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Criar produto
           </Button>

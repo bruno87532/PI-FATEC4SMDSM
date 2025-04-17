@@ -14,16 +14,15 @@ export class ProductService {
     try {
       const idDrive = (await this.googleDriveService.uploadFile(file)).data.id!
       await this.googleDriveService.makePublicFile(idDrive)
-
-      const { category, subCategory, ...newData } = data
+      const { categorys, subCategorys, ...newData } = data
       const productData = {
         ...newData,
         idUser,
         subCategorys: {
-          connect: subCategory.map(id => ({ id })),
+          connect: subCategorys.map(id => ({ id })),
         },
         categorys: {
-          connect: category.map(id => ({ id }))
+          connect: categorys.map(id => ({ id }))
         },
         idDrive
       }

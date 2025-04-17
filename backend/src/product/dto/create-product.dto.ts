@@ -44,22 +44,22 @@ export class CreateProductDto {
   @IsOptional()
   @IsDate({ message: "The promotionalExpiration must be a date" })
   @Transform(({ value }) => new Date(value))
-  promotionExpiration: Date
+  promotionExpiration?: Date
 
   @IsOptional()
-  @IsDate({ message: "The promotionalExpiration must be a date" })
+  @IsDate({ message: "The promotionalStart must be a date" })
   @Transform(({ value }) => new Date(value))
-  promotionStart: Date
+  promotionStart?: Date
 
-  @IsArray({ message: "The subcategory must be an array" })
-  @ArrayMinSize(1, { message: "The subcategory array must have at least 1 element" })
-  @ArrayMaxSize(5, { message: "The subcategory array must have at most 5 elements" })
-  subCategory: string[];
+  @IsArray({ message: "The subcategorys must be an array" })
+  @ArrayMinSize(1, { message: "The subcategorys array must have at least 1 element" })
+  @ArrayMaxSize(5, { message: "The subcategorys array must have at most 5 elements" })
+  subCategorys: string[];
 
-  @IsArray({ message: "The category must be an array" })
-  @ArrayMinSize(1, { message: "The category array must have at least 1 element" })
-  @ArrayMaxSize(5, { message: "The category array must have at most 5 elements" })
-  category: string[];
+  @IsArray({ message: "The categorys must be an array" })
+  @ArrayMinSize(1, { message: "The categorys array must have at least 1 element" })
+  @ArrayMaxSize(5, { message: "The categorys array must have at most 5 elements" })
+  categorys: string[];
 
   @IsNotEmpty({ message: "The stock is required" })
   @IsInt({ message: "The stock must be an integer" })

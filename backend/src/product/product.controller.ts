@@ -28,6 +28,6 @@ export class ProductController {
     @UploadedFile(ValidateImagePipe) file: Express.Multer.File,
     @Request() req,
   ) {
-    return await this.productService.createProduct(data, req.user.id, file)
+    return await this.productService.createProduct(data, req.user.userId, file)
   }
 }

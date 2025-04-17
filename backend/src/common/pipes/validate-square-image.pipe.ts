@@ -12,7 +12,6 @@ export class ValidateImagePipe implements PipeTransform {
   private async resizeImage(image: sharp.Sharp) {
     return await image.resize(200, 200).toBuffer()
   }
-
   async transform(file: Express.Multer.File) {
     if (!file || !file.buffer) {
       throw new BadRequestException("The file is required")
