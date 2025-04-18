@@ -15,7 +15,7 @@ export class productService {
   }) {
     const formData = new FormData()
     const keysCategory: (keyof typeof data)[] = ["categorys", "subCategorys"]
-    const keys: (keyof typeof data)[] = ["name", "description", "regularPrice", "promotionalPrice", "promotionExpiration", "stock", "file"]
+    const keys: (keyof typeof data)[] = ["name", "description", "regularPrice", "promotionalPrice", "promotionExpiration", "promotionStart", "stock", "file"]
     for (const key of keysCategory) {
       const arr = data[key] as string[]
       for (let x = 0; x < arr.length; x++) {
@@ -25,10 +25,13 @@ export class productService {
     for (const key of keys) {
       const value = data[key]
       if (value) {
-        if (value instanceof Date) formData.append(key, value.toISOString())
+        if (value instanceof Date) {
+          formData.append(key, value.toISOString())
+        } 
         else formData.append(key, value as string | Blob)
       }
     }
+    console.log(formData)
     await fetch(this.pathBackend + "/product", {
       credentials: "include",
       method: "POST",

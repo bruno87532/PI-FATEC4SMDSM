@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { CalendarIcon, ImageIcon, Loader2, X } from "lucide-react"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -23,12 +23,56 @@ import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { maskPrice } from "@/utils/mask-price"
 import { productService } from "@/services/product"
+import { categoryService } from "@/services/category"
+import { subCategoryService } from "@/services/subCategory"
 
 export const ProductForm = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isPromotional, setIsPromotional] = useState<boolean>(false)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [categories, setCategories] = useState<{
+    value: string;
+    label: string;
+  }[] | null>(null)
+  const [subCategories, setSubCategories] = useState<{
+    value: string;
+    label: string
+  }[] | []>([])
+  const [subCategoriesData, setSubCategoriesData] = useState<{
+    value: string;
+    label: string;
+    idCategory: string;
+  }[] | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+
+  useEffect(() => {
+    const getSubcategories = async () => {
+      const res = await subCategoryService.getSubCategories()
+      const data = []
+      for (const resData of res) {
+        data.push({
+          label: resData.name,
+          value: resData.id,
+          idCategory: resData.idCategory
+        })
+      }
+      setSubCategoriesData(data)
+    }
+    const getCategories = async () => {
+      const res = await categoryService.getCategories()
+      const data = []
+      for (const resData of res) {
+        data.push({
+          label: resData.name,
+          value: resData.id
+        })
+      }
+      setCategories(data)
+    }
+
+    getSubcategories()
+    getCategories()
+  }, [])
 
   const ProductSchema = z.object({
     name: z.string()
@@ -61,22 +105,31 @@ export const ProductForm = () => {
         message: "O preço deve ser um número positivo"
       }),
     promotionalPrice: z.string()
+      .optional()
       .refine((val) => {
-        if (isPromotional && !val) return false
+        if (isPromotional && val === "00.00") return false
         return true
       }, { message: "O preço promocional é obrigatório" }),
-    promotionalExpiration: z.date()
+    promotionExpiration: z.date()
+      .optional()
       .refine((value) => {
-        const now = new Date()
-        if (now > value && isPromotional) return false
+        if (value) {
+          const now = new Date()
+          now.setHours(0, 0, 0, 0)
+          if (now > value && isPromotional) return false
+        }
         return true
       }, {
         message: "A data de expiração da promoção deve ser uma data futura"
       }),
     promotionStart: z.date()
+      .optional()
       .refine((value) => {
-        const now = new Date()
-        if (now > value && isPromotional) return false
+        if (value) {
+          const now = new Date()
+          now.setHours(0, 0, 0, 0)
+          if (now > value && isPromotional) return false
+        }
         return true
       }, {
         message: "A data de início da promoção deve ser uma data futura"
@@ -104,9 +157,6 @@ export const ProductForm = () => {
       name: "",
       description: "",
       regularPrice: "00.00",
-      promotionalPrice: "00.00",
-      promotionalExpiration: new Date(),
-      promotionStart: new Date(),
       subCategorys: [],
       categorys: [],
       stock: ""
@@ -133,33 +183,46 @@ export const ProductForm = () => {
     productForm.resetField("file")
   }
 
+  const handleCategoriesChange = (ids: string[]) => {
+    const data = []
+    if (!subCategoriesData) return
+    for (const id of ids) {
+      for (const subCategorie of subCategoriesData) {
+        if (subCategorie.idCategory === id) {
+          data.push({
+            label: subCategorie.label,
+            value: subCategorie.value
+          })
+        }
+      }
+    }
+    setSubCategories(data)
+  }
+
+  const onCheckboxChange = (checked: boolean) => {
+    setIsPromotional(checked)
+    if (checked) {
+      productForm.setValue("promotionalPrice", "00.00")
+      productForm.setValue("promotionExpiration", new Date())
+      productForm.setValue("promotionStart", new Date())
+    } else {
+      productForm.resetField("promotionExpiration")
+      productForm.resetField("promotionStart")
+      productForm.resetField("promotionalPrice")
+    }
+  }
+
   const handleSubmit = async (data: Product) => {
     try {
       data.regularPrice = (parseFloat(data.regularPrice) * 100).toString()
-      if (parseFloat(data.promotionalPrice) === 0) {
-        const { promotionalPrice, ...dataToSend } = data
-        await productService.createProduct(dataToSend)
-      } else {
-        data.promotionalPrice = (parseFloat(data.promotionalPrice) * 100).toString()
-        await productService.createProduct(data)
-      }
+      if (data.promotionalPrice) data.promotionalPrice = (parseFloat(data.promotionalPrice) * 100).toString()
+      await productService.createProduct(data)
     } catch (error) {
 
     }
   }
 
-  const options = [
-    { value: 'alimentos', label: 'Alimentos' },
-    { value: 'bebidas', label: 'Bebidas' },
-    { value: 'limpeza', label: 'Produtos de Limpeza' },
-    { value: 'higiene', label: 'Higiene Pessoal' },
-    { value: 'hortifruti', label: 'Hortifruti' },
-    { value: 'padaria', label: 'Padaria' },
-    { value: 'congelados', label: 'Congelados' },
-    { value: 'outros', label: 'Outros' },
-  ]
-
-  const [selectedCategorys, setSelectedCategorys] = useState<string[]>([])
+  if (!categories || !subCategoriesData) return <div>Carregando...</div>
 
   return (
     <Form {...productForm}>
@@ -237,8 +300,13 @@ export const ProductForm = () => {
                       <FormLabel>Categoria</FormLabel>
                       <FormControl>
                         <MultiSelect
-                          options={options}
-                          onValueChange={(value) => field.onChange(value)}
+                          options={categories}
+                          onValueChange={
+                            (value) => {
+                              field.onChange(value)
+                              handleCategoriesChange(value)
+                            }
+                          }
                           placeholder="Categorias do produto"
                           variant="inverted"
                           animation={2}
@@ -255,10 +323,11 @@ export const ProductForm = () => {
                   name="subCategorys"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Categoria</FormLabel>
+                      <FormLabel>Sub categoria</FormLabel>
                       <FormControl>
                         <MultiSelect
-                          options={options}
+                          disabled={subCategories?.length === 0}
+                          options={subCategories ?? []}
                           onValueChange={(value) => field.onChange(value)}
                           placeholder="Sub categorias do produto"
                           variant="inverted"
@@ -352,7 +421,9 @@ export const ProductForm = () => {
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       checked={isPromotional}
-                      onCheckedChange={() => setIsPromotional(!isPromotional)}
+                      onCheckedChange={
+                        (checked) => onCheckboxChange(!!checked)
+                      }
                     />
                     <div className="space-y-1 leading-none">
                       <Label>Produto em promoção</Label>
@@ -421,7 +492,7 @@ export const ProductForm = () => {
 
                         <FormField
                           control={productForm.control}
-                          name="promotionalExpiration"
+                          name="promotionExpiration"
                           render={({ field }) => (
                             <FormItem className="flex flex-col">
                               <FormLabel>Fim da Promoção</FormLabel>
@@ -479,4 +550,3 @@ export const ProductForm = () => {
     </Form>
   )
 }
-

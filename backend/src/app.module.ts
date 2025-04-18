@@ -11,9 +11,11 @@ import { PlanModule } from './plan/plan.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { ProductModule } from './product/product.module';
 import { GoogleDriveModule } from './google-drive/google-drive.module';
+import { CategoryModule } from './category/category.module';
+import { SubCategoryModule } from './subcategory/subcategory.module';
 
 @Module({
-  imports: [UsersModule, PrismaModule, EmailModule, AuthModule, RecoverModule, StripeModule, PlanModule, SubscriptionModule, ProductModule, GoogleDriveModule],
+  imports: [UsersModule, PrismaModule, EmailModule, AuthModule, RecoverModule, StripeModule, PlanModule, SubscriptionModule, ProductModule, GoogleDriveModule, CategoryModule, SubCategoryModule],
   controllers: [AppController],
   providers: [AppService],
 })

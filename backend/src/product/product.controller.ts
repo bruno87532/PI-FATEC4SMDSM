@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards, UsePipes, ValidationPipe, Request, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, UsePipes, ValidationPipe, Request, UseInterceptors, UploadedFile, Get } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ProductService } from './product.service';
@@ -29,5 +29,12 @@ export class ProductController {
     @Request() req,
   ) {
     return await this.productService.createProduct(data, req.user.userId, file)
+  }
+
+  @Get()
+  @UseGuards(AuthGuard("jwt"))
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  async getProductsById(@Request() req) {
+    return await this.productService.getProductsById(req.user.userId)
   }
 }
