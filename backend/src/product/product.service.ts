@@ -39,10 +39,22 @@ export class ProductService {
   async getProductsById(idUser: string) {
     try {
       const products = await this.prismaService.product.findMany({
-        where: { idUser }
+        where: { idUser },
+        include: {
+          categorys: {
+            select: {
+              id: true
+            }
+          },
+          subCategorys: {
+            select: {
+              id: true
+            }
+          }
+        }
       })
 
-      if (!products) {
+      if (!products || products.length === 0) {
         throw new BadRequestException("Products not found")
       }
 

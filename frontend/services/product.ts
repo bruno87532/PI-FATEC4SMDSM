@@ -1,3 +1,5 @@
+import { ProductDb } from "@/type/product";
+
 export class productService {
   private static pathBackend = process.env.NEXT_PUBLIC_BACKEND
 
@@ -31,11 +33,22 @@ export class productService {
         else formData.append(key, value as string | Blob)
       }
     }
-    console.log(formData)
     await fetch(this.pathBackend + "/product", {
       credentials: "include",
       method: "POST",
       body: formData
     })
+  }
+
+  static async getProductsById(): Promise<ProductDb[]> {
+    const res = await fetch(this.pathBackend + "/product/me", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      credentials: "include"
+    })
+
+    return await res.json()
   }
 }

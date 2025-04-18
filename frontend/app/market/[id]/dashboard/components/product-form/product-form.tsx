@@ -25,8 +25,11 @@ import { maskPrice } from "@/utils/mask-price"
 import { productService } from "@/services/product"
 import { categoryService } from "@/services/category"
 import { subCategoryService } from "@/services/subCategory"
+import { useToast } from "@/hooks/use-toast"
 
 export const ProductForm = () => {
+  const { toast } = useToast()
+
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isPromotional, setIsPromotional] = useState<boolean>(false)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -141,7 +144,7 @@ export const ProductForm = () => {
       .min(1, { message: "Pelo menos uma categoria deve ser selecionada" })
       .max(5, { message: "No máximo 5 categorias podem ser selecionadas" }),
     stock: z.string()
-      .refine((val) => !isNaN(Number(val)) && Number(val) > 10, {
+      .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
         message: "O estoque deve ser um número positivo"
       }),
     file: z
@@ -214,17 +217,26 @@ export const ProductForm = () => {
 
   const handleSubmit = async (data: Product) => {
     try {
+      setIsLoading(true)
+
       data.regularPrice = (parseFloat(data.regularPrice) * 100).toString()
       if (data.promotionalPrice) data.promotionalPrice = (parseFloat(data.promotionalPrice) * 100).toString()
       await productService.createProduct(data)
-    } catch (error) {
 
+      toast({
+        title: "Produto cadastradado",
+        description: "O seu produto foi cadastrado com sucesso"
+      })
+      
+      setIsLoading(false)
+    } catch (error) {
+      setIsLoading(false)
     }
   }
 
   if (!categories || !subCategoriesData) return <div>Carregando...</div>
 
-  return (
+  return (    
     <Form {...productForm}>
       <form onSubmit={productForm.handleSubmit(handleSubmit)} className="space-y-8">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
@@ -543,7 +555,7 @@ export const ProductForm = () => {
           </Button>
           <Button type="submit" disabled={isLoading} >
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Criar produto
+            {!isLoading && "Criar produto"}
           </Button>
         </div>
       </form>

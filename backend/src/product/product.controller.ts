@@ -31,7 +31,7 @@ export class ProductController {
     return await this.productService.createProduct(data, req.user.userId, file)
   }
 
-  @Get()
+  @Get("/me")
   @UseGuards(AuthGuard("jwt"))
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   async getProductsById(@Request() req) {
