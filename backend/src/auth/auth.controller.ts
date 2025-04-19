@@ -1,4 +1,4 @@
-import { Controller, Body, UsePipes, ValidationPipe, Post, HttpStatus, Res, Request } from '@nestjs/common';
+import { Controller, Body, UsePipes, ValidationPipe, Post, HttpStatus, Res, Request, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { VerifyCodeDto } from './dto/verify-code.dto';
 import { RecoverDto } from './dto/recover.dto'
@@ -56,5 +56,10 @@ export class AuthController {
         return this.authService.login(req, res)
     }
 
+    @Get("/me")
+    @UseGuards(AuthGuard("jwt"))
+    async isAuthenticated() {
+      return { authenticated: true }
+    }
 }
 

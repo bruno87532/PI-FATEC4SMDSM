@@ -65,4 +65,24 @@ export class ProductService {
       throw new InternalServerErrorException("An error ocurred while fetching products")
     }
   }
+
+  async deleteProductById(ids: string[]) {
+    try {
+      const products = await this.prismaService.product.deleteMany({
+        where: { 
+          id: {
+            in: ids
+          } 
+        }
+      })
+
+      if (products.count === 0) throw new BadRequestException("Products not found")
+
+      return products
+    } catch (error) {
+      console.error("An error ocurred while deleting product", error)
+      if (error instanceof HttpException) throw error
+      throw new InternalServerErrorException("An error ocurred while deleting product")
+    }
+  }
 }

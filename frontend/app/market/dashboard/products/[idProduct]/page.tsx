@@ -1,12 +1,9 @@
 "use client"
 
-import type { Metadata } from "next"
 import { ProductForm } from "../../components/product-form/product-form"
 import { useParams } from "next/navigation"
 
 const EditProductPage = () => {
-  const { idProduct } = useParams()
-  
   return (
     <div className="flex flex-col gap-4 p-4 md:p-8">
       <div>
@@ -14,7 +11,7 @@ const EditProductPage = () => {
         <p className="text-muted-foreground">Atualize os detalhes do produto</p>
       </div>
 
-      <ProductForm productId={ idProduct as string} />
+      <ProductForm />
     </div>
   )
 }
