@@ -9,9 +9,10 @@ export const DialogPrice = ({ price }: { price: string }) => {
   const stripePromise = loadStripe(
     process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY ?? ""
   )
-
+  
   const fetchClientSecret = useCallback(() => StripeService.createCheckout(price), [])
   const options = { fetchClientSecret }
+  console.log(options)
 
   return (
     <Dialog>

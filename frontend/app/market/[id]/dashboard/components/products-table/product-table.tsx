@@ -40,7 +40,6 @@ export const ProductsTable = () => {
           const nameSubCategories = product.subCategorys
             .map(sc => subCategoryMap.get(sc.id))
             .filter(Boolean) as string[]
-
           return {
             id: product.id,
             idDrive: product.idDrive,
