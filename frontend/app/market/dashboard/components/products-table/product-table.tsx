@@ -15,12 +15,14 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { productService } from "@/services/product"
+import { useToast } from "@/hooks/use-toast"
 
 export const ProductsTable = () => {
   const [selectedProducts, setSelectedProducts] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [productToDelete, setProductToDelete] = useState<string | null>(null)
   const [products, setProducts] = useState<ProductPage[] | []>([])
+  const { toast } = useToast()
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -81,8 +83,22 @@ export const ProductsTable = () => {
     }
   }
 
-  const handleDeleteProduct = (id: string) => {
-    console.log(`Deleting product ${id}`)
+  const handleDeleteProduct = async (ids: string[]) => {
+    try {
+      await productService.deleteProductByIds(ids)
+      setProducts(products.filter(product => !ids.includes(product.id)))
+      const isManyProduct = ids.length > 1
+      toast({
+        title: isManyProduct ? "Produtos deletados" : "Produto deletado",
+        description: isManyProduct ? "Seus produtos foram deletados com sucesso" : "Seu produto foi deletado com sucesso"
+      })
+    } catch (error) {
+      toast({
+        title: "Erro interno",
+        description: "Devido a problemas técnicos não foi possível deletar o produto. Tente novamente mais tarde"
+      })
+      console.error("An error ocurred while deleting products", error)
+    }
     setProductToDelete(null)
   }
   const now = new Date()
@@ -124,7 +140,8 @@ export const ProductsTable = () => {
                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() => {
-                      selectedProducts.forEach((id) => handleDeleteProduct(id))
+                      const ids = selectedProducts.map(id => id)
+                      handleDeleteProduct(ids)
                       setSelectedProducts([])
                     }}
                   >
@@ -249,7 +266,7 @@ export const ProductsTable = () => {
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => handleDeleteProduct(product.id)}>Excluir</AlertDialogAction>
+                          <AlertDialogAction onClick={() => handleDeleteProduct([product.id])}>Excluir</AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>

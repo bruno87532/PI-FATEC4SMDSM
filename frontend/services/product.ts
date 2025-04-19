@@ -51,4 +51,17 @@ export class productService {
 
     return await res.json()
   }
+
+  static async deleteProductByIds(ids: string[]) {
+    const res = await fetch(this.pathBackend + "/product/delete-many", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ ids })
+    })
+
+    await res.json()
+  }
 }

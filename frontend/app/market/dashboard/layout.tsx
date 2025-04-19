@@ -1,8 +1,25 @@
-import type { ReactNode } from "react"
+"use client"
+
+import { type ReactNode, useEffect } from "react"
 import { DashboardNav } from "./components/dashboard-nav/dashboard-nav"
 import { UserNav } from "./components/user-nav/user-nav"
+import { useAuth } from "@/app/context/auth-context"
+import { useRouter } from "next/navigation"
 
-const  DashboardLayout = ({ children }: { children: ReactNode }) => {
+const DashboardLayout = ({ children }: { children: ReactNode }) => {
+  // const { isLoggedin, isLoading } = useAuth()
+  // const router = useRouter()
+
+  // useEffect(() => {
+  //   if (!isLoading && !isLoggedin) {
+  //     router.push("/")
+  //   }
+  // }, [isLoading, isLoggedin, router])
+
+  // if (isLoading || (!isLoggedin && typeof window !== "undefined")) {
+  //   return <div>Carregando...</div>
+  // }
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-10 border-b bg-background">

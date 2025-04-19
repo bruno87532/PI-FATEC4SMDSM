@@ -141,4 +141,16 @@ export class authService {
 
     return await res.json()
   }
+
+  static async isAuthenticated() {
+    const res = await fetch(this.pathBackend + "auth/me", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      credentials: "include"
+    })
+
+    return await res.json()
+  }
 }
