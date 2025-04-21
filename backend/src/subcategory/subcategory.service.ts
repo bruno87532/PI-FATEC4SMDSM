@@ -10,7 +10,6 @@ export class SubCategoryService {
       const subCategories = await this.prismaService.subcategory.findMany()
       
       if (!subCategories) throw new BadRequestException("subCategories not found")
-
       return subCategories
     } catch (error) {
       console.error("An error ocurred while fetching subcategories", error)

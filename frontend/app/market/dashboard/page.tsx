@@ -17,7 +17,7 @@ const Dashboard = () => {
           <h1 className="text-3xl font-bold tracking-tight">Painel do Anunciante</h1>
           <p className="text-muted-foreground">Gerencie seus produtos, promoções e acompanhe seu desempenho</p>
         </div>
-        <Link href="/dashboard/produtos/novo">
+        <Link href="/market/dashboard/products/new">
           <Button>Adicionar Produto</Button>
         </Link>
       </div>

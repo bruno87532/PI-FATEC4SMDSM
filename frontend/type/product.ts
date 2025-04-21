@@ -23,3 +23,16 @@ export interface ProductPage extends Product {
   nameCategories: string[];
   nameSubCategories: string[];
 }
+
+export interface CreateOrUpdateProduct {
+  name: string;
+  description?: string;
+  regularPrice: string;
+  promotionalPrice?: string;
+  promotionExpiration?: Date;
+  promotionStart?: Date;
+  stock: string;
+  categorys: string[];
+  subCategorys: string[];
+  file: File;
+}

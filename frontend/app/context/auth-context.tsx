@@ -18,11 +18,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const isAuthenticated = async () => {
       try {
-        await authService.isAuthenticated()
+        const res = await authService.isAuthenticated()
         setIsLoggedin(true)
         setIsLoading(false)
       } catch (error) {
-        console.log(error)
         setIsLoading(false)
         setIsLoggedin(false)
       }
@@ -40,8 +39,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext)
-  console.log(context)
-  console.log("Teste")
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider")
   }

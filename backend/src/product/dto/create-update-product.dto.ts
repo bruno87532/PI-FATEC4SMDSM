@@ -14,7 +14,7 @@ import {
 } from "class-validator";
 import { Transform } from "class-transformer";
 
-export class CreateProductDto {
+export class CreateUpdateProductDto {
   @IsNotEmpty({ message: "The name is required" })
   @IsString({ message: "The name must be a string" })
   @MinLength(2 ,{ message: "The name must be at least 2 characters long" })

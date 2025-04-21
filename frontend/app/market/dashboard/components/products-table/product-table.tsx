@@ -3,14 +3,14 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { BookOpen, Edit, MoreHorizontal, Search, Trash2 } from "lucide-react"
+import { Edit, MoreHorizontal, Search, Trash2 } from "lucide-react"
 import { categoryService } from "@/services/category"
 import { subCategoryService } from "@/services/subCategory"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { ProductPage, ProductDb } from "@/type/product"
+import { ProductPage } from "@/type/product"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
@@ -237,7 +237,7 @@ export const ProductsTable = () => {
                         <DropdownMenuLabel>Ações</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
-                          <Link href={`/market/100/dashboard/products/${product.id}`}>
+                          <Link href={`/market/dashboard/products/${product.id}`}>
                             <Edit className="mr-2 h-4 w-4" />
                             Editar
                           </Link>

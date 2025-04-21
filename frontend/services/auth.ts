@@ -143,13 +143,17 @@ export class authService {
   }
 
   static async isAuthenticated() {
-    const res = await fetch(this.pathBackend + "auth/me", {
+    const res = await fetch(this.pathBackend + "/auth/me", {
       method: "GET",
       headers: {
         "Content-Type": "application/json"
       },
       credentials: "include"
     })
+
+    if (!res.ok) {
+      throw new Error("unauthenticated user")
+    }
 
     return await res.json()
   }

@@ -13,9 +13,10 @@ import { ProductModule } from './product/product.module';
 import { GoogleDriveModule } from './google-drive/google-drive.module';
 import { CategoryModule } from './category/category.module';
 import { SubCategoryModule } from './subcategory/subcategory.module';
+import { StreamToBufferModule } from './stream-to-buffer/stream-to-buffer.module';
 
 @Module({
-  imports: [UsersModule, PrismaModule, EmailModule, AuthModule, RecoverModule, StripeModule, PlanModule, SubscriptionModule, ProductModule, GoogleDriveModule, CategoryModule, SubCategoryModule],
+  imports: [UsersModule, PrismaModule, EmailModule, AuthModule, RecoverModule, StripeModule, PlanModule, SubscriptionModule, ProductModule, GoogleDriveModule, CategoryModule, SubCategoryModule, StreamToBufferModule],
   controllers: [AppController],
   providers: [AppService],
 })

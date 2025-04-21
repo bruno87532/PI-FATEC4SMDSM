@@ -1,8 +1,11 @@
 import { Module } from '@nestjs/common';
 import { GoogleDriveService } from './google-drive.service';
 import { google } from "googleapis"
+import { GoogleDriveController } from './google-drive.controller';
+import { StreamToBufferModule } from 'src/stream-to-buffer/stream-to-buffer.module';
 
 @Module({
+  imports: [StreamToBufferModule],
   providers: [
     GoogleDriveService,
     {
@@ -19,6 +22,7 @@ import { google } from "googleapis"
       }
     }
   ],
-  exports: [GoogleDriveService]
+  exports: [GoogleDriveService],
+  controllers: [GoogleDriveController]
 })
 export class GoogleDriveModule {}

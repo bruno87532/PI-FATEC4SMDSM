@@ -7,18 +7,18 @@ import { useAuth } from "@/app/context/auth-context"
 import { useRouter } from "next/navigation"
 
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
-  // const { isLoggedin, isLoading } = useAuth()
-  // const router = useRouter()
+  const { isLoggedin, isLoading } = useAuth()
+  const router = useRouter()
 
-  // useEffect(() => {
-  //   if (!isLoading && !isLoggedin) {
-  //     router.push("/")
-  //   }
-  // }, [isLoading, isLoggedin, router])
+  useEffect(() => {
+    if (!isLoading && !isLoggedin) {
+      router.push("/")
+    }
+  }, [isLoading, isLoggedin, router])
 
-  // if (isLoading || (!isLoggedin && typeof window !== "undefined")) {
-  //   return <div>Carregando...</div>
-  // }
+  if (isLoading || (!isLoggedin && typeof window !== "undefined")) {
+    return <div>Carregando...</div>
+  }
 
   return (
     <div className="flex min-h-screen flex-col">

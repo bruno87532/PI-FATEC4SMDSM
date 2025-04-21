@@ -17,7 +17,7 @@ export default function ProductsPage() {
           <h1 className="text-3xl font-bold tracking-tight">Produtos</h1>
           <p className="text-muted-foreground">Gerencie todos os seus produtos e promoções</p>
         </div>
-        <Link href="/dashboard/produtos/novo">
+        <Link href="/market/dashboard/products/new">
           <Button>Adicionar Produto</Button>
         </Link>
       </div>
