@@ -1,5 +1,5 @@
-import { MainBanner } from "@/components/main-banner"
-import { ProductSection } from "@/components/product-section"
+import { MainBanner } from "@/app/components/main-banner/main-banner"
+import { ProductSection } from "@/app/components/product-section/product-section"
 import { CombosSection } from "@/app/components/combos-sections/combos-sections"
 import { SiteHeader } from "./components/site-header/site-header";
 import { MainNav } from "./components/main-nav/main-nav";

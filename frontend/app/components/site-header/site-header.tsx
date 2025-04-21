@@ -5,13 +5,18 @@ import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Mic } from "lucide-react"
-import { ShoppingCart, User } from "lucide-react"
+import { User } from "lucide-react"
 import { useState } from "react"
 import { Dialog, DialogTrigger } from "@radix-ui/react-dialog"
 import { AuthDialog } from "../auth/auth-dialog"
+import { SideMenu, type CartItem } from "../side-menucar/side-menu"
 
 export const SiteHeader = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [cartItems, setCartItems] = useState<CartItem[]>([
+    { id: 1, name: "Maçã Fuji", price: 8.99, quantity: 2 },
+    { id: 2, name: "Leite Integral", price: 5.49, quantity: 1 },
+  ])
 
   return (
     <header className="w-full border-b max-w-6xl mx-auto">
@@ -57,13 +62,12 @@ export const SiteHeader = () => {
               </DialogTrigger>
               <AuthDialog />
             </Dialog>
-          <Button variant="ghost" size="icon">
-            <ShoppingCart className="h-5 w-5" />
-          </Button>
+
+            {/* Componente SideMenu com o botão do carrinho integrado */}
+            <SideMenu cartItems={cartItems} setCartItems={setCartItems} />
+          </div>
         </div>
       </div>
-    </div>
-    </header >
+    </header>
   )
 }
-
