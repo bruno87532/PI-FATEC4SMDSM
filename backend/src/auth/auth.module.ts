@@ -8,6 +8,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { CartModule } from 'src/cart/cart.module';
 
 @Module({
   providers: [AuthService, LocalStrategy, JwtStrategy],
@@ -16,6 +17,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     forwardRef(() => UsersModule),
     RecoverModule,
     EmailModule,
+    CartModule,
     PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET_KEY,

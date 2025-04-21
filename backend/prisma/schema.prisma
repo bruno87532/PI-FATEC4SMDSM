@@ -36,6 +36,7 @@ model User {
   subscriptions Subscription[]
   products Product[]
   recoverPasswords     Recover? @relation
+  cart Cart? @relation
 }
 
 model Subscription {
@@ -94,6 +95,27 @@ model Product {
   stock Int
   idUser String
   userId User @relation(fields: [idUser], references: [id])
+  item Item[]
   categorys Category[] @relation("ProductCategorys")
   subCategorys Subcategory[] @relation("ProductSubCategorys")
+}
+
+model Cart {
+  id String @id @default(uuid())
+  idUser String @unique
+  totalPrice Int @default(0)
+  item Item[]
+  userId User @relation(fields: [idUser], references: [id])
+}
+
+model Item {
+  id String @id @default(uuid())
+  idCart String 
+  idProduct String
+  quantity Int
+  unitPrice Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  productId Product @relation(fields: [idProduct], references: [id])
+  cartId Cart @relation(fields: [idCart], references: [id])
 }

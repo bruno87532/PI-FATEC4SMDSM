@@ -14,6 +14,7 @@ import { NewPasswordDto } from './dto/new-password.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from "bcrypt";
 import { User } from './interfaces/user.interface';
+import { CartService } from 'src/cart/cart.service';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +23,7 @@ export class AuthService {
     private readonly emailService: EmailService,
     private readonly recoverService: RecoverService,
     private readonly jwtService: JwtService,
+    private readonly cartService: CartService,
   ) { }
 
   // ---- Código da lógica de verificação de código de usuário ---- //
@@ -75,7 +77,7 @@ export class AuthService {
   // ---- Fim do código da lógica de verificação de usuário ---- //
   // ---- Início do código da lógica de nova senha de conta nova ---- //
 
-  async newPassword(data: NewPasswordDto): Promise<ResponseMessage> {
+  async newAccountCompleted(data: NewPasswordDto): Promise<ResponseMessage> {
     try {
       const user = await this.usersService.getUserById(data.idUser)
       if (data.randomCode !== user.randomCode) {
@@ -85,6 +87,7 @@ export class AuthService {
         throw new BadRequestException("User is not activated")
       }
 
+      await this.cartService.createCart(data.idUser)
       await this.usersService.updateUser(data.idUser, { password: data.password })
       return { message: "User updated succesfully", statusCode: 200 }
     } catch (error) {
@@ -207,7 +210,7 @@ export class AuthService {
   }
 
   async login(@Request() req: Request & { user: User }, @Res({ passthrough: true }) res: Response): Promise<ResponseMessage> {
-    const allowedFields = ["id", "name"]
+    const allowedFields = ["id", "name", "idCart"]
     const user = req.user
     const payload = Object.fromEntries(
       Object.entries(user).filter(([key, value]) => value !== undefined && allowedFields.includes(key))

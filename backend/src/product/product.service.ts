@@ -24,7 +24,7 @@ export class ProductService {
 
   async updateProduct(data: CreateUpdateProductDto, id: string, idUser: string, file: Express.Multer.File) {
     try {
-      const product = await this.prismaService.product.findUnique({ where: { id } })
+      const product = await this.getProductById(id)
       if (!product) throw new BadRequestException("Product not found")
       if (product.idUser !== idUser) throw new ForbiddenException("You do not have permission to update this product")
 
@@ -150,6 +150,42 @@ export class ProductService {
       console.error("An error ocurred while fetching product", error)
       if (error instanceof HttpException) throw error
       throw new InternalServerErrorException("An error ocurred while fetching product")
+    }
+  }
+
+  async decrementStockProduct(id: string, quantity: number) {
+    try {
+      const product = await this.prismaService.product.update({
+        where: { id },
+        data: {
+          stock: {
+            decrement: quantity
+          }
+        }
+      })
+
+      return product
+    } catch (error) {
+      console.error("An error ocurred while decreasing the product stock", error)
+      throw new InternalServerErrorException("An error ocurred while decreasing the product stock")
+    }
+  }
+
+  async incrementStockProduct(id: string, quantity: number) {
+    try {
+      const product = await this.prismaService.product.update({
+        where: { id },
+        data: {
+          stock: {
+            increment: quantity
+          }
+        }
+      })
+
+      return product
+    } catch (error) {
+      console.error("An error ocurred while incrementing the product stock", error)
+      throw new InternalServerErrorException("An error ocurred while incrementing the product stock")
     }
   }
 }

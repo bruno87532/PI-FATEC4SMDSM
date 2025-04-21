@@ -4,14 +4,7 @@ import { EmailService } from 'src/email/email.service';
 import { randomInt } from 'crypto';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
-
-interface DataUpdateUser {
-  password?: string;
-  randomCode?: string;
-  randomCodeExpiration?: Date;
-  isActivate?: Date;
-  typeUser?: "COMMON" | "ADVERTISER"
-};
+import { DataUpdateUser } from 'src/interfaces/user.interface';
 
 @Injectable()
 export class UsersService {

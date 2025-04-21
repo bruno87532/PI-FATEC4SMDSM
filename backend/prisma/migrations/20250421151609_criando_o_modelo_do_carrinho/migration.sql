@@ -1,0 +1,2 @@
+-- AddForeignKey
+ALTER TABLE "Cart" ADD CONSTRAINT "Cart_idUser_fkey" FOREIGN KEY ("idUser") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

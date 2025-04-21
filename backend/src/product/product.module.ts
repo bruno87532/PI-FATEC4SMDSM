@@ -7,6 +7,7 @@ import { GoogleDriveModule } from 'src/google-drive/google-drive.module';
 @Module({
   imports: [PrismaModule, GoogleDriveModule],
   controllers: [ProductController],
-  providers: [ProductService]
+  providers: [ProductService],
+  exports: [ProductService]
 })
 export class ProductModule {}

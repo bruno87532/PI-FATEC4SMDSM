@@ -24,8 +24,8 @@ export class AuthController {
 
     @Post("/new-password")
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-    async newPassword(@Body() data: NewPasswordDto) {
-        return await this.authService.newPassword(data)
+    async newAccountCompleted(@Body() data: NewPasswordDto) {
+        return await this.authService.newAccountCompleted(data)
     }
 
     @Post("/recover")

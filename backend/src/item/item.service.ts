@@ -1,0 +1,131 @@
+import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { CartService } from 'src/cart/cart.service';
+import { ProductService } from 'src/product/product.service';
+
+@Injectable()
+export class ItemService {
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly cartService: CartService,
+    private readonly productService: ProductService
+  ) { }
+
+  async getItemById(id: string) {
+    try {
+      const item = await this.prismaService.item.findUnique({ where: { id } })
+      if (!item) throw new NotFoundException("Item not found")
+
+      return item
+    } catch (error) {
+      console.error("An error ocurred while fetching item", error)
+      throw new InternalServerErrorException("An error ocurred while fetching item")
+    }
+  }
+
+  async createItem(idUser: string, idProduct: string) {
+    try {
+      const cart = await this.cartService.getCartByIdUser(idUser)
+      if (!cart) throw new NotFoundException("Cart not found")
+
+      const product = await this.productService.getProductById(idProduct)
+      if (!product) throw new NotFoundException("Product not found")
+      const price = product?.promotionExpiration && product?.promotionalPrice && new Date(product.promotionExpiration).getTime() > (new Date()).getTime() ?
+        product.promotionalPrice :
+        product.regularPrice
+
+      const item = await this.prismaService.item.create({
+        data: {
+          idCart: cart.id,
+          quantity: 1,
+          idProduct,
+          unitPrice: price
+        }
+      })
+
+      await this.cartService.incrementPriceCart(cart.id, price)
+      await this.productService.decrementStockProduct(idProduct, 1)
+      return item
+    } catch (error) {
+      console.error("An error ocurred while creating item")
+      throw new InternalServerErrorException("An error ocurred while creating item")
+    }
+  }
+
+  async incrementQuantityItem(idUser: string, id: string) {
+    try {
+      const cart = await this.cartService.getCartByIdUser(idUser)
+      if (!cart) throw new NotFoundException("Cart not found")
+
+      const item = await this.getItemById(id)
+      if (item.idCart !== cart.id) throw new ForbiddenException("You do not have permission to update this item")
+
+      const updated = await this.prismaService.item.update({
+        where: { id },
+        data: {
+          quantity: {
+            increment: 1
+          }
+        }
+      })
+
+      await this.productService.decrementStockProduct(updated.idProduct, 1)
+      await this.cartService.incrementPriceCart(cart.id, updated.unitPrice)
+
+      return item
+    } catch (error) {
+      console.error("An error ocurred while updating item", error)
+      throw new InternalServerErrorException("An error ocurred while updating item")
+    }
+  }
+
+  async decrementQuantityItem(idUser: string, id: string) {
+    try {
+      const [cart, item] = await this.allowedResource(idUser, id)
+
+      const updated = await this.prismaService.item.update({
+        where: { id },
+        data: {
+          quantity: {
+            decrement: 1
+          }
+        }
+      })
+
+      await this.productService.incrementStockProduct(updated.idProduct, 1)
+      await this.cartService.decrementPriceCart(cart.id, updated.unitPrice)
+
+      return item
+    } catch (error) {
+      console.error("An error ocurred while updating item", error)
+      throw new InternalServerErrorException("An error ocurred while updating item")
+    }
+  }
+
+  async deleteItem(idUser: string, id: string) {
+    try {
+      const [cart, item] = await this.allowedResource(idUser, id)
+
+      const deleted = await this.prismaService.item.delete({
+        where: { id }
+      })
+
+      await this.cartService.decrementPriceCart(cart.id, deleted.quantity * deleted.unitPrice)
+      await this.productService.incrementStockProduct(deleted.idProduct, deleted.quantity)
+      return deleted
+    } catch (error) {
+      console.error("An error ocurred while deleting item", error)
+      throw new InternalServerErrorException("An error ocurred while deleting item")
+    }
+  }
+
+  private async allowedResource(idUser: string, id: string) {
+    const cart = await this.cartService.getCartByIdUser(idUser)
+    if (!cart) throw new NotFoundException("Cart not found")
+
+    const item = await this.getItemById(id)
+    if (item.idCart !== cart.id) throw new ForbiddenException("You do not have permission to acess this item")
+    
+    return [cart, item]
+  }
+}
