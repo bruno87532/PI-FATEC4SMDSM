@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, ConflictException, HttpException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CartService } from 'src/cart/cart.service';
 import { ProductService } from 'src/product/product.service';
@@ -19,6 +19,7 @@ export class ItemService {
       return item
     } catch (error) {
       console.error("An error ocurred while fetching item", error)
+      if (error instanceof HttpException) throw error
       throw new InternalServerErrorException("An error ocurred while fetching item")
     }
   }
@@ -30,6 +31,8 @@ export class ItemService {
 
       const product = await this.productService.getProductById(idProduct)
       if (!product) throw new NotFoundException("Product not found")
+      if (product.stock <= 0) throw new ConflictException("Product out of stock")
+        
       const price = product?.promotionExpiration && product?.promotionalPrice && new Date(product.promotionExpiration).getTime() > (new Date()).getTime() ?
         product.promotionalPrice :
         product.regularPrice
@@ -48,6 +51,7 @@ export class ItemService {
       return item
     } catch (error) {
       console.error("An error ocurred while creating item")
+      if (error instanceof HttpException) throw error
       throw new InternalServerErrorException("An error ocurred while creating item")
     }
   }
@@ -59,6 +63,10 @@ export class ItemService {
 
       const item = await this.getItemById(id)
       if (item.idCart !== cart.id) throw new ForbiddenException("You do not have permission to update this item")
+
+      const product = await this.productService.getProductById(item.idProduct)
+      if (!product) throw new BadRequestException("Product not found")
+      if (product.stock <= 0) throw new ConflictException("Product out of stock")  
 
       const updated = await this.prismaService.item.update({
         where: { id },
@@ -75,6 +83,7 @@ export class ItemService {
       return item
     } catch (error) {
       console.error("An error ocurred while updating item", error)
+      if (error instanceof HttpException) throw error
       throw new InternalServerErrorException("An error ocurred while updating item")
     }
   }
@@ -116,6 +125,19 @@ export class ItemService {
     } catch (error) {
       console.error("An error ocurred while deleting item", error)
       throw new InternalServerErrorException("An error ocurred while deleting item")
+    }
+  }
+
+  async deleteAllItens(idUser: string) {
+    try {
+      const deleted = await this.prismaService.cart.deleteMany({
+        where: { idUser }
+      })
+
+      return deleted
+    } catch (error) {
+      console.error("An error ocurrd while deleting all itens", error)
+      throw new InternalServerErrorException("An error ocurrd while deleting all itens")
     }
   }
 

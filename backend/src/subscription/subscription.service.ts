@@ -67,4 +67,18 @@ export class SubscriptionService {
       throw new InternalServerErrorException("An error ocurred while fetching subscription")
     }
   }
+
+  async getSubscriptionsActivateByIdPlan(idPlan: string): Promise<Subscription[]> {
+    try {
+      const subscriptions = await this.prismaService.subscription.findMany({ where: { idPlan } })
+      const subscriptionsActivate = subscriptions.filter((subscription) => subscription.isActivate === true) 
+      if (!subscriptionsActivate) throw new NotFoundException("Subscriptions not found")
+
+      return subscriptionsActivate
+    } catch (error) {
+      console.error("Ocurred an error while fetching all subscriptions", error)
+      if (error instanceof HttpException) throw error
+      throw new InternalServerErrorException("Ocurred an error while fetching all subscriptions")
+    }
+  }
 }

@@ -35,4 +35,10 @@ export class ItemController {
   async deleteItem(@Request() req, @Param("id") id: string) {
     return await this.itemService.deleteItem(req.user.userId, id)
   }
+
+  @UseGuards(AuthGuard("jwt"))
+  @Delete()
+  async deleteAllItens(@Request() req) {
+    return await this.itemService.deleteAllItens(req.user.userId)
+  }
 }

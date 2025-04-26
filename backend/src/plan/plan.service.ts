@@ -6,7 +6,7 @@ import { Plan } from '@prisma/client';
 export class PlanService {
   constructor(private readonly prismaService: PrismaService) {}
   
-  async getPlan(): Promise<Plan[] | null> {
+  async getPlan(): Promise<Plan[]> {
     return await this.prismaService.plan.findMany()
   }
 

@@ -75,22 +75,4 @@ export class CartService {
       throw new InternalServerErrorException("An error ocurred while updating cart")
     }
   }
-
-  // async removeProducts(idUser: string, ids: string[]) {
-  //   try {
-  //     const cart = await this.prismaService.cart.update({
-  //       where: { idUser },
-  //       data: {
-  //         products: {
-  //           disconnect: ids.map((id) => ({ id }))
-  //         }
-  //       }
-  //     })
-
-  //     return cart
-  //   } catch (error) {
-  //     console.error("An error ocurrd while removing all itens from cart", error)
-  //     throw new InternalServerErrorException("An error ocurrd while removing all itens from cart")
-  //   }
-  // }
 }
