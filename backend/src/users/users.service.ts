@@ -145,4 +145,23 @@ export class UsersService {
 
   // ---- Fim do código da lógica de atualização de usuário ---- //
 
+  async getUsersByIds(ids: string[]) {
+    try {
+      const users = await this.prismaService.user.findMany({
+        where: {
+          id: {
+            in: ids
+          }
+        }
+      })
+
+      if (users.length === 0) throw new BadRequestException("Users not found")
+
+      return users
+    } catch (error) {
+      console.error("An error ocurred while fetching users by ids", error)
+      throw new Error("An error ocurred while fetching users by ids")
+    }
+  }
+
 }

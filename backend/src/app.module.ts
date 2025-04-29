@@ -16,11 +16,10 @@ import { SubCategoryModule } from './subcategory/subcategory.module';
 import { StreamToBufferModule } from './stream-to-buffer/stream-to-buffer.module';
 import { CartModule } from './cart/cart.module';
 import { ItemModule } from './item/item.module';
-import { ControllerModule } from './service/controller/controller.module';
-import { HighlitProductsModule } from './highlit-products/highlit-products.module';
+import { HighlightProductsModule } from './highlight-products/highlit-products.module';
 
 @Module({
-  imports: [UsersModule, PrismaModule, EmailModule, AuthModule, RecoverModule, StripeModule, PlanModule, SubscriptionModule, ProductModule, GoogleDriveModule, CategoryModule, SubCategoryModule, StreamToBufferModule, CartModule, ItemModule, ControllerModule, HighlitProductsModule],
+  imports: [UsersModule, PrismaModule, EmailModule, AuthModule, RecoverModule, StripeModule, PlanModule, SubscriptionModule, ProductModule, GoogleDriveModule, CategoryModule, SubCategoryModule, StreamToBufferModule, CartModule, ItemModule, HighlightProductsModule],
   controllers: [AppController],
   providers: [AppService],
 })

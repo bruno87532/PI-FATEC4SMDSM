@@ -22,12 +22,10 @@ export const SiteHeader = () => {
     <header className="w-full border-b max-w-6xl mx-auto">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between gap-4">
-          {/* Logo */}
           <Link href="/" className="flex items-center font-extrabold text-lg">
             PI4DSM
           </Link>
 
-          {/* Location Selector */}
           <div className="flex items-center text-sm text-gray-600">
             <span className="mr-2">Retire em:</span>
             <Button variant="ghost" className="text-green-600">
@@ -36,7 +34,6 @@ export const SiteHeader = () => {
             <span className="ml-2">Frete: R$ 0,00</span>
           </div>
 
-          {/* Search Bar */}
           <div className="flex flex-1 max-w-xl items-center gap-2">
             <div className="relative flex-1">
               <Input
@@ -63,8 +60,7 @@ export const SiteHeader = () => {
               <AuthDialog />
             </Dialog>
 
-            {/* Componente SideMenu com o botão do carrinho integrado */}
-            <SideMenu cartItems={cartItems} setCartItems={setCartItems} />
+            <SideMenu />
           </div>
         </div>
       </div>
