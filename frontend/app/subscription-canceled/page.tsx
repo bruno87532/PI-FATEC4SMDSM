@@ -1,8 +1,18 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
+import { Loader2 } from "lucide-react"
+import React, { useState } from "react"
+import { useSubscriptionCancelling } from "./hook/use-subscription-cancelling"
 
 const SubscriptionCanceled = () => {
+  const reasons = ["Muito caro", "Não estou usando", "Falta de recursos", "Encontrei outra alternativa"]
+  const [isLoadingReason, setIsLoadingReason] = useState<string | null>(null)
+  
+  const handleClick = useSubscriptionCancelling({ setIsLoadingReason })
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md">
@@ -34,18 +44,13 @@ const SubscriptionCanceled = () => {
           <div className="bg-gray-100 rounded-lg p-4 mt-4">
             <h3 className="font-medium text-gray-800 mb-2">Você se importaria de compartilhar o motivo de sua saída?</h3>
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" size="sm" className="text-sm">
-                Muito caro
-              </Button>
-              <Button variant="outline" size="sm" className="text-sm">
-                Não estou usando
-              </Button>
-              <Button variant="outline" size="sm" className="text-sm">
-                Falta de recursos
-              </Button>
-              <Button variant="outline" size="sm" className="text-sm">
-                Encontrei outra alternativa
-              </Button>
+              {
+                reasons.map((reason, index) => (
+                  <Button variant="outline" key={index} value={reason} size="sm" className="text-sm" onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleClick(e)}>
+                    { isLoadingReason === reason ? (<Loader2 className="h-6 w-6 animate-spin" />) : reason }
+                  </Button>
+                ))
+              }
             </div>
           </div>
         </CardContent>
