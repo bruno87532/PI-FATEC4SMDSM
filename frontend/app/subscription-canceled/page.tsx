@@ -10,8 +10,9 @@ import { useSubscriptionCancelling } from "./hook/use-subscription-cancelling"
 const SubscriptionCanceled = () => {
   const reasons = ["Muito caro", "Não estou usando", "Falta de recursos", "Encontrei outra alternativa"]
   const [isLoadingReason, setIsLoadingReason] = useState<string | null>(null)
-  
-  const handleClick = useSubscriptionCancelling({ setIsLoadingReason })
+  const [isLoadingReactivated, setIsLoadingReactivated] = useState<boolean>(false)
+
+  const { handleClick, reactivateSubscription } = useSubscriptionCancelling({ setIsLoadingReason, setIsLoadingReactivated })
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
@@ -47,7 +48,7 @@ const SubscriptionCanceled = () => {
               {
                 reasons.map((reason, index) => (
                   <Button variant="outline" key={index} value={reason} size="sm" className="text-sm" onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleClick(e)}>
-                    { isLoadingReason === reason ? (<Loader2 className="h-6 w-6 animate-spin" />) : reason }
+                    {isLoadingReason === reason ? (<Loader2 className="h-6 w-6 animate-spin" />) : reason}
                   </Button>
                 ))
               }
@@ -55,7 +56,9 @@ const SubscriptionCanceled = () => {
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-3">
-          <Button className="w-full">Reativar minha inscrição</Button>
+          <Button className="w-full" onClick={reactivateSubscription}>
+            {isLoadingReactivated ? <Loader2 className="animate-spin h-6 w-6" /> : "Reativar minha inscrição"}
+          </Button>
           <div className="flex justify-between w-full">
             <Link href="#" className="w-full">
               <Button

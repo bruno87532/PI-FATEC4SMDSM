@@ -1,4 +1,4 @@
-import { Controller, Post, Headers, Body, UsePipes, ValidationPipe, UseGuards, Request } from '@nestjs/common'
+import { Controller, Post, Headers, Body, UsePipes, ValidationPipe, UseGuards, Request, Patch } from '@nestjs/common'
 import { StripeService } from './stripe.service'
 import { CreateCheckoutDto } from './dto/create-checkout.dto'
 import { AuthGuard } from '@nestjs/passport'
@@ -24,8 +24,14 @@ export class StripeController {
   }
 
   @UseGuards(AuthGuard("jwt"))
-  @Post("/cancel-subscription")
+  @Patch("/cancel-subscription")
   async cancelSubscription(@Request() req) {
     return await this.stripeService.cancelSubscription(req.user.userId)
+  }
+
+  @UseGuards(AuthGuard("jwt"))
+  @Patch("/reactivate-subscription")
+  async reactivateSubscription(@Request () req) {
+    return await this.stripeService.reactivateSubscription(req.user.userId)
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable, Inject, InternalServerErrorException, BadRequestException, HttpException } from '@nestjs/common';
+import { Injectable, Inject, InternalServerErrorException, BadRequestException, HttpException, NotFoundException } from '@nestjs/common';
 import Stripe from 'stripe';
 import { SubscriptionService } from 'src/subscription/subscription.service';
 import { PlanService } from 'src/plan/plan.service';
@@ -60,14 +60,15 @@ export class StripeService {
           await this.handleCheckoutSessionCompleted(session)
           break
         case "invoice.payment_succeeded":
-          const invoice: Stripe.Invoice = event.data.object 
+          const invoice: Stripe.Invoice = event.data.object
           await this.handleInvoicePaymentSucceeded(invoice)
           break
-          case "customer.subscription.deleted":
-            const subscription: Stripe.Subscription = event.data.object
-            await this.handleCustomerSubscriptionDeleted(subscription)
+        case "customer.subscription.deleted":
+          const subscription: Stripe.Subscription = event.data.object
+          await this.handleCustomerSubscriptionDeleted(subscription)
+      }
 
-        }
+      return { message: "action processed successfully" }
     } catch (error) {
       console.error("An error ocurred while handling the webhook stripe", error)
       throw new InternalServerErrorException("An error ocurred while handling the webhook stripe")
@@ -77,9 +78,10 @@ export class StripeService {
   private async handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
     try {
       if (typeof session.subscription !== "string") throw new BadRequestException("The subscription must be a string")
-        
+
       const subscription: Stripe.Subscription = await this.stripe.subscriptions.retrieve(session.subscription)
       const idStripe = subscription!.id
+      console.log(idStripe)
       const idPrice = subscription!.items.data[0].plan.id
       const idPlan = (await this.planService.getPlanByIdPrice(idPrice)).id
 
@@ -103,7 +105,7 @@ export class StripeService {
 
       const idStripe = invoice.subscription
       if (typeof idStripe !== "string") throw new BadRequestException("The idStripe must be a string")
-      const { id, idUser } = await this.subscriptionService.getSubscriptionByIdStripe(idStripe) 
+      const { id, idUser } = await this.subscriptionService.getSubscriptionByIdStripe(idStripe)
       const subscription = await this.stripe.subscriptions.retrieve(idStripe)
 
       const dateUnix = (subscription.current_period_end + 24 * 60 * 60) * 1000
@@ -132,9 +134,9 @@ export class StripeService {
   // ---- Fim da lógica de processar pagamento ---- //
   // ---- Início da lógica de solicitação de cancelamento de assinatura ---- //
 
-  async cancelSubscription(userId: string) {
+  async cancelSubscription(idUser: string) {
     try {
-      const arraySubscription = await this.subscriptionService.getSubscriptionsByIdUser(userId)
+      const arraySubscription = await this.subscriptionService.getSubscriptionsByIdUser(idUser)
       let subscriptionActivate: Subscription | null = null
       for (const subscription of arraySubscription) {
         if (subscription.isActivate === true) {
@@ -142,7 +144,7 @@ export class StripeService {
         }
       }
       if (typeof subscriptionActivate?.idStripe !== "string") throw new BadRequestException("idStripe must be a string")
-      await this.stripe.subscriptions.cancel(subscriptionActivate.idStripe)
+      const stripeCancel = await this.stripe.subscriptions.update(subscriptionActivate.idStripe, { cancel_at_period_end: true })
 
       return { message: "subscription canceled successfully" }
     } catch (error) {
@@ -153,4 +155,35 @@ export class StripeService {
   }
 
   // ---- Fim da lógica de solicitação de cancelamento de assinatura ---- //
+  // ---- Início da lógica de reativação de assinatura ---- //
+
+  async reactivateSubscription(idUser: string) {
+    try {
+      const subscriptions = await this.subscriptionService.getSubscriptionsByIdUser(idUser);
+
+      let recentSubscription = subscriptions[0];
+
+      subscriptions.forEach((subscription) => {
+        if (new Date(recentSubscription.expirationDate).getTime() > new Date(subscription.expirationDate).getTime() && subscription.isActivate) {
+          recentSubscription = subscription;
+        }
+      });
+
+      if (!recentSubscription.isActivate) throw new BadRequestException("Unable to reactivate subscription")
+      if (new Date().getTime() > new Date(recentSubscription.expirationDate).getTime()) throw new BadRequestException("Current date greather than expiration date")
+
+      await this.stripe.subscriptions.update(recentSubscription.idStripe, {
+        cancel_at_period_end: false
+      })
+
+      return { message: "Subscription reactivated successfully" }
+    } catch (error) {
+      console.error("An error ocurred while reactiving subscription", error);
+      if (error instanceof HttpException) throw error
+      throw new InternalServerErrorException("An error ocurred while reactiving subscription");
+    }
+  }
+
+
+  // ---- Fim da lógica de reativação de assinatura ---- //
 }
