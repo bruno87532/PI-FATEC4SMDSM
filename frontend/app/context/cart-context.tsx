@@ -2,23 +2,24 @@
 
 import React, { createContext, useContext, useState } from "react"
 
-interface Cart {
+interface Item {
   id: string;
-  regularPrice: number;
-  promotionalPrice?: number;
-  name: string;
+  idProduct: string;
   quantity: number;
+  unitPrice: number;
+  name: string;
+  regularPrice: number;
 }
 
 type CartContextType = {
-  cart: Cart[]
-  setCart: React.Dispatch<React.SetStateAction<Cart[]>>
+  cart: Item[]
+  setCart: React.Dispatch<React.SetStateAction<Item[]>>
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [cart, setCart] = useState<Cart[]>([]) 
+  const [cart, setCart] = useState<Item[]>([]) 
 
   return (
     <CartContext.Provider value={{ cart, setCart }}>

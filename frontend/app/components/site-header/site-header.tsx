@@ -9,7 +9,8 @@ import { User } from "lucide-react"
 import { useState } from "react"
 import { Dialog, DialogTrigger } from "@radix-ui/react-dialog"
 import { AuthDialog } from "../auth/auth-dialog"
-import { SideMenu, type CartItem } from "../side-menucar/side-menu"
+import { SideMenuCart } from "../side-menu-cart/side-menu-cart"
+import { CartItem } from "../cart/cart-side-menu"
 
 export const SiteHeader = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -60,7 +61,7 @@ export const SiteHeader = () => {
               <AuthDialog />
             </Dialog>
 
-            <SideMenu />
+            <SideMenuCart />
           </div>
         </div>
       </div>

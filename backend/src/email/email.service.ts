@@ -13,7 +13,6 @@ export class EmailService {
     },
     context: Record<string, string>,
   ): Promise<void> {
-    console.log("teste")
     try {
       this.mailerService.sendMail({
         ...dataEmail,

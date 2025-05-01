@@ -33,7 +33,6 @@ export class StripeService {
         ui_mode: "embedded",
         return_url: (process.env.PATH_FRONTEND ?? "") + "/purchase-confirmation?payment-confirmation&session_id={CHECKOUT_SESSION_ID}"
       })
-      console.log("teste")
       return session
     } catch (error) {
       console.error("An error ocurred while creating checkout stripe", error)
@@ -81,7 +80,6 @@ export class StripeService {
         
       const subscription: Stripe.Subscription = await this.stripe.subscriptions.retrieve(session.subscription)
       const idStripe = subscription!.id
-      console.log(idStripe)
       const idPrice = subscription!.items.data[0].plan.id
       const idPlan = (await this.planService.getPlanByIdPrice(idPrice)).id
 

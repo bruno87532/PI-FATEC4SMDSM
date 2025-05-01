@@ -1,7 +1,7 @@
 "use client"
 
+import { ApiError } from "@/type/error"
 import type React from "react"
-
 import { useState } from "react"
 import Image from "next/image"
 import { Plus } from "lucide-react"
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import type { ProductDb } from "@/type/product"
 import { useCart } from "@/app/context/cart-context"
 import { useToast } from "@/hooks/use-toast"
+import { itemService } from "@/services/item"
 
 export const ProductCard: React.FC<{ product: ProductDb }> = ({ product }) => {
   const { cart, setCart } = useCart()
@@ -21,42 +22,58 @@ export const ProductCard: React.FC<{ product: ProductDb }> = ({ product }) => {
     product.promotionalPrice &&
     new Date(product.promotionExpiration).getTime() > now.getTime()
 
-  
+
   const displayPrice = isOnPromotion
     ? (product.promotionalPrice! / 100).toFixed(2)
     : (product.regularPrice / 100).toFixed(2)
 
   const regularPrice = (product.regularPrice / 100).toFixed(2)
 
-  const addToCart = () => {
-    setIsAddingToCart(true)
+  const addToCart = async () => {
+    try {
+      setIsAddingToCart(true)
+      const existingProduct = cart.find((item) => item.idProduct === product.id)
 
-    // Simulate API call or processing time
-    setTimeout(() => {
-      const existingProduct = cart.find((item) => item.id === product.id)
-
-      if (existingProduct) {
-        const updatedCart = cart.map((item) =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item,
+      if (!!existingProduct) {
+        await itemService.incrementItem(existingProduct.id)
+        setCart((prevCart) => prevCart
+          .map((item) => item.id === existingProduct.id ? { ...item, quantity: item.quantity + 1 } : item)
         )
-        setCart(updatedCart)
       } else {
-        setCart([...cart, { ...product, quantity: 1 }])
+        const item = await itemService.createItem(product.id)
+        setCart((prevCart) => [
+          ...prevCart,
+          {
+            id: item.id,
+            idProduct: item.idProduct,
+            quantity: 1,
+            unitPrice: item.unitPrice,
+            name: product.name,
+            regularPrice: product.regularPrice,
+          }
+        ])
       }
-
       toast({
         title: "Produto adicionado",
         description: `${product.name} foi adicionado ao carrinho.`,
-        variant: "default",
       })
 
       setIsAddingToCart(false)
-    }, 500)
-  }
+    } catch (error) {
+      if (error instanceof ApiError && error.message === "Product out of stock") {
+        toast({
+          title: "Produto fora de estoque",
+          description: "Não foi possível adicionar o produto, produto sem estoque."
+        })
+      } else {
+        toast({
+          title: "Erro interno",
+          description: "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor tente novamente mais tarde."
+        })
+      }
 
-  const quickAdd = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    addToCart()
+      setIsAddingToCart(false)
+    }
   }
 
   return (
@@ -76,7 +93,7 @@ export const ProductCard: React.FC<{ product: ProductDb }> = ({ product }) => {
           variant="ghost"
           className="absolute top-0 right-0 h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
           aria-label={`Adicionar ${product.name} rapidamente ao carrinho`}
-          onClick={quickAdd}
+          onClick={addToCart}
         >
           <Plus className="h-5 w-5" />
           <span className="sr-only">Adicionar rapidamente</span>

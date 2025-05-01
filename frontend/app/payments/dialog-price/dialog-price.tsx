@@ -12,7 +12,6 @@ export const DialogPrice = ({ price }: { price: string }) => {
 
   const fetchClientSecret = useCallback(() => StripeService.createCheckout(price), [price])
   const options = { fetchClientSecret }
-  console.log(options)
 
   return (
     <Dialog>

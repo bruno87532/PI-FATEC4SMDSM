@@ -1,21 +1,14 @@
 "use client"
-
-import type React from "react"
 import { ShoppingCart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetClose, SheetFooter } from "../ui/sheet"
 import { useCart } from "@/app/context/cart-context"
+import { useItem } from "./hook/use-item"
 
-// Tipo para os itens do carrinho
-export type CartItem = {
-  id: number
-  name: string
-  price: number
-  quantity: number
-}
-
-export const SideMenu = () => {
+export const SideMenuCart = () => {
   const { cart, setCart } = useCart()
+
+  const { incrementItem, decrementItem, removeItem } = useItem()
 
   return (
     <Sheet>
@@ -29,11 +22,11 @@ export const SideMenu = () => {
           )}
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-[350px] sm:w-[450px]">
+      <SheetContent className="w-[350px] sm:w-[450px] flex flex-col">
         <SheetHeader>
           <SheetTitle>Seu Carrinho</SheetTitle>
         </SheetHeader>
-        <div className="py-4 flex-1 overflow-auto">
+        <div className="py-4 flex-1 overflow-y-auto max-h-[calc(100vh-180px)]">
           {cart.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center py-10">
               <ShoppingCart className="h-12 w-12 text-muted-foreground mb-4" />
@@ -45,7 +38,7 @@ export const SideMenu = () => {
               </SheetClose>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 p-1">
               {cart.map((item) => (
                 <div key={item.id} className="flex justify-between items-center border-b pb-3">
                   <div>
@@ -55,15 +48,7 @@ export const SideMenu = () => {
                         variant="outline"
                         size="icon"
                         className="h-6 w-6 rounded-full"
-                        onClick={() => {
-                          setCart(
-                            cart.map((cartItem) =>
-                              cartItem.id === item.id && cartItem.quantity > 1
-                                ? { ...cartItem, quantity: cartItem.quantity - 1 }
-                                : cartItem,
-                            ),
-                          )
-                        }}
+                        onClick={() => decrementItem(item.id)}
                       >
                         -
                       </Button>
@@ -72,27 +57,19 @@ export const SideMenu = () => {
                         variant="outline"
                         size="icon"
                         className="h-6 w-6 rounded-full"
-                        onClick={() => {
-                          setCart(
-                            cart.map((cartItem) =>
-                              cartItem.id === item.id ? { ...cartItem, quantity: cartItem.quantity + 1 } : cartItem,
-                            ),
-                          )
-                        }}
+                        onClick={() => incrementItem(item.id)}
                       >
                         +
                       </Button>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-medium">R$ {(item.regularPrice * item.quantity).toFixed(2)}</p>
+                    <p className="font-medium">R$ {((item.regularPrice / 100) * item.quantity).toFixed(2)}</p>
                     <Button
                       variant="ghost"
                       size="sm"
                       className="text-red-500 h-6 mt-1"
-                      onClick={() => {
-                        setCart(cart.filter((cartItem) => cartItem.id !== item.id))
-                      }}
+                      onClick={() => removeItem(item.id)}
                     >
                       Remover
                     </Button>
@@ -103,21 +80,19 @@ export const SideMenu = () => {
           )}
         </div>
         {cart.length > 0 && (
-          <SheetFooter className="border-t pt-4">
+          <SheetFooter className="border-t pt-4 mt-auto">
             <div className="w-full space-y-4">
               <div className="flex justify-between">
                 <span className="font-medium">Subtotal:</span>
                 <span className="font-medium">
-                  R$ {cart.reduce((total, item) => total + item.regularPrice * item.quantity, 0).toFixed(2)}
+                  R$ {cart.reduce((total, item) => total + (item.regularPrice / 100) * item.quantity, 0).toFixed(2)}
                 </span>
-              </div>
-              <div className="flex justify-between text-sm text-muted-foreground">
-                <span>Frete:</span>
-                <span>Grátis</span>
               </div>
               <div className="flex justify-between font-bold text-lg">
                 <span>Total:</span>
-                <span>R$ {cart.reduce((total, item) => total + item.regularPrice * item.quantity, 0).toFixed(2)}</span>
+                <span>
+                  R$ {cart.reduce((total, item) => total + (item.regularPrice / 100) * item.quantity, 0).toFixed(2)}
+                </span>
               </div>
               <Button className="w-full bg-green-600 hover:bg-green-700">Finalizar Pedido</Button>
             </div>

@@ -3,7 +3,6 @@ export class planService {
   private static pathBackend = process.env.NEXT_PUBLIC_BACKEND
   static async getPlan() {
     try {
-      console.log(this.pathBackend + "/plan")
       const res = await fetch(this.pathBackend + "/plan", {
         method: "GET",
         headers: {

@@ -13,7 +13,6 @@ export const usePagination = ({ totalItems, itemsPerPage, initialPage = 0 }: Pag
 
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage))
 
-  // Ensure current page is within bounds
   if (currentPage >= totalPages) {
     setCurrentPage(totalPages - 1)
   }
