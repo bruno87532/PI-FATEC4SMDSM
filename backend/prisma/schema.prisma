@@ -24,98 +24,106 @@ datasource db {
 }
 
 model User {
-  id                   String           @id @default(uuid())
+  id                   String         @id @default(uuid())
   name                 String
-  email                String           @unique
-  phone                String?          @db.VarChar(11)
+  email                String         @unique
+  phone                String?        @db.VarChar(11)
   password             String?
-  randomCode           String?          @db.VarChar(6)
+  randomCode           String?        @db.VarChar(6)
   randomCodeExpiration DateTime
   isActivate           DateTime?
-  typeUser typeUser @default(COMMON)
-  subscriptions Subscription[]
-  products Product[]
-  recoverPasswords     Recover? @relation
-  cart Cart? @relation
+  typeUser             typeUser       @default(COMMON)
+  subscriptions        Subscription[]
+  products             Product[]
+  recoverPasswords     Recover?       @relation
+  cart                 Cart?          @relation
 }
 
 model Subscription {
-  id String @id @default(uuid())
-  idStripe String @unique
-  idPlan String
-  idUser String
-  expirationDate DateTime
-  isActivate Boolean @default(true)
-  user User @relation(fields: [idUser], references: [id])
-  plan Plan @relation(fields: [idPlan], references: [id])
+  id                     String                   @id @default(uuid())
+  idStripe               String                   @unique
+  idPlan                 String
+  idUser                 String
+  expirationDate         DateTime
+  isActivate             Boolean                  @default(true)
+  subscriptionCancelling subscriptionCancelling[]
+  user                   User                     @relation(fields: [idUser], references: [id])
+  plan                   Plan                     @relation(fields: [idPlan], references: [id])
 }
 
 model Recover {
-  id          String    @id @default(uuid())
-  randomCode  String    @unique
-  user        User      @relation(fields: [userId], references: [id])
-  userId      String    @unique
+  id          String      @id @default(uuid())
+  randomCode  String      @unique
+  user        User        @relation(fields: [userId], references: [id])
+  userId      String      @unique
   expiredCode DateTime
-  type typeRecover
+  type        typeRecover
   isActivate  DateTime?
 }
 
 model Plan {
-  id String @id @default(uuid())
-  name String
-  idPrice String @unique 
+  id            String         @id @default(uuid())
+  name          String
+  idPrice       String         @unique
   subscriptions Subscription[]
 }
 
-
 model Subcategory {
-  id String @id @default(uuid())
-  name String 
+  id         String    @id @default(uuid())
+  name       String
   idCategory String
-  category Category @relation(fields: [idCategory], references: [id])
-  products Product[] @relation("ProductSubCategorys")
+  category   Category  @relation(fields: [idCategory], references: [id])
+  products   Product[] @relation("ProductSubCategorys")
 }
 
 model Category {
-  id String @id @default(uuid())
-  name String
+  id          String        @id @default(uuid())
+  name        String
   subcateogry Subcategory[]
-  products Product[] @relation("ProductCategorys")
+  products    Product[]     @relation("ProductCategorys")
 }
 
 model Product {
-  id String @id @default(uuid())
-  idDrive String @unique
-  name String
-  description String?
-  regularPrice Int
-  promotionalPrice Int?
+  id                  String        @id @default(uuid())
+  idDrive             String        @unique
+  name                String
+  description         String?
+  regularPrice        Int
+  promotionalPrice    Int?
   promotionExpiration DateTime?
-  promotionStart DateTime?
-  stock Int
-  idUser String
-  userId User @relation(fields: [idUser], references: [id])
-  item Item[]
-  categorys Category[] @relation("ProductCategorys")
-  subCategorys Subcategory[] @relation("ProductSubCategorys")
+  promotionStart      DateTime?
+  stock               Int
+  idUser              String
+  userId              User          @relation(fields: [idUser], references: [id])
+  item                Item[]
+  categorys           Category[]    @relation("ProductCategorys")
+  subCategorys        Subcategory[] @relation("ProductSubCategorys")
 }
 
 model Cart {
-  id String @id @default(uuid())
-  idUser String @unique
-  totalPrice Int @default(0)
-  item Item[]
-  userId User @relation(fields: [idUser], references: [id])
+  id         String @id @default(uuid())
+  idUser     String @unique
+  totalPrice Int    @default(0)
+  item       Item[]
+  userId     User   @relation(fields: [idUser], references: [id])
 }
 
 model Item {
-  id String @id @default(uuid())
-  idCart String 
+  id        String   @id @default(uuid())
+  idCart    String
   idProduct String
-  quantity Int
+  quantity  Int
   unitPrice Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  productId Product @relation(fields: [idProduct], references: [id])
-  cartId Cart @relation(fields: [idCart], references: [id])
+  productId Product  @relation(fields: [idProduct], references: [id])
+  cartId    Cart     @relation(fields: [idCart], references: [id])
+}
+
+model subscriptionCancelling {
+  id             String       @id @default(uuid())
+  createdAt      DateTime     @default(now())
+  idSubscription String
+  reason         String
+  subscriptionId Subscription @relation(fields: [idSubscription], references: [id])
 }

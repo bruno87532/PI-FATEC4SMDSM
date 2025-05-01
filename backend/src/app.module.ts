@@ -17,9 +17,10 @@ import { StreamToBufferModule } from './stream-to-buffer/stream-to-buffer.module
 import { CartModule } from './cart/cart.module';
 import { ItemModule } from './item/item.module';
 import { HighlightProductsModule } from './highlight-products/highlit-products.module';
+import { SubscriptionCancellingModule } from './subscription-cancelling/subscription-cancelling.module';
 
 @Module({
-  imports: [UsersModule, PrismaModule, EmailModule, AuthModule, RecoverModule, StripeModule, PlanModule, SubscriptionModule, ProductModule, GoogleDriveModule, CategoryModule, SubCategoryModule, StreamToBufferModule, CartModule, ItemModule, HighlightProductsModule],
+  imports: [UsersModule, PrismaModule, EmailModule, AuthModule, RecoverModule, StripeModule, PlanModule, SubscriptionModule, ProductModule, GoogleDriveModule, CategoryModule, SubCategoryModule, StreamToBufferModule, CartModule, ItemModule, HighlightProductsModule, SubscriptionCancellingModule],
   controllers: [AppController],
   providers: [AppService],
 })
