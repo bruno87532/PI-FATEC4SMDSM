@@ -78,14 +78,14 @@ export class StripeService {
   private async handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
     try {
       if (typeof session.subscription !== "string") throw new BadRequestException("The subscription must be a string")
+      const idUser = session.metadata!.id
+      await this.unsubscribeImmediately(idUser)
 
       const subscription: Stripe.Subscription = await this.stripe.subscriptions.retrieve(session.subscription)
       const idStripe = subscription!.id
-      console.log(idStripe)
       const idPrice = subscription!.items.data[0].plan.id
       const idPlan = (await this.planService.getPlanByIdPrice(idPrice)).id
 
-      const idUser = session.metadata!.id
 
       const dateUnix = (subscription!.current_period_end + 24 * 60 * 60) * 1000;
       const expirationDate = new Date(dateUnix)
@@ -151,6 +151,18 @@ export class StripeService {
       console.error("An error ocurred while canceling subscription", error)
       if (error instanceof HttpException) throw error
       throw new InternalServerErrorException("An error ocurred while canceling subscription")
+    }
+  }
+
+  private async unsubscribeImmediately(idUser: string) {
+    try {
+      const subscription = await this.subscriptionService.getSubscriptionActiveByIdUser(idUser)
+      await this.subscriptionService.updateSubscription(subscription.id, {
+        isActivate: false
+      })
+      await this.stripe.subscriptions.cancel(subscription.idStripe)
+    } catch(error) {
+      console.error("There is no active subscription")
     }
   }
 

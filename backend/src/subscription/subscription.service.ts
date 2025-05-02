@@ -27,6 +27,25 @@ export class SubscriptionService {
     }
   }
 
+  async getSubscriptionActiveByIdUser(idUser: string) {
+    try {
+      const subscription = await this.prismaService.subscription.findFirst({
+        where: {
+          idUser, 
+          isActivate: true
+        }
+      })
+
+      if (!subscription) throw new NotFoundException("Subscription not found")
+
+      return subscription
+    } catch (error) {
+      console.error("An error ocurred while fetching subscription", error)
+      if (error instanceof HttpException) throw error
+      throw new InternalServerErrorException("An error ocurred while fetching subscription")
+    }
+  }
+
   async getSubscriptionByIdStripe(idStripe: string): Promise<Subscription> {
     try {
       const subscription = await this.prismaService.subscription.findUnique({ where: { idStripe } })

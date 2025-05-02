@@ -48,7 +48,7 @@ const Stripe = () => {
     try {
       await StripeService.cancelSubscription()
       router.push("/subscription-canceled")
-    } catch (error) {}
+    } catch (error) { }
   }
 
   return (
@@ -286,6 +286,7 @@ const Stripe = () => {
                 <DialogDescription className="text-center pt-2">
                   Você tem certeza que deseja cancelar sua assinatura?
                   <p className="mt-2 font-medium">Sua assinatura ficará ativa até o fim do período contratado.</p>
+                  <p className="mt-2 font-medium">Não haverá mais cobranças recorrentes.</p>
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter className="flex flex-row justify-center gap-2 sm:justify-center">
