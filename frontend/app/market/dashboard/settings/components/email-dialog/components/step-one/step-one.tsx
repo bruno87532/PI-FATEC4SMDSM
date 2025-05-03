@@ -5,8 +5,6 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Input } from "@/components/ui/input"
 import React from "react"
-import { useAuthContext } from "../../../../auth-context"
-import { useAuthRegisterContext } from "../../auth-register-context"
 import { userService } from "@/services/user"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
@@ -20,8 +18,6 @@ const StepOneSchema = z.object({
 type StepOne = z.infer<typeof StepOneSchema>
 
 export const StepOne = () => {
-  const { setActiveTab } = useAuthContext()
-  const { setRegisterStep, setIdUser } = useAuthRegisterContext()
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const stepOneForm = useForm<StepOne>({
@@ -36,8 +32,6 @@ export const StepOne = () => {
     setIsLoading(true)
     try {
       const user = await userService.createUser(data)
-      setIdUser(user.id)
-      setRegisterStep(2)
     } catch (error) {
       if (error instanceof ApiError && error.message === "Email already registered") {
         stepOneForm.setError("email", {
@@ -86,7 +80,7 @@ export const StepOne = () => {
         </Button>
         <div className="text-center text-sm">
           Já possui uma conta?{" "}
-          <Button type="button" variant="link" className="p-0" onClick={() => setActiveTab("login")}>
+          <Button type="button" variant="link" className="p-0">
             Entrar
           </Button>
         </div>

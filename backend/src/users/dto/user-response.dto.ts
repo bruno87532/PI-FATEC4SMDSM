@@ -8,6 +8,9 @@ export class UserResponseDto {
     name: string
 
     @Expose()
+    advertiserName: string
+
+    @Expose()
     email: string 
 
     @Expose()

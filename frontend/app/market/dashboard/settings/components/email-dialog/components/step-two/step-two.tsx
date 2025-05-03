@@ -4,7 +4,6 @@ import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
-import { useAuthRegisterContext } from "../../auth-register-context"
 import { authService } from "@/services/auth"
 import { ApiError } from "@/type/error"
 import { Loader2 } from "lucide-react"
@@ -17,12 +16,10 @@ const StepTwoSchema = z.object({
 type StepTwo = z.infer<typeof StepTwoSchema>
 
 export const StepTwo = () => {
-  const { setRegisterStep, idUser, setRandomCode } = useAuthRegisterContext()
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const resetRegister = () => {
     stepTwoForm.reset({ otp: "" })
-    setRegisterStep(1)
   }
 
   const stepTwoForm = useForm<StepTwo>({
@@ -35,9 +32,6 @@ export const StepTwo = () => {
   const handleSubmit = async (data: StepTwo) => {
     try {
       setIsLoading(true)
-      await authService.verifyCode({ idUser, otp: data.otp })
-      setRandomCode(data.otp)
-      setRegisterStep(3)
     } catch (error) {
       if (error instanceof ApiError && error.message === "Invalid code") {
         stepTwoForm.setError("otp", {

@@ -5,15 +5,16 @@ import { randomInt } from 'crypto';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { DataUpdateUser } from 'src/interfaces/user.interface';
+import { PasswordIsEqualDto } from './dto/password-is-equal.dto';
+import { RecoverService } from 'src/recover/recover.service';
 
 @Injectable()
 export class UsersService {
   constructor(
+    private readonly recoverService: RecoverService,
     private readonly prismaService: PrismaService,
     private readonly emailService: EmailService,
   ) { }
-
-  // ---- Código para lógica de criar usuário ---- //
 
   async createUser(data: { name: string; email: string }): Promise<User> {
     try {
@@ -65,9 +66,6 @@ export class UsersService {
     )
   }
 
-  // ---- Fim do código da lógica de criar usuário ---- //
-  // ---- Código para obter usuário por id ---- //
-
   async getUserById(id: string) {
     try {
       const user = await this.prismaService.user.findUnique({ where: { id } })
@@ -83,9 +81,6 @@ export class UsersService {
     }
   }
 
-  // ---- Fim do código que obtém o usuário por id ---- //
-  // ---- Código para obter usuário por email ---- //
-
   async getUserByEmail(email: string) {
     try {
       const user = await this.prismaService.user.findUnique({ where: { email } })
@@ -99,9 +94,6 @@ export class UsersService {
       throw new InternalServerErrorException("An error ocurred while fetching the user by email")
     }
   }
-
-  // ---- Fim do código que obtém o usuário por email ---- //
-  // ---- Código da lógica de atualização de usuário ---- //
 
   async updateUser(id: string, data: DataUpdateUser) {
     try {
@@ -143,8 +135,6 @@ export class UsersService {
     return password
   }
 
-  // ---- Fim do código da lógica de atualização de usuário ---- //
-
   async getUsersByIds(ids: string[]) {
     try {
       const users = await this.prismaService.user.findMany({
@@ -164,4 +154,17 @@ export class UsersService {
     }
   }
 
+  async PasswordIsEqual(id: string, data: PasswordIsEqualDto) {
+    try {
+      const user = await this.getUserById(id)
+      if (user.password && await bcrypt.compare(data.password, user.password)) {
+        return { success: true }
+      }
+      return { success: false }
+    } catch (error) {
+      console.error("An error ocurred while comparing password")
+      if (error instanceof HttpException) throw error
+      throw new InternalServerErrorException("An error ocurred while comparing password")
+    }
+  }
 }

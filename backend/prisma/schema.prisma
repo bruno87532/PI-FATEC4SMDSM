@@ -32,6 +32,7 @@ model User {
   randomCode           String?        @db.VarChar(6)
   randomCodeExpiration DateTime
   isActivate           DateTime?
+  advertiserName       String?
   typeUser             typeUser       @default(COMMON)
   subscriptions        Subscription[]
   products             Product[]
