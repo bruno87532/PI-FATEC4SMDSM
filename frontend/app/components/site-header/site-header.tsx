@@ -1,16 +1,14 @@
 "use client"
 
 import Link from "next/link"
-import { Search } from "lucide-react"
+import { Search, Mic, User, Crown } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Mic } from "lucide-react"
-import { User } from "lucide-react"
 import { useState } from "react"
 import { Dialog, DialogTrigger } from "@radix-ui/react-dialog"
 import { AuthDialog } from "../auth/auth-dialog"
 import { SideMenuCart } from "../side-menu-cart/side-menu-cart"
-import { CartItem } from "../cart/cart-side-menu"
+import type { CartItem } from "../cart/cart-side-menu"
 
 export const SiteHeader = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -22,20 +20,23 @@ export const SiteHeader = () => {
   return (
     <header className="w-full border-b max-w-6xl mx-auto">
       <div className="container mx-auto px-4 py-3">
-        <div className="flex items-center justify-between gap-4">
+        <div className="grid grid-cols-[auto_auto_1fr_auto] items-center gap-4">
           <Link href="/" className="flex items-center font-extrabold text-lg">
             PI4DSM
           </Link>
 
-          <div className="flex items-center text-sm text-gray-600">
-            <span className="mr-2">Retire em:</span>
-            <Button variant="ghost" className="text-green-600">
-              Campinas - Betânia (19)
+          <Link href="/payments" className="shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-green-500 text-white border-2 border-black hover:bg-green-600 shadow-sm"
+            >
+              <Crown className="h-4 w-4 mr-1.5" />
+              Seja Premium
             </Button>
-            <span className="ml-2">Frete: R$ 0,00</span>
-          </div>
+          </Link>
 
-          <div className="flex flex-1 max-w-xl items-center gap-2">
+          <div className="flex items-center gap-2">
             <div className="relative flex-1">
               <Input
                 type="search"
