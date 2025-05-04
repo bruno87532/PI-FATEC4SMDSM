@@ -2,24 +2,22 @@ import { BadRequestException, HttpException, Injectable, NotFoundException } fro
 import { randomInt } from 'crypto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { InternalServerErrorException } from '@nestjs/common';
-import { RecoverTypeEnum } from './enum/recover-type.enum';
 
 @Injectable()
-export class RecoverService {
+export class RecoverPasswordService {
   constructor(private readonly prismaService: PrismaService) { }
 
   // ---- Início do código da lógica de criar código de mudar email/senha ---- //
 
-  async createRecover(idUser: string, type: RecoverTypeEnum) {
+  async createRecover(idUser: string) {
     try {
       const randomCode = this.generateRandomCode()
       const expirationTime = this.generateExpirationTime()
-      const recover = await this.prismaService.recover.create({
+      const recover = await this.prismaService.recoverPassword.create({
         data: {
           randomCode,
           userId: idUser,
           expiredCode: expirationTime,
-          type
         }
       })
 
@@ -45,7 +43,7 @@ export class RecoverService {
 
   async getRecoverByRandomCode(randomCode: string) {
     try {
-      const recover = await this.prismaService.recover.findUnique({ where: { randomCode } })
+      const recover = await this.prismaService.recoverPassword.findUnique({ where: { randomCode } })
       if (!recover) {
         throw new NotFoundException("Invalid Code")
       }
@@ -63,7 +61,7 @@ export class RecoverService {
 
   async getRecoverByIdUser(idUser: string) {
     try {
-      const recover = await this.prismaService.recover.findUnique({ where: { userId: idUser } })
+      const recover = await this.prismaService.recoverPassword.findUnique({ where: { userId: idUser } })
       if (!recover) {
         throw new NotFoundException("Nonexistent user or user don't have recover")
       }
@@ -81,7 +79,7 @@ export class RecoverService {
 
   async updateRecoverById(id: string, data: { isActivate: Date; }) {
     try {
-      const recover = await this.prismaService.recover.update({
+      const recover = await this.prismaService.recoverPassword.update({
         where: { id },
         data
       })
@@ -98,7 +96,7 @@ export class RecoverService {
 
   async deleteRecoverByIdUser(idUser: string) {
     try {
-      await this.prismaService.recover.deleteMany({ where: { userId: idUser } })
+      await this.prismaService.recoverPassword.deleteMany({ where: { userId: idUser } })
     } catch (error) {
       console.error(`An error ocurred while deleting recover from user with id ${idUser}`, error)
       throw new InternalServerErrorException("An error ocurred while deleting recover from user")

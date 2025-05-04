@@ -11,11 +11,15 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { userService } from "@/services/user"
 import { useToast } from "@/hooks/use-toast"
 import { useUser } from "../../../context/user-content"
+import { Loader2 } from "lucide-react"
 
 export const AdvertiserNameDialog = () => {
   const { user, setUser } = useUser()
   const { toast } = useToast()
+
   const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+
   const formSchema = z.object({
     advertiserName: z.string().min(1, { message: "O nome de anunciante deve ter pelo menos 1 caracter" })
   })
@@ -31,25 +35,37 @@ export const AdvertiserNameDialog = () => {
 
   const onSubmit = async (data: formSchema) => {
     try {
-      await userService.updateUser(data)
-      setUser((prev) => {
-        if (!prev) return prev 
-        return {
-          ...prev,
-          advertiserName: data.advertiserName
-        }
-      })
-      toast({
-        title: "Nome alterado",
-        description: "Nome de anunciante alterado com sucesso"
-      })
+      setIsLoading(true)
+      const res = await userService.haveUserWithAdvertiserName(data.advertiserName)
+      if (res.haveUser) {
+        form.setError("advertiserName", {
+          type: "manual",
+          message: "Nome de anunciante já cadastrado."
+        })
+      } else {
+        await userService.updateUser(data)
+        setUser((prev) => {
+          if (!prev) return prev
+          return {
+            ...prev,
+            advertiserName: data.advertiserName
+          }
+        })
+        toast({
+          title: "Nome alterado",
+          description: "Nome de anunciante alterado com sucesso"
+        })
+        setIsOpen(false)
+      }
+
     } catch (error) {
       toast({
         title: "Erro interno",
         description: "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação, por favor tente novamente mais tarde"
       })
-    } finally {
       setIsOpen(false)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -81,7 +97,9 @@ export const AdvertiserNameDialog = () => {
               )}
             />
             <DialogFooter>
-              <Button type="submit">Salvar alterações</Button>
+              <Button type="submit">
+                {isLoading ? <Loader2 className="animate-spin" /> : "Salvar alterações"}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

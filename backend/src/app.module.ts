@@ -5,7 +5,7 @@ import { UsersModule } from './users/users.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { EmailModule } from './email/email.module';
 import { AuthModule } from './auth/auth.module';
-import { RecoverModule } from './recover/recover.module';
+import { RecoverPasswordModule } from './recover-password/recover-password.module';
 import { StripeModule } from './stripe/stripe.module';
 import { PlanModule } from './plan/plan.module';
 import { SubscriptionModule } from './subscription/subscription.module';
@@ -18,9 +18,10 @@ import { CartModule } from './cart/cart.module';
 import { ItemModule } from './item/item.module';
 import { HighlightProductsModule } from './highlight-products/highlit-products.module';
 import { SubscriptionCancellingModule } from './subscription-cancelling/subscription-cancelling.module';
+import { RecoverEmailModule } from './recover-email/recover-email.module';
 
 @Module({
-  imports: [UsersModule, PrismaModule, EmailModule, AuthModule, RecoverModule, StripeModule, PlanModule, SubscriptionModule, ProductModule, GoogleDriveModule, CategoryModule, SubCategoryModule, StreamToBufferModule, CartModule, ItemModule, HighlightProductsModule, SubscriptionCancellingModule],
+  imports: [UsersModule, PrismaModule, EmailModule, AuthModule, RecoverPasswordModule, StripeModule, PlanModule, SubscriptionModule, ProductModule, GoogleDriveModule, CategoryModule, SubCategoryModule, StreamToBufferModule, CartModule, ItemModule, HighlightProductsModule, SubscriptionCancellingModule, RecoverEmailModule],
   controllers: [AppController],
   providers: [AppService],
 })

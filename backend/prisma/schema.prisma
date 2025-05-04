@@ -4,11 +4,6 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
-enum typeRecover {
-  EMAIL
-  PASSWORD
-}
-
 enum typeUser {
   ADVERTISER
   COMMON
@@ -24,20 +19,21 @@ datasource db {
 }
 
 model User {
-  id                   String         @id @default(uuid())
+  id                   String           @id @default(uuid())
   name                 String
-  email                String         @unique
-  phone                String?        @db.VarChar(11)
+  email                String           @unique
+  phone                String?          @db.VarChar(11)
   password             String?
-  randomCode           String?        @db.VarChar(6)
+  randomCode           String?          @db.VarChar(6)
   randomCodeExpiration DateTime
   isActivate           DateTime?
-  advertiserName       String?
-  typeUser             typeUser       @default(COMMON)
+  advertiserName       String?          @unique
+  typeUser             typeUser         @default(COMMON)
   subscriptions        Subscription[]
   products             Product[]
-  recoverPasswords     Recover?       @relation
-  cart                 Cart?          @relation
+  recoverPasswords     RecoverPassword? @relation
+  recoverEmail         RecoverEmail?    @relation
+  cart                 Cart?            @relation
 }
 
 model Subscription {
@@ -47,19 +43,27 @@ model Subscription {
   idUser                 String
   expirationDate         DateTime
   isActivate             Boolean                  @default(true)
-  subscriptionCancelling subscriptionCancelling[]
+  subscriptionCancelling SubscriptionCancelling[]
   user                   User                     @relation(fields: [idUser], references: [id])
   plan                   Plan                     @relation(fields: [idPlan], references: [id])
 }
 
-model Recover {
-  id          String      @id @default(uuid())
-  randomCode  String      @unique
-  user        User        @relation(fields: [userId], references: [id])
-  userId      String      @unique
+model RecoverPassword {
+  id          String    @id @default(uuid())
+  randomCode  String    @unique
+  user        User      @relation(fields: [userId], references: [id])
+  userId      String    @unique
   expiredCode DateTime
-  type        typeRecover
   isActivate  DateTime?
+}
+
+model RecoverEmail {
+  id          String    @id @default(uuid())
+  randomCode  String    @unique
+  userId      String    @unique
+  newEmail    String    @unique
+  user        User      @relation(fields: [userId], references: [id])
+  expiredCode DateTime
 }
 
 model Plan {
@@ -121,7 +125,7 @@ model Item {
   cartId    Cart     @relation(fields: [idCart], references: [id])
 }
 
-model subscriptionCancelling {
+model SubscriptionCancelling {
   id             String       @id @default(uuid())
   createdAt      DateTime     @default(now())
   idSubscription String

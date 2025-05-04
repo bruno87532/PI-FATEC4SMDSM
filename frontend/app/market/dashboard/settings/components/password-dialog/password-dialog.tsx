@@ -8,23 +8,32 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { authService } from "@/services/auth"
+import { ApiError } from "@/type/error"
+import { useToast } from "@/hooks/use-toast"
+import { Eye, EyeOff } from "lucide-react"
+import { Loader2 } from "lucide-react"
 
 export const PasswordDialog = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
-  
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [showNewPassword, setShowNewPassword] = useState<boolean>(false)
+  const [showOldPassword, setShowOldPassword] = useState<boolean>(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false)
+  const { toast } = useToast()
+
   const formSchema = z
     .object({
-      currentPassword: z.string().min(1, {
+      oldPassword: z.string().min(1, {
         message: "A senha atual é obrigatória.",
       }),
       newPassword: z
         .string()
-        .min(8, {
-          message: "A senha deve ter pelo menos 8 caracteres.",
-        })
-        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
-          message: "A senha deve conter pelo menos uma letra maiúscula, uma minúscula e um número.",
-        }),
+        .min(8, "A senha deve conter pelo menos 8 caracteres")
+        .regex(/(?=.*[A-Z])/, "A senha deve conter pelo menos uma letra maiúscula")
+        .regex(/(?=.*[a-z])/, "A senha deve conter pelo menos uma letra minúscula")
+        .regex(/(?=.*\W)/, "A senha deve conter pelo menos um caracter especial")
+        .regex(/(?=(.*\d){5,})/, "A senha deve conter pelo menos cinco números"),
       confirmPassword: z.string().min(1, {
         message: "Confirme sua nova senha.",
       }),
@@ -34,16 +43,37 @@ export const PasswordDialog = () => {
       path: ["confirmPassword"],
     })
 
-  const form = useForm({
+  type FormSchema = z.infer<typeof formSchema>
+
+  const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      currentPassword: "",
+      oldPassword: "",
       newPassword: "",
       confirmPassword: "",
     },
   })
 
-  function onSubmit() {
+  const handleSubmit = async (data: FormSchema) => {
+    try {
+      const { oldPassword, newPassword } = data
+      setIsLoading(true)
+      await authService.alterPassword({ oldPassword, newPassword })
+      toast({
+        title: "Senha alterada",
+        description: "Sua senha foi alterada com sucesso"
+      })
+      setIsOpen(false)
+    } catch (error) {
+      if (error instanceof ApiError && error.message === "Passwords are different") {
+        form.setError("oldPassword", {
+          type: "manual",
+          message: "Senha incorreta"
+        })
+      }
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -65,15 +95,27 @@ export const PasswordDialog = () => {
           <DialogDescription>Insira sua senha atual e a nova senha para atualizar.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="currentPassword"
+              name="oldPassword"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Senha Atual</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
+                    <div className="relative">
+                      <Input type={showOldPassword ? "text" : "password"} placeholder="••••••••" {...field} />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-full px-3"
+                        onClick={() => setShowOldPassword(!showOldPassword)}
+                      >
+                        {showOldPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        <span className="sr-only">{showOldPassword ? "Esconder senha" : "Mostrar senha"}</span>
+                      </Button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -84,13 +126,22 @@ export const PasswordDialog = () => {
               name="newPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nova Senha</FormLabel>
+                  <FormLabel>Senha</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
+                    <div className="relative">
+                      <Input type={showNewPassword ? "text" : "password"} placeholder="••••••••" {...field} />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-full px-3"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                      >
+                        {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        <span className="sr-only">{showNewPassword ? "Esconder senha" : "Mostrar senha"}</span>
+                      </Button>
+                    </div>
                   </FormControl>
-                  <FormDescription>
-                    A senha deve ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma minúscula e um número.
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -100,16 +151,32 @@ export const PasswordDialog = () => {
               name="confirmPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Confirmar Nova Senha</FormLabel>
+                  <FormLabel>Confirmar Senha</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
+                    <div className="relative">
+                      <Input type={showConfirmPassword ? "text" : "password"} placeholder="••••••••" {...field} />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-full px-3"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      >
+                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        <span className="sr-only">
+                          {showConfirmPassword ? "Esconder senha" : "Mostrar senha"}
+                        </span>
+                      </Button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <DialogFooter>
-              <Button type="submit">Atualizar Senha</Button>
+              <Button type="submit">
+                {isLoading ? <Loader2 className="animate-spin" /> : "Atualizar senha"}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

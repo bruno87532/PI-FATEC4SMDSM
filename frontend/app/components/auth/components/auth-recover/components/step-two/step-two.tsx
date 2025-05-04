@@ -37,7 +37,6 @@ export const StepTwo = () => {
     setIsLoading(true)
     try {
       await authService.verifyRecover({
-        type: "PASSWORD",
         randomCode: data.otp,
         idUser
       })

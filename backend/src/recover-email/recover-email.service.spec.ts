@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { RecoverService } from './recover.service';
+import { RecoverEmailService } from './recover-email.service';
 
-describe('RecoverService', () => {
-  let service: RecoverService;
+describe('RecoverEmailService', () => {
+  let service: RecoverEmailService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [RecoverService],
+      providers: [RecoverEmailService],
     }).compile();
 
-    service = module.get<RecoverService>(RecoverService);
+    service = module.get<RecoverEmailService>(RecoverEmailService);
   });
 
   it('should be defined', () => {

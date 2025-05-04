@@ -1,32 +1,33 @@
-import { BadRequestException, HttpException, Injectable, Request, Res } from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable, NotFoundException, Request, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { UsersService } from 'src/users/users.service';
 import { InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { VerifyCodeDto } from './dto/verify-code.dto';
 import { EmailService } from 'src/email/email.service';
-import { RecoverService } from 'src/recover/recover.service';
+import { RecoverPasswordService } from 'src/recover-password/recover-password.service';
 import { RecoverDto } from './dto/recover.dto';
 import { VerifyRecoverDto } from './dto/verify-recover.dto';
 import { ChangeDto } from './dto/change.dto';
 import { ResponseMessage, ResponseMessageIdUser } from './response-message.interface';
-import { RecoverTypeEnum } from 'src/recover/enum/recover-type.enum';
 import { NewPasswordDto } from './dto/new-password.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from "bcrypt";
 import { User } from './interfaces/user.interface';
 import { CartService } from 'src/cart/cart.service';
+import { RecoverEmailService } from 'src/recover-email/recover-email.service';
+import { VerifyRecoverEmailDto } from './dto/verify-recover-email.dto';
+import { AlterPasswordDto } from './dto/alter-password-dto';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly emailService: EmailService,
-    private readonly recoverService: RecoverService,
+    private readonly recoverPasswordService: RecoverPasswordService,
     private readonly jwtService: JwtService,
     private readonly cartService: CartService,
+    private readonly recoverEmailService: RecoverEmailService,
   ) { }
-
-  // ---- Código da lógica de verificação de código de usuário ---- //
 
   async verifyCode(data: VerifyCodeDto): Promise<ResponseMessage> {
     const { randomCode } = data
@@ -74,9 +75,6 @@ export class AuthService {
     }
   }
 
-  // ---- Fim do código da lógica de verificação de usuário ---- //
-  // ---- Início do código da lógica de nova senha de conta nova ---- //
-
   async newAccountCompleted(data: NewPasswordDto): Promise<ResponseMessage> {
     try {
       const user = await this.usersService.getUserById(data.idUser)
@@ -97,30 +95,22 @@ export class AuthService {
     }
   }
 
-  // ---- Fim do código da lógica de nova senha de conta nova ---- //
-  // ---- Código da lógica de enviar email para alterar senha/email ---- //
-
-  async sendChangeEmail(data: RecoverDto): Promise<ResponseMessageIdUser> {
+  async sendChangePassword(data: RecoverDto): Promise<ResponseMessageIdUser> {
     try {
-      const { email, type } = data
+      const { email } = data
 
       const user = await this.usersService.getUserByEmail(email)
       if (!user.isActivate) {
         throw new UnauthorizedException("User is not verified")
       }
-      await this.recoverService.deleteRecoverByIdUser(user.id)
-      const recover = await this.recoverService.createRecover(user.id, type)
+      await this.recoverPasswordService.deleteRecoverByIdUser(user.id)
+      const recover = await this.recoverPasswordService.createRecover(user.id)
 
-      const templates = {
-        [RecoverTypeEnum.PASSWORD]: { template: "recover-password", subject: "Recuperação de senha" },
-        [RecoverTypeEnum.EMAIL]: { template: "recover-email", subject: "Alterar email" }
-      };
-      const { template, subject } = templates[type];
       await this.emailService.sendEmail(
         {
           to: email,
-          template,
-          subject,
+          template: "recover-password",
+          subject: "Recuperação de senha",
         },
         {
           code: recover.randomCode,
@@ -135,18 +125,13 @@ export class AuthService {
     }
   }
 
-  // ---- Fim do código da lógica de enviar email para alterar senha ---- //
-  // ---- Início do código da lógica de verificar código de alterar senha ---- //
 
-  async verifyRecover(data: VerifyRecoverDto): Promise<ResponseMessage> {
-    const { idUser, type, randomCode } = data
+  async verifyRecoverPassword(data: VerifyRecoverDto): Promise<ResponseMessage> {
+    const { idUser, randomCode } = data
     try {
-      const recover = await this.recoverService.getRecoverByRandomCode(randomCode)
+      const recover = await this.recoverPasswordService.getRecoverByRandomCode(randomCode)
       if (recover.userId !== idUser) {
         throw new BadRequestException("Invalid code")
-      }
-      if (recover.type !== type) {
-        throw new BadRequestException("Invalid code type")
       }
       if (recover.isActivate) {
         throw new BadRequestException("randomCode already verified")
@@ -154,11 +139,11 @@ export class AuthService {
       if (new Date().getTime() > recover.expiredCode.getTime()) {
         const user = await this.usersService.getUserById(idUser)
         const email = user.email
-        this.sendChangeEmail({ email, type })
+        this.sendChangePassword({ email })
         throw new BadRequestException("Expired code")
       }
 
-      this.recoverService.updateRecoverById(recover.id, { isActivate: new Date() })
+      this.recoverPasswordService.updateRecoverById(recover.id, { isActivate: new Date() })
       return { message: "randomCode verified successfully", statusCode: 200 }
     } catch (error) {
       console.error("An error ocurrend while checked the randomCode")
@@ -167,21 +152,15 @@ export class AuthService {
     }
   }
 
-  // ---- Fim do código da lógica de verificar código de alterar senha ---- //
-  // ---- Início do código da lógica para alter senha do usuário ---- //
-
-  async changeEmailOrPassword(data: ChangeDto): Promise<ResponseMessage> {
+  async changePassword(data: ChangeDto): Promise<ResponseMessage> {
     try {
-      const recover = await this.recoverService.getRecoverByIdUser(data.idUser)
-      if (recover.type !== data.type) {
-        throw new BadRequestException("Invalid code type")
-      }
+      const recover = await this.recoverPasswordService.getRecoverByIdUser(data.idUser)
       if (!recover.isActivate) {
         throw new BadRequestException("Invalid recover")
       }
 
       await this.usersService.updateUser(data.idUser, { password: data.password })
-      await this.recoverService.deleteRecoverByIdUser(data.idUser)
+      await this.recoverPasswordService.deleteRecoverByIdUser(data.idUser)
 
       return { message: "User updated successfully", statusCode: 200 }
     } catch (error) {
@@ -190,9 +169,6 @@ export class AuthService {
       throw new InternalServerErrorException("An error ocurred while changing password of the user")
     }
   }
-
-  // ---- Fim do código da lógica para alter senha do usuário ---- //
-  // ---- Início do código da lógica de validar senha ---- //
 
   async validateUser(email: string, password: string) {
     try {
@@ -228,6 +204,77 @@ export class AuthService {
     return { message: "Login successfully", statusCode: 200 }
   }
 
-  // ---- Fim do código da lógica de validar senha ---- //
-}
+  async sendChangeEmail(data: RecoverDto, idUser: string) {
+    try {
+      const { email } = data
 
+      try {
+        const user = await this.usersService.getUserByEmail(email)
+        if (user) throw new BadRequestException("Email already registered")
+      } catch (error) {
+        if (error instanceof BadRequestException) {
+          throw error
+        } 
+      }
+
+      await this.recoverEmailService.deleteRecoverByIdUser(idUser)
+      const recover = await this.recoverEmailService.createRecoverEmail(idUser, email)
+
+      await this.emailService.sendEmail(
+        {
+          to: email,
+          template: "recover-email",
+          subject: "Recuperação de email",
+        },
+        {
+          code: recover.randomCode,
+          year: new Date().getFullYear().toString()
+        }
+      )
+      return { message: "An email was sent", statusCode: 200 }
+    } catch (error) {
+      console.error("An error ocurred while sendind the email: ", error)
+      if (error instanceof HttpException) throw error
+      throw new InternalServerErrorException("An error ocurred while sending the email")
+    }
+  }
+
+  async verifyRecoverEmail(data: VerifyRecoverEmailDto, idUser: string): Promise<ResponseMessage> {
+    const { randomCode } = data
+    try {
+      const recover = await this.recoverEmailService.getRecoverEmailByRandomCode(randomCode)
+      if (new Date().getTime() > recover.expiredCode.getTime()) {
+        const user = await this.usersService.getUserById(idUser)
+        const email = recover.newEmail
+        this.sendChangeEmail({ email }, idUser)
+        throw new BadRequestException("Expired code")
+      }
+
+      await this.usersService.updateUser(idUser, { email: recover.newEmail })
+      await this.recoverEmailService.deleteRecoverByIdUser(idUser)
+      return { message: "randomCode verified successfully", statusCode: 200 }
+    } catch (error) {
+      console.error("An error ocurrend while checked the randomCode")
+      if (error instanceof HttpException) throw error
+      throw new InternalServerErrorException("An error ocurrend while checked the randomCode")
+    }
+  }
+
+  async alterPassword(data: AlterPasswordDto, idUser: string) {
+    try {
+      const isEqual = await this.usersService.passwordIsEqual(idUser, data.oldPassword)
+      const newData = {
+        password: data.newPassword
+      }
+      if (isEqual) {
+        await this.usersService.updateUser(idUser, newData)
+        return { message: "Password updated successfully" }
+      }
+      throw new BadRequestException("Passwords are different")
+    } catch (error) {
+      console.error("An error ocurred while checking the password for updating", error)
+      if (error instanceof HttpException) throw error
+      throw new InternalServerErrorException("An error ocurred while checking the password for updating")
+    }
+  } 
+}  

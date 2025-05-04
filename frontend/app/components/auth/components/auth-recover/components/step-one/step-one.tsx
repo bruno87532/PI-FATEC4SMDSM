@@ -34,7 +34,7 @@ export const StepOne = () => {
   const handleSubmit = async (data: StepOne) => {
     try {
       setIsLoading(true)
-      const res = await authService.authRecover(data.email)
+      const res = await authService.authRecoverPassword(data.email)
       setIdUser(res.idUser)
       setRecoverStep(2)
     } catch (error) {

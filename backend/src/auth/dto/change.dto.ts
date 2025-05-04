@@ -1,5 +1,4 @@
 import { IsString, Matches, IsNotEmpty, MinLength, IsEmail, IsOptional, IsEnum } from "class-validator";
-import { RecoverTypeEnum } from "src/recover/enum/recover-type.enum";
 
 export class ChangeDto {
   @IsOptional()
@@ -10,14 +9,6 @@ export class ChangeDto {
   @Matches(/(?=.*\W)/, { message: "Password must have at lest 1 special character" })
   @Matches(/(?=(.*\d){5,})/, { message: "Password must have at least 5 numeric characters" })
   password: string
-
-  @IsOptional()
-  @IsEmail({}, { message: "The email must be a valid email" })
-  email: string
-
-  @IsNotEmpty({ message: "The type is required" }) 
-  @IsEnum(RecoverTypeEnum, { message: "The type must be PASSWORD or EMAIL" })
-  type: RecoverTypeEnum
 
   @IsString({ message: "The idUser must be a string" })
   @IsNotEmpty({ message: "The idUser is required" })

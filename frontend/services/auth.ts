@@ -44,15 +44,14 @@ export class authService {
     return await res.json()
   }
 
-  static async authRecover(email: string) {
-    const res = await fetch(this.pathBackend + "/auth/recover", {
+  static async authRecoverPassword(email: string) {
+    const res = await fetch(this.pathBackend + "/auth/recover-password", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
         email,
-        type: "PASSWORD"
       })
     })
 
@@ -64,12 +63,31 @@ export class authService {
     return await res.json()
   }
 
-  static async verifyRecover(data: {
+  static async authRecoverEmail(email: string) {
+    const res = await fetch(this.pathBackend + "/auth/recover-email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email,
+      }),
+      credentials: "include"
+    })
+
+    if (!res.ok) {
+      const error = await res.json()
+      throw new ApiError(error.message || "An error ocurred while sending an email to recover email")
+    }
+
+    return await res.json()
+  }
+
+  static async verifyRecoverPassword(data: {
     randomCode: string,
     idUser: string,
-    type: "PASSWORD" | "EMAIL"
   }) {
-    const res = await fetch(this.pathBackend + "/auth/verify-recover", {
+    const res = await fetch(this.pathBackend + "/auth/verify-recover-password", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -77,7 +95,6 @@ export class authService {
       body: JSON.stringify({
         randomCode: data.randomCode,
         idUser: data.idUser,
-        type: data.type
       })
     })
     if (!res.ok) {
@@ -87,32 +104,44 @@ export class authService {
     return await res.json()
   }
 
-  static async changeEmailOrPassword(data: {
-    email?: string;
-    type: "PASSWORD" | "EMAIL";
-    password?: string;
+  static async verifyRecoverEmail(randomCode: string) {
+    const res = await fetch(this.pathBackend + "/auth/verify-recover-email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        randomCode
+      }),
+      credentials: "include"
+    })
+    if (!res.ok) {
+      const error = await res.json();
+      throw new ApiError(error.message || "An error ocurred while verify randomCode")
+    }
+    return await res.json()
+  }
+
+  static async changePassword(data: {
+    password: string;
     idUser: string;
   }) {
-    const { password, email, idUser, type } = data
-    if (!password && !email) {
-      throw new Error("Password or email are required")
-    }
+    const { password, idUser } = data
 
-    const res = await fetch(this.pathBackend + "/auth/change", {
+    const res = await fetch(this.pathBackend + "/auth/change-password", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
         idUser,
-        type,
-        ...(password ? { password } : { email })
+        password
       })
     })
 
     if (!res.ok) {
       const error = await res.json()
-      throw new ApiError(error.message || "An error ocurred while changing email or password")
+      throw new ApiError(error.message || "An error ocurred while changing password")
     }
 
     return await res.json()
@@ -153,6 +182,24 @@ export class authService {
 
     if (!res.ok) {
       throw new Error("unauthenticated user")
+    }
+
+    return await res.json()
+  }
+
+  static async alterPassword(data: { oldPassword: string, newPassword: string }) {
+    const res = await fetch(this.pathBackend + "/auth/alter-password", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      credentials: "include",
+      body: JSON.stringify(data)
+    })
+
+    if (!res.ok) {
+      const error = await res.json()
+      throw new ApiError(error.message || "An error ocurred while checking the password for updating user")
     }
 
     return await res.json()

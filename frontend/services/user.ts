@@ -74,4 +74,43 @@ export class userService {
       throw error
     }
   }
+
+  static async haveUserWithAdvertiserName(advertiserName: string) {
+    try {
+      const res = await fetch(this.pathBackend + "/users/have-user-with-advertiser-name", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ advertiserName })
+      })
+
+      if (!res.ok) throw new Error("failed to check for user with this advertiser name")
+
+      return await res.json()
+    } catch (error) {
+      console.error("An error ocurred while checking for the user with advertiser name")
+      throw error
+    }
+  }
+
+  static async emailIsEqual(email: string) {
+    try {
+      const res = await fetch(this.pathBackend + "/users/email-is-equal", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify({ email })
+      })
+
+      if (!res.ok) throw new Error("Failed to check user by email")
+        
+      return await res.json()
+    } catch (error) {
+      console.error("An error ocurred while checking for the user by email")
+      throw error
+    }
+  }
 }

@@ -8,39 +8,58 @@ import React from "react"
 import { userService } from "@/services/user"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
+import { authService } from "@/services/auth"
 import { ApiError } from "@/type/error"
+import { useStep } from "../context/step-context"
 
 const StepOneSchema = z.object({
-  email: z.string().email("Informe um email válido"),
-  name: z.string().min(1, "Informe um nome válido")
+  oldEmail: z.string().email("Informe um email válido"),
+  newEmail: z.string().email("Informe um email válido"),
 })
 
 type StepOne = z.infer<typeof StepOneSchema>
 
 export const StepOne = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const { setStep, step } = useStep()
 
   const stepOneForm = useForm<StepOne>({
     resolver: zodResolver(StepOneSchema),
     defaultValues: {
-      email: "",
-      name: "",
+      oldEmail: "",
+      newEmail: "",
     }
   })
 
   const handleSubmit = async (data: StepOne) => {
     setIsLoading(true)
     try {
-      const user = await userService.createUser(data)
+      const res = await userService.emailIsEqual(data.oldEmail)
+      if (res.success) {
+        if (data.newEmail === data.oldEmail) {
+          stepOneForm.setError("newEmail", {
+            type: "manual",
+            message: "O novo email deve ser diferente do antigo"
+          })
+        } else {
+          await authService.authRecoverEmail(data.newEmail)
+          setStep(2)
+        }
+      } else {
+        stepOneForm.setError("oldEmail", {
+          type: "manual",
+          message: "Email diferente do cadastrado"
+        })
+      }
     } catch (error) {
       if (error instanceof ApiError && error.message === "Email already registered") {
-        stepOneForm.setError("email", {
+        stepOneForm.setError("newEmail", {
           type: "manual",
-          message: "Email já cadastrado."
+          message: "Email já cadastrado"
         })
-        setIsLoading(false)
-        return;
       }
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -49,12 +68,12 @@ export const StepOne = () => {
       <form onSubmit={stepOneForm.handleSubmit(handleSubmit)} className="space-y-4">
         <FormField
           control={stepOneForm.control}
-          name="name"
+          name="oldEmail"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nome</FormLabel>
+              <FormLabel>Antigo email</FormLabel>
               <FormControl>
-                <Input placeholder="Digite o seu nome" {...field} />
+                <Input placeholder="seu@antigoemail.com" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -62,12 +81,12 @@ export const StepOne = () => {
         />
         <FormField
           control={stepOneForm.control}
-          name="email"
+          name="newEmail"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Novo email</FormLabel>
               <FormControl>
-                <Input placeholder="seu@email.com" {...field} />
+                <Input placeholder="seu@novoemail.com" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -78,12 +97,6 @@ export const StepOne = () => {
             isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : "Continuar"
           }
         </Button>
-        <div className="text-center text-sm">
-          Já possui uma conta?{" "}
-          <Button type="button" variant="link" className="p-0">
-            Entrar
-          </Button>
-        </div>
       </form>
     </Form>
   )

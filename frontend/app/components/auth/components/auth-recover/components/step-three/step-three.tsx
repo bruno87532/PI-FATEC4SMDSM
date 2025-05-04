@@ -57,10 +57,9 @@ export const StepThree = () => {
   const handleSubmit = async (data: StepThree) => {
     try {
       setIsLoading(true)
-      await authService.changeEmailOrPassword({
+      await authService.changePassword({
         password: data.password,
         idUser,
-        type: "PASSWORD"
       })
       setRecoverStep(1)
       setActiveTab("login")

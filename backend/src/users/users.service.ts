@@ -5,13 +5,12 @@ import { randomInt } from 'crypto';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { DataUpdateUser } from 'src/interfaces/user.interface';
-import { PasswordIsEqualDto } from './dto/password-is-equal.dto';
-import { RecoverService } from 'src/recover/recover.service';
+import { HaveUserWithAdvertiserNameDto } from './dto/have-user-with-advertiser-name.dto';
+import { EmailIsEqualDto } from './dto/email-is-equal.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
-    private readonly recoverService: RecoverService,
     private readonly prismaService: PrismaService,
     private readonly emailService: EmailService,
   ) { }
@@ -154,17 +153,42 @@ export class UsersService {
     }
   }
 
-  async PasswordIsEqual(id: string, data: PasswordIsEqualDto) {
+  async passwordIsEqual(id: string, password: string) {
     try {
       const user = await this.getUserById(id)
-      if (user.password && await bcrypt.compare(data.password, user.password)) {
-        return { success: true }
+      if (user.password && await bcrypt.compare(password, user.password)) {
+        return true
       }
-      return { success: false }
+      return false
     } catch (error) {
       console.error("An error ocurred while comparing password")
       if (error instanceof HttpException) throw error
       throw new InternalServerErrorException("An error ocurred while comparing password")
+    }
+  }
+
+  async emailIsEqual(id: string, data: EmailIsEqualDto) {
+    try {
+      const user = await this.getUserById(id)
+      if (user.email === data.email) return { success: true }
+      else return { success: false }
+    } catch (error) {
+      console.error("An error ocurred while comparing email")
+      if (error instanceof HttpException) throw error
+      throw new InternalServerErrorException("An error ocurred while comparing email")
+    }
+  }
+
+  async haveUserWithAdvertiserName(data: HaveUserWithAdvertiserNameDto) {
+    try {
+      const user = await this.prismaService.user.findUnique({ where: { advertiserName: data.advertiserName } })
+
+      if (!user) return { haveUser: false }
+
+      return { haveUser: true }
+    } catch (error) {
+      console.error("An error ocurred while fethcing user", error)
+      throw new InternalServerErrorException("An error ocurred while fethcing user")
     }
   }
 }

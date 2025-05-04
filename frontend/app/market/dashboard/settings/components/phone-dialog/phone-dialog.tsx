@@ -83,8 +83,8 @@ export const PhoneDialog = () => {
                     <Input {...field}
                       onChange={(e) => {
                         const value = e.target.value
-                        const maskedValue = maskPhone(value) // Aplica a máscara no valor
-                        field.onChange(maskedValue) // Atualiza o valor com a máscara
+                        const maskedValue = maskPhone(value)
+                        field.onChange(maskedValue) 
                       }}
                       value={field.value}
                     />

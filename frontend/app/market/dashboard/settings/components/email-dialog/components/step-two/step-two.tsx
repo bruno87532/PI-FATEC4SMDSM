@@ -7,7 +7,9 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import { authService } from "@/services/auth"
 import { ApiError } from "@/type/error"
 import { Loader2 } from "lucide-react"
-import { useState } from "react"
+import React, { useState } from "react"
+import { useStep } from "../context/step-context"
+import { useToast } from "@/hooks/use-toast"
 
 const StepTwoSchema = z.object({
   otp: z.string().length(6, "O código deve ter 6 dígitos.")
@@ -15,11 +17,14 @@ const StepTwoSchema = z.object({
 
 type StepTwo = z.infer<typeof StepTwoSchema>
 
-export const StepTwo = () => {
+export const StepTwo = ({ setIsOpen }: { setIsOpen: React.Dispatch<React.SetStateAction<boolean>> }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const { step, setStep } = useStep()
+  const { toast } = useToast()
 
   const resetRegister = () => {
     stepTwoForm.reset({ otp: "" })
+    setStep(1)
   }
 
   const stepTwoForm = useForm<StepTwo>({
@@ -32,6 +37,12 @@ export const StepTwo = () => {
   const handleSubmit = async (data: StepTwo) => {
     try {
       setIsLoading(true)
+      await authService.verifyRecoverEmail(data.otp)
+      toast({
+        title: "Email alterado",
+        description: "Seu email foi alterado com sucesso"
+      })
+      setIsOpen(false)
     } catch (error) {
       if (error instanceof ApiError && error.message === "Invalid code") {
         stepTwoForm.setError("otp", {
@@ -45,6 +56,7 @@ export const StepTwo = () => {
           message: "Código de verificação expirado. Foi encaminhado um novo código para o seu email."
         })
       }
+    } finally {
       setIsLoading(false)
     }
   }
@@ -52,8 +64,8 @@ export const StepTwo = () => {
   return (
     <Form {...stepTwoForm}>
       <form onSubmit={stepTwoForm.handleSubmit(handleSubmit)} className="space-y-4">
-        <div className="text-center mb-4">
-          <p className="text-sm text-muted-foreground">
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground mb-4">
             Enviamos um código de verificação para o seu email.
           </p>
         </div>

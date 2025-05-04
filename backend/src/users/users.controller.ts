@@ -6,7 +6,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { UserResponseDto } from './dto/user-response.dto';
 import { plainToInstance } from 'class-transformer';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { PasswordIsEqualDto } from './dto/password-is-equal.dto';
+import { HaveUserWithAdvertiserNameDto } from './dto/have-user-with-advertiser-name.dto';
+import { EmailIsEqualDto } from './dto/email-is-equal.dto';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -35,8 +36,15 @@ export class UsersController {
   @UseGuards(AuthGuard("jwt"))
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   @HttpCode(HttpStatus.OK)
-  @Post("/password-is-equal")
-  async passwordIsEqual(@Request() req, @Body() data: PasswordIsEqualDto) {
-    return await this.usersService.PasswordIsEqual(req.user.userId, data)
+  @Post("/email-is-equal")
+  async emailIsEqual(@Request() req, @Body() data: EmailIsEqualDto) {
+    return await this.usersService.emailIsEqual(req.user.userId, data)
+  }
+
+  @Post("/have-user-with-advertiser-name")
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  @HttpCode(HttpStatus.OK)
+  async haveUserWithAdvertiserName(@Body() data: HaveUserWithAdvertiserNameDto) {
+    return await this.usersService.haveUserWithAdvertiserName(data)
   }
 }
