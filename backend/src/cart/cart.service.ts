@@ -1,18 +1,42 @@
-import { BadRequestException, HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { ProductService } from 'src/product/product.service';
+import { HttpException, Injectable, InternalServerErrorException, ConflictException, NotFoundException } from "@nestjs/common";
+import { PrismaService } from "src/prisma/prisma.service";
+import { Cart } from "@prisma/client";
+// import { BadRequestException, HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+// import { PrismaService } from 'src/prisma/prisma.service';
+// import { ProductService } from 'src/product/product.service';
 
 @Injectable()
 export class CartService {
-  constructor(
-    private readonly prismaService: PrismaService,
-    private readonly productService: ProductService
-  ) { }
+  constructor(private readonly prismaService: PrismaService) { }
 
-  async getCartByIdUser(idUser: string) {
+  async createCart(idUser, idAdvertiser, valueInital) {
     try {
-      const cart = await this.prismaService.cart.findUnique({ where: { idUser } })
-      if (!cart) throw new BadRequestException("Cart not found")
+      const cart = await this.prismaService.cart.create({
+        data: {
+          idUser,
+          idAdvertiser: idAdvertiser,
+          totalPrice: valueInital
+        }
+      })
+      return cart
+    } catch (error) {
+      console.error("An error ocurred while creating cart", error)
+      if (error instanceof HttpException) throw error
+      throw new InternalServerErrorException("An error ocurred while creating cart")
+    }
+  }
+
+  async getCartByIdAdvertiser(idUser: string, idAdvertiser: string): Promise<Cart> {
+    try {
+      const cart = await this.prismaService.cart.findFirst({
+        where: {
+          idUser,
+          idAdvertiser
+        }
+      })
+
+      if (!cart) throw new NotFoundException("Cart not found")
+
       return cart
     } catch (error) {
       console.error("An error ocurred while fetching cart", error)
@@ -21,58 +45,72 @@ export class CartService {
     }
   }
 
-  async createCart(idUser: string) {
+  async getCartById(id: string) {
     try {
-      const cart = await this.prismaService.cart.create({
+      const cart = await this.prismaService.cart.findUnique({ where: { id } })
+      if (!cart) throw new NotFoundException("Cart not found")
+      return cart
+    } catch (error) {
+      console.error("An error ocurred while fetching cart", error)
+      if (error instanceof HttpException) throw error
+      throw new InternalServerErrorException("An error ocurred while fetching cart")
+    }
+  }
+
+  async incrementPrice(id: string, value: number) {
+    try {
+      const cart = this.prismaService.cart.update({
+        where: {
+          id
+        },
         data: {
-          idUser,
+          totalPrice: {
+            increment: value
+          }
         }
       })
 
       return cart
     } catch (error) {
-      console.error("An error ocurred while creating cart", error)
-      throw new InternalServerErrorException("An error ocurred while creating cart")
+      console.error("An error ocurred while incrementing price", error)
+      throw new InternalServerErrorException("An error ocurred while incrementing price")
     }
   }
 
-  async incrementPriceCart(id: string, priceToAdd: number) {
+  async decrementPrice(id: string, value: number) {
     try {
-      const updated = await this.prismaService.cart.update({
+      const cart = this.prismaService.cart.update({
         where: {
           id
         },
         data: {
           totalPrice: {
-            increment: priceToAdd
+            decrement: value
           }
         }
       })
 
-      return updated
+      return cart
     } catch (error) {
-      console.error("An error ocurred while updating cart", error)
-      throw new InternalServerErrorException("An error ocurred while updating cart")
+      console.error("An error ocurred while decrementing price", error)
+      throw new InternalServerErrorException("An error ocurred while decrementing price")
     }
   }
 
-  async decrementPriceCart(id: string, priceToRemove: number) {
+  async getCartsByIdUser(idUser: string) {
     try {
-      const updated = await this.prismaService.cart.update({
-        where: {
-          id
-        },
-        data: {
-          totalPrice: {
-            decrement: priceToRemove
-          }
-        }
+      const carts = await this.prismaService.cart.findMany({
+        where: { idUser }
       })
 
-      return updated
+      if (carts.length === 0) throw new NotFoundException("Carts not found")
+
+      return carts
     } catch (error) {
-      console.error("An error ocurred while updating cart", error)
-      throw new InternalServerErrorException("An error ocurred while updating cart")
+      console.error("An error ocurred while fetching items", error)
+      if (error instanceof HttpException) throw error
+      throw new InternalServerErrorException("An error ocurred while fetching items")
     }
   }
+
 }

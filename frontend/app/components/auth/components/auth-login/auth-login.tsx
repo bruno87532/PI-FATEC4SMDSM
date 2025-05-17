@@ -11,7 +11,6 @@ import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { useAuthContext } from "../../auth-context"
 import { authService } from "@/services/auth"
 import { ApiError } from "@/type/error"
-import { useAuth } from "@/app/context/auth-context"
 
 const LoginSchema = z.object({
   email: z.string().email("Informe um email válido"),
@@ -24,7 +23,6 @@ export const AuthLogin = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const { setActiveTab } = useAuthContext()
-  const context = useAuth()
 
   const loginForm = useForm<LoginSchema>({
     resolver: zodResolver(LoginSchema),
@@ -38,7 +36,6 @@ export const AuthLogin = () => {
     try {
       setIsLoading(true)
       await authService.login(data)
-      context.setIsLoggedin(true)
       alert("Login feito com sucesso!! Este alert é temporário, só até criar uma tela.")
     } catch (error) {
       if (error instanceof ApiError && error.message === "Invalid email or password") {

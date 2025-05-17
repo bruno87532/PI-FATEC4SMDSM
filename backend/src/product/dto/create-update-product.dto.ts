@@ -1,14 +1,14 @@
-import { 
-  IsNotEmpty, 
-  IsString, 
-  MinLength, 
-  MaxLength, 
-  IsInt, 
-  IsArray, 
-  ArrayMinSize, 
-  ArrayMaxSize, 
-  IsOptional, 
-  Min, 
+import {
+  IsNotEmpty,
+  IsString,
+  MinLength,
+  MaxLength,
+  IsInt,
+  IsArray,
+  ArrayMinSize,
+  ArrayMaxSize,
+  IsOptional,
+  Min,
   Max,
   IsDate,
 } from "class-validator";
@@ -17,13 +17,13 @@ import { Transform } from "class-transformer";
 export class CreateUpdateProductDto {
   @IsNotEmpty({ message: "The name is required" })
   @IsString({ message: "The name must be a string" })
-  @MinLength(2 ,{ message: "The name must be at least 2 characters long" })
+  @MinLength(2, { message: "The name must be at least 2 characters long" })
   @MaxLength(100, { message: "The name must have a maximum of 100 characters" })
   name: string;
 
   @IsOptional()
   @IsString({ message: "The description must be a string" })
-  @MinLength(2 ,{ message: "The description must be at least 2 characters long" })
+  @MinLength(2, { message: "The description must be at least 2 characters long" })
   @MaxLength(256, { message: "The description must have a maximum of 256 characters" })
   description?: string;
 
@@ -34,21 +34,30 @@ export class CreateUpdateProductDto {
   @Transform(({ value }) => Number(value))
   regularPrice: number;
 
+  @Transform(({ value }) => {
+    if (value === undefined || value === null || value === "") return undefined
+    return Number(value)
+  })
   @IsOptional()
   @IsInt({ message: "The promotional price must be an integer" })
   @Min(1, { message: "The promotional price must be at least 1" })
   @Max(100000000, { message: "The promotional price must be less than or equal to 100.000.000" })
-  @Transform(({ value }) => Number(value))
   promotionalPrice?: number;
 
+  @Transform(({ value }) => {
+    if (value === undefined || value === null || value === "") return undefined
+    return new Date(value)
+  })
   @IsOptional()
   @IsDate({ message: "The promotionalExpiration must be a date" })
-  @Transform(({ value }) => new Date(value))
   promotionExpiration?: Date
 
+  @Transform(({ value }) => {
+    if (value === undefined || value === null || value === "") return undefined
+    return new Date(value)
+  })
   @IsOptional()
   @IsDate({ message: "The promotionalStart must be a date" })
-  @Transform(({ value }) => new Date(value))
   promotionStart?: Date
 
   @IsArray({ message: "The subcategorys must be an array" })

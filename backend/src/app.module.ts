@@ -21,7 +21,7 @@ import { SubscriptionCancellingModule } from './subscription-cancelling/subscrip
 import { RecoverEmailModule } from './recover-email/recover-email.module';
 
 @Module({
-  imports: [UsersModule, PrismaModule, EmailModule, AuthModule, RecoverPasswordModule, StripeModule, PlanModule, SubscriptionModule, ProductModule, GoogleDriveModule, CategoryModule, SubCategoryModule, StreamToBufferModule, CartModule, ItemModule, HighlightProductsModule, SubscriptionCancellingModule, RecoverEmailModule],
+  imports: [UsersModule, PrismaModule, EmailModule, AuthModule, RecoverPasswordModule, StripeModule, PlanModule, SubscriptionModule, ProductModule, GoogleDriveModule, CategoryModule, ItemModule, SubCategoryModule, CartModule, StreamToBufferModule, HighlightProductsModule, SubscriptionCancellingModule, RecoverEmailModule],
   controllers: [AppController],
   providers: [AppService],
 })

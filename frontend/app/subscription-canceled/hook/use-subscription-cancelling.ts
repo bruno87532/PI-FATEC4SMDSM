@@ -31,9 +31,9 @@ export const useSubscriptionCancelling = ({ setIsLoadingReason, setIsLoadingReac
         })
       } else {
         toast({
-          title: "Erro interno",
-          description: "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor, tente novamente mais tarde"
-        })
+          title: "Erro interno.",
+          description: "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor, tente novamente mais tarde."
+        });
       }
       setIsLoadingReason(null)
     }

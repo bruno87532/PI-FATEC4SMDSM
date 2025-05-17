@@ -1,19 +1,34 @@
 "use client"
 
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js"
-import { Dialog, DialogClose, DialogContent, DialogFooter, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { loadStripe } from "@stripe/stripe-js"
 import { useCallback, useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { StripeService } from "@/services/stripe"
-import { AlertTriangle } from "lucide-react"
 import { subscriptionService } from "@/services/subscription"
+import { useToast } from "@/hooks/use-toast"
+import { FormDialog } from "./components/form-dialog/form-dialog"
+import { CancelImmediately } from "./components/cancel-immediately/cancel-immediately"
+import { Loader2 } from "lucide-react"
+import { useUser } from "@/app/context/user-context"
 
 export const DialogPrice = ({ price }: { price: string }) => {
   const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY ?? "")
   const [showCheckout, setShowCheckout] = useState<boolean>(false)
+  const { user, setUser } = useUser()
+  const [showForm, setShowForm] = useState<boolean>(false)
   const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [isUserAdvertiser, setIsUserAdvertiser] = useState<boolean>(true)
   const [isSubscriptionActivate, setIsSubscriptionActivate] = useState<boolean>(false)
+  const { toast } = useToast()
 
   const fetchClientSecret = useCallback(() => StripeService.createCheckout(price), [price])
   const options = { fetchClientSecret }
@@ -28,13 +43,51 @@ export const DialogPrice = ({ price }: { price: string }) => {
       }
     }
 
+    const isAdvertiser = async () => {
+      try {
+        if (
+          user &&
+          (!user.zipCode ||
+            !user.state ||
+            !user.city ||
+            !user.neighborhood ||
+            !user.road ||
+            !user.marketNumber ||
+            !user.advertiserName ||
+            !user.phone)
+        ) {
+          setIsUserAdvertiser(false)
+        } else {
+          setIsUserAdvertiser(true)
+        }
+        setUser(user)
+      } catch (error) {
+        toast({
+          title: "Erro interno.",
+          description:
+            "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor, tente novamente mais tarde.",
+        })
+      }
+    }
+
     getSubscriptionActiveByIdUser()
-  }, [])
+    isAdvertiser()
+  }, [user])
+
 
   const handleOpenChange = () => {
     setIsOpen(!isOpen)
+    if (isOpen === false) {
+      setShowCheckout(false)
+    }
+  }
 
-    if (isOpen === false) setShowCheckout(false)
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center">
+        <Loader2 className="animate-spin h-10 w-10" />
+      </div>
+    )
   }
 
   return (
@@ -43,35 +96,12 @@ export const DialogPrice = ({ price }: { price: string }) => {
         <Button>Comprar</Button>
       </DialogTrigger>
       <DialogContent className="rounded-xl border-green-100 shadow-xl overflow-hidden">
-
         <div className="relative z-10">
-          {!showCheckout && isSubscriptionActivate ? (
+          {!isUserAdvertiser ? (
+            <FormDialog setIsUserAdvertiser={setIsUserAdvertiser} />
+          ) : !showCheckout && isSubscriptionActivate ? (
             <>
-              <DialogTitle className="text-xl font-bold text-green-700 flex items-center gap-2 mb-2">
-                <AlertTriangle className="h-5 w-5" />
-                Atenção
-              </DialogTitle>
-
-              <div className="">
-                <div className="flex flex-col justify-center gap-2 sm:justify-center">
-                  <DialogDescription>
-                    Se continuar com a compra sua assinatura será cancelada imediatamente.
-                    <p className="mt-2 font-medium">Você perderá todos os benefícios da assinatura atual.</p>
-                  </DialogDescription>
-                  <div className="flex flex-row justify-center gap-4 mt-2">
-                    <Button variant="outline" className="border-green-600 text-green-600"
-                      onClick={handleOpenChange}
-                    >
-                      Voltar
-                    </Button>
-                    <Button className="bg-red-500 hover:bg-red-600 text-white"
-                      onClick={() => setShowCheckout(!showCheckout)}
-                    >
-                      Confirmar cancelamento
-                    </Button>
-                  </div>
-                </div>
-              </div>
+              <CancelImmediately setIsOpen={setIsOpen} setIsSubscriptionActivate={setIsSubscriptionActivate} />
             </>
           ) : (
             <>

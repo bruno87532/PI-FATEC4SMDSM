@@ -5,6 +5,7 @@ import { ProductService } from './product.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ValidateImagePipe } from 'src/common/pipes/validate-square-image.pipe';
 import { DeleteProductByIdsDto } from './dto/delete-product-by-ids.dto';
+import { GetProductsByIdsDto } from './dto/get-products-by-ids.dto';
 
 @Controller('product')
 export class ProductController {
@@ -70,5 +71,12 @@ export class ProductController {
     @UploadedFile(ValidateImagePipe) file: Express.Multer.File
   ) {
     return await this.productService.updateProduct(data, id, req.user.userId, file)
+  }
+
+  @Post("/get-products-by-ids")
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  @UseGuards(AuthGuard("jwt"))
+  async getProductsByIds(@Body() data: GetProductsByIdsDto) {
+    return await this.productService.getProductsByIds(data)
   }
 }

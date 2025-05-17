@@ -1,0 +1,121 @@
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useToast } from "@/hooks/use-toast";
+import React, { useState } from "react";
+import { viacep } from "@/services/viacep";
+import { userService } from "@/services/user";
+import { maskPhone } from "@/utils/mask-phone";
+import { useUser } from "@/app/context/user-context";
+
+export const UseUserPayment = (setIsUserAdvertiser: React.Dispatch<React.SetStateAction<boolean>>) => {
+  const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(false)
+  const { user, setUser } = useUser()
+
+  const FormSchema = z.object({
+    advertiserName: z.string().min(1, "O nome de anunciante é obrigatório"),
+    zipCode: z.string().length(8, { message: "O CEP deve ter oito caracteres" }),
+    state: z.string().min(1, { message: "O estado é obrigatório" }),
+    city: z.string().min(1, "A cidade é obrigatória"),
+    neighborhood: z.string().min(1, { message: "O bairro é obrigatório" }),
+    road: z.string().min(1, { message: "A rua é obrigatória" }),
+    marketNumber: z.string().min(1, { message: "O número é obrigatório" }),
+    phone: z
+      .preprocess((val) => {
+        if (typeof val === "string") {
+          return val.replace(/\D/g, "");
+        }
+        return val
+      },
+        z.string()
+          .min(10, { message: "O número de telefone deve ter pelo menos 10 caracteres" })
+          .regex(/^\d{2}9\d{7,8}/, { message: "O número de telefone deve ser válido" }),
+      )
+  })
+
+  type FormSchemaType = z.infer<typeof FormSchema>
+  const form = useForm<FormSchemaType>({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      advertiserName: user?.advertiserName ?? "",
+      zipCode: user?.zipCode ?? "",
+      state: user?.state ?? "",
+      city: user?.city ?? "",
+      neighborhood: user?.neighborhood ?? "",
+      road: user?.road ?? "",
+      marketNumber: user?.marketNumber ?? "",
+      phone: user?.phone ? maskPhone(user.phone) : "",
+    },
+  })
+
+  const handleChangeCep = async (cep: string) => {
+    if (cep.length !== 8) {
+      form.setError("zipCode", {
+        type: "manual",
+        message: "Informe um cep válido"
+      })
+    } else {
+      form.clearErrors("zipCode")
+      const data = await viacep.getDataCep(cep)
+      if (data?.erro && !!data.erro === true) {
+        form.setError("zipCode", {
+          type: "manual",
+          message: "Informe um cep válido"
+        })
+      } else {
+        form.setValue("road", data.logradouro)
+        form.setValue("state", data.uf)
+        form.setValue("neighborhood", data.bairro),
+          form.setValue("city", data.localidade)
+      }
+    }
+  }
+
+  const handleSubmit = async (data: FormSchemaType) => {
+    setIsLoading(true)
+    try {
+      await userService.updateUser(data)
+      setIsUserAdvertiser(true)
+    } catch (error) {
+      toast({
+        title: "Erro interno.",
+        description: "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor, tente novamente mais tarde."
+      });
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const states = {
+    Acre: "AC",
+    Alagoas: "AL",
+    Amapá: "AP",
+    Amazonas: "AM",
+    Bahia: "BA",
+    Ceará: "CE",
+    "Distrito Federal": "DF",
+    "Espírito Santo": "ES",
+    Goiás: "GO",
+    Maranhão: "MA",
+    "Mato Grosso": "MT",
+    "Mato Grosso do Sul": "MS",
+    "Minas Gerais": "MG",
+    Pará: "PA",
+    Paraíba: "PB",
+    Paraná: "PR",
+    Pernambuco: "PE",
+    Piauí: "PI",
+    "Rio de Janeiro": "RJ",
+    "Rio Grande do Norte": "RN",
+    "Rio Grande do Sul": "RS",
+    Rondônia: "RO",
+    Roraima: "RR",
+    "Santa Catarina": "SC",
+    "São Paulo": "SP",
+    Sergipe: "SE",
+    Tocantins: "TO",
+  }
+
+  return { isLoading, states, handleSubmit, handleChangeCep, form }
+}

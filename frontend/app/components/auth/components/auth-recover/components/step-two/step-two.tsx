@@ -36,7 +36,7 @@ export const StepTwo = () => {
   const handleSubmit = async (data: StepTwo) => {
     setIsLoading(true)
     try {
-      await authService.verifyRecover({
+      await authService.verifyRecoverPassword({
         randomCode: data.otp,
         idUser
       })

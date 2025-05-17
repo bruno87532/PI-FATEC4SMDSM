@@ -8,7 +8,7 @@ import ProductMarket from "./components/product-market/product-market"
 import ProductSectionSkeleton from "./components/product-section-skeleton/product-section-skeleton"
 
 export const ProductSection = () => {
-  const { toast } = useToast()
+  const {toast} = useToast()
   const [products, setProducts] = useState<Record<string, Record<string, ProductDb[]>>>({})
   const [isLoading, setIsLoading] = useState(true)
 
@@ -23,14 +23,17 @@ export const ProductSection = () => {
         setIsLoading(false)
       } catch (error) {
         toast({
-          title: "Erro interno",
-          description: "Devido a problemas técnicos, não foi possível prosseguir com sua requisição. Por favor, tente novamente mais tarde."
-        })
+          title: "Erro interno.",
+          description: "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor, tente novamente mais tarde."
+        });
       }
     }
 
     fetchProducts()
-  }, [toast])
+  }, [])
+
+  useEffect(() => {
+  }, [products])
 
   if (isLoading) {
     return <ProductSectionSkeleton />

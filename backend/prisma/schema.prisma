@@ -28,12 +28,29 @@ model User {
   randomCodeExpiration DateTime
   isActivate           DateTime?
   advertiserName       String?          @unique
+  zipCode              String?
+  state                String?
+  city                 String?
+  neighborhood         String?
+  road                 String?
+  marketNumber         String?
   typeUser             typeUser         @default(COMMON)
   subscriptions        Subscription[]
   products             Product[]
   recoverPasswords     RecoverPassword? @relation
   recoverEmail         RecoverEmail?    @relation
-  cart                 Cart?            @relation
+  cart                 Cart[]           @relation("UserCart")
+  cartAdvertiser       Cart[]           @relation("AdvertiserCart")
+}
+
+model Cart {
+  id           String @id @default(uuid())
+  idUser       String
+  idAdvertiser String
+  totalPrice   Int    @default(0)
+  item         Item[]
+  advertiserId User   @relation("UserCart", fields: [idUser], references: [id])
+  userId       User   @relation("AdvertiserCart", fields: [idAdvertiser], references: [id])
 }
 
 model Subscription {
@@ -58,11 +75,11 @@ model RecoverPassword {
 }
 
 model RecoverEmail {
-  id          String    @id @default(uuid())
-  randomCode  String    @unique
-  userId      String    @unique
-  newEmail    String    @unique
-  user        User      @relation(fields: [userId], references: [id])
+  id          String   @id @default(uuid())
+  randomCode  String   @unique
+  userId      String   @unique
+  newEmail    String   @unique
+  user        User     @relation(fields: [userId], references: [id])
   expiredCode DateTime
 }
 
@@ -103,14 +120,6 @@ model Product {
   item                Item[]
   categorys           Category[]    @relation("ProductCategorys")
   subCategorys        Subcategory[] @relation("ProductSubCategorys")
-}
-
-model Cart {
-  id         String @id @default(uuid())
-  idUser     String @unique
-  totalPrice Int    @default(0)
-  item       Item[]
-  userId     User   @relation(fields: [idUser], references: [id])
 }
 
 model Item {

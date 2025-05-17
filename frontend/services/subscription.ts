@@ -13,11 +13,13 @@ export class subscriptionService {
         credentials: "include",
       })
 
-      if (!res.ok) throw new Error ("Failed to fetch subscription")
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error)
+      } 
 
       return await res.json()
     } catch (error) {
-      console.error("An error ocurred while fethcing subscription", error)
       throw error
     }
   }

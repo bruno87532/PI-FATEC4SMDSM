@@ -10,7 +10,7 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { userService } from "@/services/user"
 import { useToast } from "@/hooks/use-toast"
-import { useUser } from "../../../context/user-content"
+import { useUser } from "@/app/context/user-context"
 import { Loader2 } from "lucide-react"
 
 export const AdvertiserNameDialog = () => {
@@ -60,9 +60,9 @@ export const AdvertiserNameDialog = () => {
 
     } catch (error) {
       toast({
-        title: "Erro interno",
-        description: "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação, por favor tente novamente mais tarde"
-      })
+        title: "Erro interno.",
+        description: "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor, tente novamente mais tarde."
+      });
       setIsOpen(false)
     } finally {
       setIsLoading(false)

@@ -65,7 +65,7 @@ export const ProductsTable = () => {
     fetchAll()
   }, [])
   const filteredProducts = products.filter((product) => product.name.toLowerCase().includes(searchQuery.toLowerCase()))
-  
+
   const toggleSelectAll = () => {
     if (selectedProducts.length === filteredProducts.length) {
       setSelectedProducts([])
@@ -93,15 +93,15 @@ export const ProductsTable = () => {
       })
     } catch (error) {
       toast({
-        title: "Erro interno",
-        description: "Devido a problemas técnicos não foi possível deletar o produto. Tente novamente mais tarde"
-      })
+        title: "Erro interno.",
+        description: "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor, tente novamente mais tarde."
+      });
       console.error("An error ocurred while deleting products", error)
     }
     setProductToDelete(null)
   }
   const now = new Date()
-  
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -201,8 +201,8 @@ export const ProductsTable = () => {
                     />
                   </TableCell>
                   <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell>{ product.nameCategories.join(", ") }</TableCell>
-                  <TableCell>{ product.nameSubCategories.join(", ") }</TableCell>
+                  <TableCell>{product.nameCategories.join(", ")}</TableCell>
+                  <TableCell>{product.nameSubCategories.join(", ")}</TableCell>
                   <TableCell>
                     {product.promotionExpiration && product.promotionalPrice && product.promotionExpiration.getTime() > now.getTime() ? (
                       <div>

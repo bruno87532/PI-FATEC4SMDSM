@@ -11,6 +11,7 @@ export interface Product {
 }
 
 export interface ProductDb extends Product {
+  idUser: string;
   categorys: {
     id: string
   }[];
@@ -35,4 +36,14 @@ export interface CreateOrUpdateProduct {
   categorys: string[];
   subCategorys: string[];
   file: File;
+}
+
+export interface ProductFromCart {
+  id: string;
+  name: string;
+  regularPrice: number;
+  promotionalPrice?: number;
+  promotionExpiration?: Date;
+  promotionStart?: Date;
+  quantity: number;
 }

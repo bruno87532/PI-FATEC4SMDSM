@@ -23,9 +23,9 @@ const EditProductPage = () => {
         setIsLoading(false)
       } catch (error) {
         toast({
-          title: "Erro interno",
-          description: "Ocorreu um erro interno e não foi possível encontrar o seu produto. Por favor, tente novamente mais tarde."
-        })
+          title: "Erro interno.",
+          description: "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor, tente novamente mais tarde."
+        });
       }
     }
 
@@ -39,9 +39,9 @@ const EditProductPage = () => {
         <p className="text-muted-foreground">Atualize os detalhes do produto</p>
       </div>
 
-      { isLoading || !product ? (
+      {isLoading || !product ? (
         <Loader2 className="h-10 w-10 animate-spin" />
-      ) : <ProductForm product={product}/> }
+      ) : <ProductForm product={product} />}
     </div>
   )
 }

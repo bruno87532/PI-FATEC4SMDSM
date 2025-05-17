@@ -17,7 +17,7 @@ interface ProductMarketProps {
 
 const ProductMarket: React.FC<ProductMarketProps> = ({ market, products, productsPerPage }) => {
   const { currentPage, totalPages, nextPage, prevPage, goToPage } = usePagination({
-    totalItems: products.length,
+    totalitems: products.length,
     itemsPerPage: productsPerPage,
     initialPage: 0,
   })

@@ -12,7 +12,7 @@ import type { CartItem } from "../cart/cart-side-menu"
 
 export const SiteHeader = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
-  const [cartItems, setCartItems] = useState<CartItem[]>([
+  const [cartitems, setCartitems] = useState<CartItem[]>([
     { id: 1, name: "Maçã Fuji", price: 8.99, quantity: 2 },
     { id: 2, name: "Leite Integral", price: 5.49, quantity: 1 },
   ])

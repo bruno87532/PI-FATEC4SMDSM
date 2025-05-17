@@ -1,94 +1,94 @@
-import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, ConflictException, HttpException } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { CartService } from 'src/cart/cart.service';
-import { ProductService } from 'src/product/product.service';
+import { HttpException, Injectable, InternalServerErrorException, ConflictException, NotFoundException, ForbiddenException } from "@nestjs/common";
+import { PrismaService } from "src/prisma/prisma.service";
+import { CreateItemDto } from "./dto/create-item.dto";
+import { ProductService } from "src/product/product.service";
+import { CartService } from "src/cart/cart.service";
+import { GetAllItensByIdCartsDto } from "./dto/get-all-itens-by-id-cart.dto";
 
 @Injectable()
-export class ItemService {
+export class itemservice {
   constructor(
     private readonly prismaService: PrismaService,
-    private readonly cartService: CartService,
-    private readonly productService: ProductService
+    private readonly productService: ProductService,
+    private readonly cartService: CartService
   ) { }
 
-  async getItemById(id: string) {
+  async createItem(data: CreateItemDto, idUser: string) {
     try {
-      const item = await this.prismaService.item.findUnique({ where: { id } })
-      if (!item) throw new NotFoundException("Item not found")
-
-      return item
-    } catch (error) {
-      console.error("An error ocurred while fetching item", error)
-      if (error instanceof HttpException) throw error
-      throw new InternalServerErrorException("An error ocurred while fetching item")
-    }
-  }
-
-  private async existingItem(idProduct: string, idCart: string) {
-    try {
-      const itens = await this.prismaService.item.findMany({
-        where: {
-          idCart
-        }
-      })
-
-      itens.forEach((item) => {
-        if (item.idProduct === idProduct) throw new ConflictException("Item was created")
-      })
-
-    } catch (error) {
-      console.error("An error ocurred while fetching item", error)
-      if (error instanceof HttpException) throw error
-      throw new InternalServerErrorException("An error ocurred while fetching item")
-    }
-  }
-
-  async createItem(idUser: string, idProduct: string) {
-    try {
-      const cart = await this.cartService.getCartByIdUser(idUser)
-      if (!cart) throw new NotFoundException("Cart not found")
-
-      await this.existingItem(idProduct, cart.id)
-      
-      const product = await this.productService.getProductById(idProduct)
-      if (!product) throw new NotFoundException("Product not found")
+      const product = await this.productService.getProductById(data.idProduct)
       if (product.stock <= 0) throw new ConflictException("Product out of stock")
+      let idCart = ""
 
       const price = product?.promotionExpiration && product?.promotionalPrice && new Date(product.promotionExpiration).getTime() > (new Date()).getTime() ?
         product.promotionalPrice :
         product.regularPrice
 
+      try {
+        const existingCart = await this.cartService.getCartByIdAdvertiser(idUser, product.idUser)
+        idCart = existingCart.id
+      } catch (error) {
+        const newCart = await this.cartService.createCart(idUser, product.idUser, price)
+        idCart = newCart.id
+      }
+
+      await this.productService.decrementStockProduct(data.idProduct, 1)
+      console.log(idCart)
       const item = await this.prismaService.item.create({
         data: {
-          idCart: cart.id,
           quantity: 1,
-          idProduct,
-          unitPrice: price
+          unitPrice: price,
+          idProduct: product.id,
+          idCart
         }
       })
 
-      await this.cartService.incrementPriceCart(cart.id, price)
-      await this.productService.decrementStockProduct(idProduct, 1)
       return item
     } catch (error) {
-      console.error("An error ocurred while creating item")
+      console.error("An error ocurred while creating item", error)
       if (error instanceof HttpException) throw error
       throw new InternalServerErrorException("An error ocurred while creating item")
     }
   }
 
-  async incrementQuantityItem(idUser: string, id: string) {
+  async getItemById(id: string) {
     try {
-      const cart = await this.cartService.getCartByIdUser(idUser)
-      if (!cart) throw new NotFoundException("Cart not found")
+      const item = await this.prismaService.item.findUnique({ where: { id } })
+      if (!item) throw new NotFoundException("Item not found")
+      return item
+    } catch (error) {
+      console.error("An error ocurred while fetching item", error)
+      if (error instanceof HttpException) throw error
+      throw new InternalServerErrorException("An error ocurred while fetching item")
+    }
+  }
 
+  async deleteItem(id: string, idUser: string) {
+    try {
       const item = await this.getItemById(id)
-      if (item.idCart !== cart.id) throw new ForbiddenException("You do not have permission to update this item")
+      const idCart = item.idCart
+      const cart = await this.cartService.getCartById(idCart)
+      if (idUser !== cart.idUser) throw new ForbiddenException("You do not have access to this feature")
+      await this.productService.incrementStockProduct(item.idProduct, item.quantity)
+      await this.cartService.decrementPrice(idCart, item.quantity * item.unitPrice)
+      const deleted = await this.prismaService.item.delete({
+        where: { id }
+      })
+      return deleted
+    } catch (error) {
+      console.error("An error ocurred while deleting item", error)
+      if (error instanceof HttpException) throw error
+      throw new InternalServerErrorException("An error ocurred while deleting item")
+    }
+  }
 
-      const product = await this.productService.getProductById(item.idProduct)
-      if (!product) throw new NotFoundException("Product not found")
-      if (product.stock <= 0) throw new ConflictException("Product out of stock")
-
+  async incrementItem(id: string, idUser: string) {
+    try {
+      const item = await this.getItemById(id)
+      const idCart = item.idCart
+      const cart = await this.cartService.getCartById(idCart)
+      if (idUser !== cart.idUser) throw new NotFoundException("You do not have access to this feature")
+      await this.productService.decrementStockProduct(item.idProduct, 1)
+      await this.cartService.incrementPrice(idCart, item.unitPrice)
       const updated = await this.prismaService.item.update({
         where: { id },
         data: {
@@ -97,24 +97,29 @@ export class ItemService {
           }
         }
       })
-
-      await this.productService.decrementStockProduct(updated.idProduct, 1)
-      await this.cartService.incrementPriceCart(cart.id, updated.unitPrice)
-
-      return item
+      return updated
     } catch (error) {
-      console.error("An error ocurred while updating item", error)
+      console.error("An error ocurred while incrementing item", error)
       if (error instanceof HttpException) throw error
-      throw new InternalServerErrorException("An error ocurred while updating item")
+      throw new InternalServerErrorException("An error ocurred while incrementing item")
     }
   }
 
-  async decrementQuantityItem(idUser: string, id: string) {
+  async decrementItem(id: string, idUser: string) {
     try {
-      const [cart, item] = await this.allowedResource(idUser, id)
+      const item = await this.getItemById(id)
+      const idCart = item.idCart
+      const cart = await this.cartService.getCartById(idCart)
+
+      if (idUser !== cart.idUser) throw new NotFoundException("You do not have access to this feature")
+
+      await this.productService.incrementStockProduct(item.idProduct, 1)
+      await this.cartService.decrementPrice(idCart, item.unitPrice)
 
       const updated = await this.prismaService.item.update({
-        where: { id },
+        where: {
+          id
+        },
         data: {
           quantity: {
             decrement: 1
@@ -122,71 +127,29 @@ export class ItemService {
         }
       })
 
-      await this.productService.incrementStockProduct(updated.idProduct, 1)
-      await this.cartService.decrementPriceCart(cart.id, updated.unitPrice)
-
-      return item
+      return updated
     } catch (error) {
-      console.error("An error ocurred while updating item", error)
-      throw new InternalServerErrorException("An error ocurred while updating item")
-    }
-  }
-
-  async deleteItem(idUser: string, id: string) {
-    try {
-      const [cart, item] = await this.allowedResource(idUser, id)
-
-      const deleted = await this.prismaService.item.delete({
-        where: { id }
-      })
-
-      await this.cartService.decrementPriceCart(cart.id, deleted.quantity * deleted.unitPrice)
-      await this.productService.incrementStockProduct(deleted.idProduct, deleted.quantity)
-      return deleted
-    } catch (error) {
-      console.error("An error ocurred while deleting item", error)
-      throw new InternalServerErrorException("An error ocurred while deleting item")
-    }
-  }
-
-  async deleteAllItens(idUser: string) {
-    try {
-      const deleted = await this.prismaService.cart.deleteMany({
-        where: { idUser }
-      })
-
-      return deleted
-    } catch (error) {
-      console.error("An error ocurrd while deleting all itens", error)
-      throw new InternalServerErrorException("An error ocurrd while deleting all itens")
-    }
-  }
-
-  private async allowedResource(idUser: string, id: string) {
-    const cart = await this.cartService.getCartByIdUser(idUser)
-    if (!cart) throw new NotFoundException("Cart not found")
-
-    const item = await this.getItemById(id)
-    if (item.idCart !== cart.id) throw new ForbiddenException("You do not have permission to acess this item")
-
-    return [cart, item]
-  }
-
-  async getAllItensByIdUser(idUser: string) {
-    try {
-      const cart = await this.cartService.getCartByIdUser(idUser)
-
-      const itens = await this.prismaService.item.findMany({
-        where: { idCart: cart.id }
-      })
-
-      if (!itens) throw new NotFoundException("Itens not found")
-
-      return itens
-    } catch (error) {
-      console.error("An error ocurred while creating itens", error) 
+      console.error("An error ocurred while decrementing item", error)
       if (error instanceof HttpException) throw error
-      throw new InternalServerErrorException("An error ocurred while creating itens")
+      throw new InternalServerErrorException("An error ocurred while decrementing item")
+    }
+  }
+
+  async getAllitemsByIdCarts(data: GetAllItensByIdCartsDto) {
+    try {
+      const items = await this.prismaService.item.findMany({
+        where: {
+          idCart: {
+            in: data.idCarts
+          }
+        }
+      })
+
+      if (!items) throw new NotFoundException("items not found")
+
+      return items
+    } catch (error) {
+      console.error("An error ocurred while fetching items")
     }
   }
 }

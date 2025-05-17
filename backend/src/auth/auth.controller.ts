@@ -78,14 +78,13 @@ export class AuthController {
   @UseGuards(AuthGuard("local"))
   @Post("/login")
   async login(@Request() req: Request & { user: User }, @Res({ passthrough: true }) res: Response) {
-    return this.authService.login(req, res)
+    return await this.authService.login(req, res)
   }
 
-  @Get("/me")
   @UseGuards(AuthGuard("jwt"))
-  async isAuthenticated() {
-    return { authenticated: true }
+  @Get("/renew-token")
+  async renewToken(@Request() req, @Res({ passthrough: true }) res: Response) {
+    return await this.authService.renewToken(req.user.userId, res)
   }
-
 }
 

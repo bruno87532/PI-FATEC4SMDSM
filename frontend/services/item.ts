@@ -1,11 +1,5 @@
 import { ApiError } from "@/type/error"
-
-interface Item {
-  id: string;
-  idProduct: string;
-  quantity: number;
-  unitPrice: number;
-}
+import type { Item } from "@/type/item"
 
 export class itemService {
   private static pathBackend = process.env.NEXT_PUBLIC_BACKEND
@@ -74,25 +68,6 @@ export class itemService {
     }
   }
 
-  static async getAllItensByIdUser(): Promise<Item[]> {
-    try {
-      const res = await fetch(this.pathBackend + "/item", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        credentials: "include"
-      })
-
-      if (!res.ok) throw new Error("Failed to fetching itens")
-
-      return await res.json()
-    } catch (error) {
-      console.error("An error ocurred while fetching all itens", error)
-      throw error
-    }
-  }
-
   static async deleteItem(id: string) {
     try {
       const res = await fetch(this.pathBackend + "/item/" + id, {
@@ -108,6 +83,35 @@ export class itemService {
       return await res.json()
     } catch (error) {
       console.error("An error ocurred while deleting item", error)
+      throw error
+    }
+  }
+
+  static async getAllItensByIdCarts(idCarts: string[]): Promise<{
+    idCart: string;
+    idProduct: string;
+    quantity: number;
+    unitPrice: number;
+    id: string;
+  }[]> {
+    try {
+      const res = await fetch(this.pathBackend + "/item/get-all-itens-by-id-carts", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ idCarts })
+      })
+
+      if (!res.ok) {
+        const error = await res.json()
+        throw new ApiError(error.message || "An error ocurred while fetching itens")
+      }
+
+      return await res.json()
+    } catch (error) {
+      console.error("An error ocurred while fetching itens", error)
       throw error
     }
   }

@@ -1,3 +1,4 @@
+import { ApiError } from "@/type/error";
 import { ProductDb } from "@/type/product";
 import { CreateOrUpdateProduct } from "@/type/product";
 
@@ -14,8 +15,10 @@ export class productService {
       })
 
       if (!res.ok) {
-        throw new Error("An error ocurred while creating product")
+        const error = await res.json()
+        throw new ApiError(error.message || "An error ocurred while creating product")
       }
+
     } catch (error) {
       console.error("An error ocurred while creating product", error)
       throw error
@@ -31,9 +34,12 @@ export class productService {
         body: formData
       })
 
+      
       if (!res.ok) {
-        throw new Error("An error ocurred while updating product")
+        const error = await res.json()
+        throw new ApiError(error.message || "An error ocurred while creating product")
       }
+
     } catch (error) {
       console.error("An error ocurred while updating product", error)
       throw error
@@ -103,5 +109,28 @@ export class productService {
     })
 
     return await res.json()
+  }
+
+  static async getProductsByIds(ids: string[]): Promise<ProductDb[]> {
+    try {
+      const res = await fetch(this.pathBackend + "/product/get-products-by-ids", {
+        headers: {
+          "Content-Type": "application/json"
+        },
+        method: "POST",
+        credentials: "include",
+        body: JSON.stringify({ ids })
+      })
+
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error)
+      }
+
+      return await res.json()
+    } catch (error) {
+      console.error("An error ocurred while fetching products", error)
+      throw error 
+    }
   }
 }

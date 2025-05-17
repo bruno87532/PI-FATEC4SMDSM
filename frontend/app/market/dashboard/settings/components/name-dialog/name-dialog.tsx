@@ -8,7 +8,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useUser } from "../../../context/user-content"
+import { useUser } from "@/app/context/user-context"
 import { useToast } from "@/hooks/use-toast"
 import { userService } from "@/services/user"
 
@@ -35,7 +35,7 @@ export const NameDialog = () => {
       await userService.updateUser(data)
       setUser((prev) => {
         if (!prev) return null
-        
+
         return {
           ...prev,
           name: data.name
@@ -47,9 +47,9 @@ export const NameDialog = () => {
       })
     } catch (error) {
       toast({
-        title: "Erro interno",
-        description: "Ocorreu um erro interno e não foi possível processar sua solicitação. Por favor tentw novamente mais tarde"
-      })
+        title: "Erro interno.",
+        description: "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor, tente novamente mais tarde."
+      });
     } finally {
       setIsOpen(false)
     }

@@ -1,54 +1,31 @@
 "use client"
 
-import { type ReactNode, useEffect } from "react"
+import { type ReactNode } from "react"
 import { DashboardNav } from "./components/dashboard-nav/dashboard-nav"
 import { UserNav } from "./components/user-nav/user-nav"
-import { useAuth } from "@/app/context/auth-context"
-import { useRouter } from "next/navigation"
-import { UsersProvider } from "./context/user-content"
+import { UserProvider } from "@/app/context/user-context"
+import Link from "next/link"
 
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
-  const { isLoggedin, isLoading } = useAuth()
-  const router = useRouter()
-
-  useEffect(() => {
-    if (!isLoading && !isLoggedin) {
-      router.push("/")
-    }
-  }, [isLoading, isLoggedin, router])
-
-  if (isLoading || (!isLoggedin && typeof window !== "undefined")) {
-    return <div>Carregando...</div>
-  }
-
   return (
-    <UsersProvider>
+    <UserProvider>
       <div className="flex min-h-screen flex-col">
         <header className="sticky top-0 z-10 border-b bg-background">
           <div className="flex h-16 items-center px-4 md:px-6">
             <div className="font-bold text-xl mr-6">MercadoAnúncios</div>
             <nav className="hidden md:flex flex-1 items-center space-x-4 lg:space-x-6">
-              <a href="/dashboard" className="text-sm font-medium transition-colors hover:text-primary">
-                Painel
-              </a>
-              <a
-                href="/dashboard/produtos"
+              <Link
+                href="/market/dashboard/products"
                 className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
               >
                 Produtos
-              </a>
-              <a
-                href="/dashboard/estatisticas"
-                className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-              >
-                Estatísticas
-              </a>
-              <a
-                href="/dashboard/configuracoes"
+              </Link>
+              <Link
+                href="/market/dashboard/settings"
                 className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
               >
                 Configurações
-              </a>
+              </Link>
             </nav>
             <div className="ml-auto flex items-center space-x-4">
               <UserNav />
@@ -62,7 +39,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
           <main className="flex-1">{children}</main>
         </div>
       </div>
-    </UsersProvider>
+    </UserProvider>
   )
 }
 

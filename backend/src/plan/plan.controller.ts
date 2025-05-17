@@ -8,7 +8,7 @@ export class PlanController {
   constructor(private readonly planService: PlanService) {}
 
   @Get()
-  async getPlanById() {
+  async getPlan() {
     return plainToInstance(PlanResponseDto, await this.planService.getPlan())
   }
 }

@@ -4,7 +4,7 @@ import { FormField, FormLabel, FormControl, FormMessage, FormItem } from "@/comp
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { maskPrice } from "@/utils/mask-price"
-import React, { useState, useRef, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { MultiSelect } from "@/components/ui/multi-select"
 import { categoryService } from "@/services/category"
 import { subCategoryService } from "@/services/subCategory"

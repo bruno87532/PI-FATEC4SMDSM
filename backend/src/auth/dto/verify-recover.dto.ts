@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsString, Length } from "class-validator";
+import { IsNotEmpty, IsString, Length } from "class-validator";
 
 export class VerifyRecoverDto {
   @IsNotEmpty({ message: "The randomCode is required" })

@@ -3,15 +3,15 @@
 import { useState, useCallback } from "react"
 
 interface PaginationProps {
-  totalItems: number
+  totalitems: number
   itemsPerPage: number
   initialPage?: number
 }
 
-export const usePagination = ({ totalItems, itemsPerPage, initialPage = 0 }: PaginationProps) => {
+export const usePagination = ({ totalitems, itemsPerPage, initialPage = 0 }: PaginationProps) => {
   const [currentPage, setCurrentPage] = useState(initialPage)
 
-  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage))
+  const totalPages = Math.max(1, Math.ceil(totalitems / itemsPerPage))
 
   if (currentPage >= totalPages) {
     setCurrentPage(totalPages - 1)

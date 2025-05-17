@@ -10,6 +10,7 @@ import type { ProductDb } from "@/type/product"
 import { useCart } from "@/app/context/cart-context"
 import { useToast } from "@/hooks/use-toast"
 import { itemService } from "@/services/item"
+import type { Item } from "@/type/item"
 
 export const ProductCard: React.FC<{ product: ProductDb }> = ({ product }) => {
   const { cart, setCart } = useCart()
@@ -29,49 +30,70 @@ export const ProductCard: React.FC<{ product: ProductDb }> = ({ product }) => {
   const regularPrice = (product.regularPrice / 100).toFixed(2)
 
   const addToCart = async () => {
+    setIsAddingToCart(true)
     try {
-      setIsAddingToCart(true)
-      const existingProduct = cart.find((item) => item.idProduct === product.id)
+      const currentCart: Record<string, Item[]> = cart ?? {}
 
-      if (!!existingProduct) {
-        await itemService.incrementItem(existingProduct.id)
-        setCart((prevCart) =>
-          prevCart.map((item) => (item.id === existingProduct.id ? { ...item, quantity: item.quantity + 1 } : item)),
-        )
-      } else {
-        const item = await itemService.createItem(product.id)
-        setCart((prevCart) => [
-          ...prevCart,
-          {
-            id: item.id,
-            idProduct: item.idProduct,
-            quantity: 1,
-            unitPrice: item.unitPrice,
-            name: product.name,
-            regularPrice: product.regularPrice,
-          },
-        ])
+      let existingItem: Item | undefined = undefined
+      let existingCartId: string | undefined = undefined
+
+      for (const [cartId, items] of Object.entries(currentCart)) {
+        console.log(cartId)
+        console.log(items)
+        const found = items.find((i) => i.idProduct === product.id)
+        if (found) {
+          existingItem = found
+          existingCartId = cartId
+          break
+        }
       }
+
+      if (existingItem && existingCartId) {
+        await itemService.incrementItem(existingItem.id)
+
+        setCart((prev) => {
+          if (!prev) return prev
+          const updated = { ...prev }
+          updated[existingCartId!] = updated[existingCartId!].map((i) =>
+            i.id === existingItem!.id
+              ? { ...i, quantity: i.quantity + 1 }
+              : i
+          )
+          return updated
+        })
+      } else {
+        const newItem = await itemService.createItem(product.id)
+
+        setCart((prev) => {
+          const updated = prev ? { ...prev } : {}
+          if (updated[newItem.idCart]) {
+            updated[newItem.idCart] = [...updated[newItem.idCart], newItem]
+          } else {
+            updated[newItem.idCart] = [newItem]
+          }
+          return updated
+        })
+      }
+
       toast({
         title: "Produto adicionado",
         description: `${product.name} foi adicionado ao carrinho.`,
       })
-
-      setIsAddingToCart(false)
     } catch (error) {
       if (error instanceof ApiError && error.message === "Product out of stock") {
         toast({
           title: "Produto fora de estoque",
-          description: "Não foi possível adicionar o produto, produto sem estoque.",
+          description:
+            "Não foi possível adicionar o produto, produto sem estoque.",
         })
       } else {
         toast({
-          title: "Erro interno",
+          title: "Erro interno.",
           description:
-            "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor tente novamente mais tarde.",
+            "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor, tente novamente mais tarde.",
         })
       }
-
+    } finally {
       setIsAddingToCart(false)
     }
   }
@@ -81,8 +103,12 @@ export const ProductCard: React.FC<{ product: ProductDb }> = ({ product }) => {
       <div className="relative mb-4">
         {isOnPromotion && (
           <div className="absolute top-0 left-0 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
-            {/* Calculando a porcentagem de desconto aproximada */}-
-            {Math.round(((product.regularPrice - (product.promotionalPrice || 0)) / product.regularPrice) * 100)}%
+            {Math.round(
+              ((product.regularPrice - (product.promotionalPrice || 0)) /
+                product.regularPrice) *
+              100
+            )}
+            %
           </div>
         )}
         <div className="flex justify-center">
@@ -100,6 +126,7 @@ export const ProductCard: React.FC<{ product: ProductDb }> = ({ product }) => {
           className="absolute top-0 right-0 p-1 bg-white rounded-full border h-8 w-8 flex items-center justify-center"
           aria-label={`Adicionar ${product.name} rapidamente ao carrinho`}
           onClick={addToCart}
+          disabled={isAddingToCart}
         >
           <Plus className="h-5 w-5 text-green-600" />
           <span className="sr-only">Adicionar rapidamente</span>
@@ -117,27 +144,36 @@ export const ProductCard: React.FC<{ product: ProductDb }> = ({ product }) => {
                 viewBox="0 0 20 20"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
               </svg>
             ))}
           </div>
         </div>
 
-        <h3 className="text-sm font-medium mb-1 line-clamp-2" title={product.name}>
+        <h3
+          className="text-sm font-medium mb-1 line-clamp-2"
+          title={product.name}
+        >
           {product.name}
         </h3>
 
         <div className="mt-auto">
           {isOnPromotion ? (
             <>
-              <p className="text-xs text-gray-500 line-through">de R$ {regularPrice.replace(".", ",")}</p>
+              <p className="text-xs text-gray-500 line-through">
+                de R$ {regularPrice.replace(".", ",")}
+              </p>
               <div className="flex items-end gap-1">
-                <span className="text-green-600 font-bold text-lg">R$ {displayPrice.replace(".", ",")}</span>
+                <span className="text-green-600 font-bold text-lg">
+                  R$ {displayPrice.replace(".", ",")}
+                </span>
               </div>
             </>
           ) : (
             <div className="flex items-end gap-1">
-              <span className="text-green-600 font-bold text-lg">R$ {displayPrice.replace(".", ",")}</span>
+              <span className="text-green-600 font-bold text-lg">
+                R$ {displayPrice.replace(".", ",")}
+              </span>
             </div>
           )}
 

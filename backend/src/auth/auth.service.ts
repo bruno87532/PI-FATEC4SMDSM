@@ -13,7 +13,7 @@ import { NewPasswordDto } from './dto/new-password.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from "bcrypt";
 import { User } from './interfaces/user.interface';
-import { CartService } from 'src/cart/cart.service';
+import { SubscriptionService } from 'src/subscription/subscription.service';
 import { RecoverEmailService } from 'src/recover-email/recover-email.service';
 import { VerifyRecoverEmailDto } from './dto/verify-recover-email.dto';
 import { AlterPasswordDto } from './dto/alter-password-dto';
@@ -25,7 +25,7 @@ export class AuthService {
     private readonly emailService: EmailService,
     private readonly recoverPasswordService: RecoverPasswordService,
     private readonly jwtService: JwtService,
-    private readonly cartService: CartService,
+    private readonly subscriptionService: SubscriptionService,
     private readonly recoverEmailService: RecoverEmailService,
   ) { }
 
@@ -85,7 +85,6 @@ export class AuthService {
         throw new BadRequestException("User is not activated")
       }
 
-      await this.cartService.createCart(data.idUser)
       await this.usersService.updateUser(data.idUser, { password: data.password })
       return { message: "User updated succesfully", statusCode: 200 }
     } catch (error) {
@@ -186,12 +185,7 @@ export class AuthService {
   }
 
   async login(@Request() req: Request & { user: User }, @Res({ passthrough: true }) res: Response): Promise<ResponseMessage> {
-    const allowedFields = ["id", "name", "idCart"]
-    const user = req.user
-    const payload = Object.fromEntries(
-      Object.entries(user).filter(([key, value]) => value !== undefined && allowedFields.includes(key))
-    )
-
+    const payload = await this.createPayload(req.user)
     const token = this.jwtService.sign(payload)
 
     res.cookie("access_token", token, {
@@ -204,6 +198,41 @@ export class AuthService {
     return { message: "Login successfully", statusCode: 200 }
   }
 
+  private async createPayload(user: User) {
+    let isAdvertiser = false
+    try {
+      const subscriptionActivate = await this.subscriptionService.getSubscriptionActiveByIdUser(user.id)
+      isAdvertiser = true
+    } catch (error) { }
+
+    const allowedFields = ["id", "name"]
+    const payload = Object.fromEntries(
+      Object.entries(user).filter(([key, value]) => value !== undefined && allowedFields.includes(key))
+    )
+
+    payload["isAdvertiser"] = isAdvertiser
+    return payload
+  }
+
+  async renewToken(idUser: string, @Res({ passthrough: true }) res: Response) {
+    try {
+      const user = await this.usersService.getUserById(idUser)
+      const payload = await this.createPayload({ id: idUser, name: user.name })
+      const token = this.jwtService.sign(payload)
+      res.cookie("access_token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 1000 * 60 * 60 * 24
+      })
+
+      return { message: "token renewed", statusCode: 200 }
+    } catch (error) {
+      console.error("An error ocurred while renewing token", error)
+      throw new InternalServerErrorException("An error ocurred while renewing token")
+    }
+  }
+
   async sendChangeEmail(data: RecoverDto, idUser: string) {
     try {
       const { email } = data
@@ -214,7 +243,7 @@ export class AuthService {
       } catch (error) {
         if (error instanceof BadRequestException) {
           throw error
-        } 
+        }
       }
 
       await this.recoverEmailService.deleteRecoverByIdUser(idUser)
@@ -276,5 +305,5 @@ export class AuthService {
       if (error instanceof HttpException) throw error
       throw new InternalServerErrorException("An error ocurred while checking the password for updating")
     }
-  } 
+  }
 }  

@@ -8,8 +8,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { CartModule } from 'src/cart/cart.module';
 import { RecoverEmailModule } from 'src/recover-email/recover-email.module';
+import { SubscriptionModule } from 'src/subscription/subscription.module';
 
 @Module({
   providers: [AuthService, LocalStrategy, JwtStrategy],
@@ -19,8 +19,8 @@ import { RecoverEmailModule } from 'src/recover-email/recover-email.module';
     RecoverPasswordModule,
     EmailModule,
     RecoverEmailModule,
-    CartModule,
     PassportModule,
+    SubscriptionModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET_KEY,
       signOptions: { expiresIn: "1d" }

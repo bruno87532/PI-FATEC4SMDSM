@@ -171,22 +171,6 @@ export class authService {
     return await res.json()
   }
 
-  static async isAuthenticated() {
-    const res = await fetch(this.pathBackend + "/auth/me", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      credentials: "include"
-    })
-
-    if (!res.ok) {
-      throw new Error("unauthenticated user")
-    }
-
-    return await res.json()
-  }
-
   static async alterPassword(data: { oldPassword: string, newPassword: string }) {
     const res = await fetch(this.pathBackend + "/auth/alter-password", {
       method: "PATCH",
@@ -203,5 +187,24 @@ export class authService {
     }
 
     return await res.json()
+  }
+
+  static async renewToken() {
+    try {
+      const res = await fetch(this.pathBackend + "/auth/renew-token", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include"
+      })
+
+      if (!res.ok) throw new Error("An error ocurred while renewing token")
+
+      return await res.json()
+    } catch (error) {
+      console.error("An error ocurred while renewing token", error)
+      throw error
+    }
   }
 }

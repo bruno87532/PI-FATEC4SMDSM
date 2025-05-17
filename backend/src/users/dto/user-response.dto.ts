@@ -8,7 +8,7 @@ export class UserResponseDto {
     name: string
 
     @Expose()
-    advertiserName: string
+    advertiserName: string | null
 
     @Expose()
     email: string 
@@ -16,8 +16,29 @@ export class UserResponseDto {
     @Expose()
     phone: string | null
 
+    @Expose()
+    zipCode: string | null
+
+    @Expose()
+    state: string | null
+
+    @Expose()
+    city: string | null
+
+    @Expose()
+    neighborhood: string | null
+
+    @Expose()
+    road: string | null
+
+    @Expose()
+    marketNumber: string | null
+
     @Exclude()
     password: string
+
+    @Exclude()
+    typeUser: string
 
     @Exclude()
     randomCode: string

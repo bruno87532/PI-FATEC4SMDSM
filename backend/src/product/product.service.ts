@@ -1,7 +1,9 @@
-import { BadRequestException, ForbiddenException, HttpException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateUpdateProductDto } from './dto/create-update-product.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { GoogleDriveService } from 'src/google-drive/google-drive.service';
+import { Product } from '@prisma/client';
+import { GetProductsByIdsDto } from './dto/get-products-by-ids.dto';
 
 @Injectable()
 export class ProductService {
@@ -125,7 +127,7 @@ export class ProductService {
     }
   }
 
-  async getProductById(id: string) {
+  async getProductById(id: string): Promise<Product> {
     try {
       const product = await this.prismaService.product.findUnique({
         where: { id },
@@ -143,7 +145,7 @@ export class ProductService {
         }
       })
 
-      if (!product) new BadRequestException("Product not found")
+      if (!product) throw new NotFoundException("Product not found")
 
       return product
     } catch (error) {
@@ -188,4 +190,24 @@ export class ProductService {
       throw new InternalServerErrorException("An error ocurred while incrementing the product stock")
     }
   }
+
+  async getProductsByIds(data: GetProductsByIdsDto) {
+    try {
+      const products = await this.prismaService.product.findMany({
+        where: {
+          id: {
+            in: data.ids
+          }
+        }
+      })
+
+      if (!products) throw new NotFoundException("Products not found")
+
+      return products
+    } catch (error) {
+      console.error("An error ocurred while fetching products", error)
+      if (error instanceof HttpException) throw error
+      throw new InternalServerErrorException("An error ocurred while fetching products")
+    }
+  } 
 }

@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { userService } from "@/services/user"
-import { useUser } from "../../../context/user-content"
+import { useUser } from "@/app/context/user-context"
 import { useToast } from "@/hooks/use-toast"
 import { maskPhone } from "@/utils/mask-phone"
 
@@ -19,9 +19,17 @@ export const PhoneDialog = () => {
   const { toast } = useToast()
 
   const formSchema = z.object({
-    phone: z.string()
-      .min(11, { message: "O número de telefone deve ter pelo menos 11 caracteres" })
-      .regex(/^\(\d{2}\) 9\d{4} - \d{4}$/, { message: "O número de telefone deve ser válido" })
+    phone: z
+      .preprocess((val) => {
+        if (typeof val === "string") {
+          return val.replace(/\D/g, "");
+        }
+        return val
+      },
+        z.string()
+          .min(10, { message: "O número de telefone deve ter pelo menos 10 caracteres" })
+          .regex(/^\d{2}9\d{7,8}/, { message: "O número de telefone deve ser válido" }),
+      )
   })
 
   type formSchema = z.infer<typeof formSchema>
@@ -53,9 +61,9 @@ export const PhoneDialog = () => {
       })
     } catch (error) {
       toast({
-        title: "Erro interno",
-        description: "Ocorreu um erro interno ao prosseguir com a sua solicitação. Por favor tente novamente mais tarde"
-      })
+        title: "Erro interno.",
+        description: "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor, tente novamente mais tarde."
+      });
     } finally {
       setIsOpen(false)
     }
@@ -84,7 +92,7 @@ export const PhoneDialog = () => {
                       onChange={(e) => {
                         const value = e.target.value
                         const maskedValue = maskPhone(value)
-                        field.onChange(maskedValue) 
+                        field.onChange(maskedValue)
                       }}
                       value={field.value}
                     />

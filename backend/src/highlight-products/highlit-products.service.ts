@@ -53,7 +53,7 @@ export class HighlightProductsService {
           if (productList.length > 0) {
             const user = users.find(user => user.id === productList[0].idUser);
             if (user) {
-              result[plan.name][user.name] = productList;
+              result[plan.name][user.advertiserName!] = productList;
             }
           }
         });

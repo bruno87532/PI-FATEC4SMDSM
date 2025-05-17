@@ -8,6 +8,8 @@ import { plainToInstance } from 'class-transformer';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { HaveUserWithAdvertiserNameDto } from './dto/have-user-with-advertiser-name.dto';
 import { EmailIsEqualDto } from './dto/email-is-equal.dto';
+import { getAdvertiserNameByIdsDto } from './dto/get-advertiser-name-by-ids.dto';
+import { UserNameResponseDto } from './dto/user-name-response.dto';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -46,5 +48,12 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   async haveUserWithAdvertiserName(@Body() data: HaveUserWithAdvertiserNameDto) {
     return await this.usersService.haveUserWithAdvertiserName(data)
+  }
+
+  @Post("/get-advertiser-names-by-ids") 
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  @HttpCode(HttpStatus.OK) 
+  async getAdvertiserNamesByIds(@Body() data: getAdvertiserNameByIdsDto) {
+    return plainToInstance(UserNameResponseDto, await this.usersService.getAdvertiserNameByIds(data), { excludeExtraneousValues: true })
   }
 }

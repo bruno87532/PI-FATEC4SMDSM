@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { BarChart3, Home, Package, Settings } from "lucide-react"
+import { Package, Settings } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -10,32 +10,22 @@ import { Button } from "@/components/ui/button"
 export const DashboardNav = () => {
   const pathname = usePathname()
 
-  const navItems = [
-    {
-      title: "Painel",
-      href: "/dashboard",
-      icon: Home,
-    },
+  const navitems = [
     {
       title: "Produtos",
-      href: "/dashboard/produtos",
+      href: "/market/dashboard/products",
       icon: Package,
     },
     {
-      title: "Estatísticas",
-      href: "/dashboard/estatisticas",
-      icon: BarChart3,
-    },
-    {
       title: "Configurações",
-      href: "/dashboard/configuracoes",
+      href: "/market/dashboard/settings",
       icon: Settings,
     },
   ]
 
   return (
     <nav className="grid gap-1 p-4">
-      {navItems.map((item) => (
+      {navitems.map((item) => (
         <Button
           key={item.href}
           variant={pathname === item.href ? "secondary" : "ghost"}

@@ -18,7 +18,7 @@ export class userService {
 
       if (!res.ok) {
         const error = await res.json();
-        throw new ApiError(error.message || "An error ocurred while creating user", 400)
+        throw new ApiError(error.message || "An error ocurred while creating user")
       }
 
       return await res.json()
@@ -39,13 +39,13 @@ export class userService {
       })
 
       if (!res.ok) {
-        throw new Error( "An error ocurred while creating user")
+        const error = await res.json()
+        throw new Error(error)
       }
-
-      return await res.json()
+      const data = await res.json()
+      return data
     } catch (error) {
-      console.error("An error ocurred while fetching user", error)
-      throw error
+      return 
     }
   }
 
@@ -55,6 +55,12 @@ export class userService {
     advertiserName?: string;
     email?: string;
     phone?: string;
+    zipCode?: string;
+    state?: string;
+    city?: string;
+    neighborhood?: string;
+    road?: string;
+    marketNumber?: string;
   }) {
     try {
       const res = await fetch(this.pathBackend + "/users", {
@@ -66,7 +72,10 @@ export class userService {
         credentials: "include"
       })
 
-      if (!res.ok) throw new Error("Failed to update user")
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error)
+      }
 
       return await res.json()
     } catch (error) {
@@ -110,6 +119,29 @@ export class userService {
       return await res.json()
     } catch (error) {
       console.error("An error ocurred while checking for the user by email")
+      throw error
+    }
+  }
+
+  static async getAdvertiserNamesByIds(ids: string[]): Promise<{ id: string; advertiserName: string }[]> {
+    try {
+      const res = await fetch(this.pathBackend + "/users/get-advertiser-names-by-ids", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ ids })
+      })
+
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error)
+      }
+
+      return await res.json()
+    } catch (error) {
+      console.error("An error ocurred while fetching users", error)
       throw error
     }
   }

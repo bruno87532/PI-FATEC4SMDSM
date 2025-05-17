@@ -16,6 +16,7 @@ import { createSchema } from "./schema/schema"
 import { ProductPromotion } from "./components/product-promotion/product-promotion"
 import { Product } from "./schema/schema"
 import { useProductData } from "./hook/use-product-data"
+import { ApiError } from "@/type/error"
 
 export const ProductForm = ({ product }: { product?: ProductDb }) => {
   const { toast } = useToast()
@@ -35,7 +36,7 @@ export const ProductForm = ({ product }: { product?: ProductDb }) => {
       subCategorys: subCategoryDb ?? [],
       categorys: categoryDb ?? [],
       stock: product?.stock.toString() ?? "",
-      promotionalPrice: promotionalPrice?.toString() ?? "00:00",
+      promotionalPrice: promotionalPrice?.toString() ?? "",
       promotionExpiration: promotionExpiration ? new Date(promotionExpiration) : new Date(),
       promotionStart: promotionStart ? new Date(promotionStart) : new Date()
     }
@@ -63,13 +64,19 @@ export const ProductForm = ({ product }: { product?: ProductDb }) => {
         title,
         description
       })
-
-      setIsLoading(false)
     } catch (error) {
-      toast({
-        title: "Erro interno",
-        description: "Devido a problemas técnico não foi possível prosseguir com sua requisição. Por favor tente novamente mais tarde"
-      })
+      if (error instanceof ApiError && error.message === "The image and width must be equal") {
+        productForm.setError("file", {
+          type: "manual", 
+          message: "A imagem deve ter dimensões iguais"
+        })
+      } else {
+        toast({
+          title: "Erro interno.",
+          description: "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor, tente novamente mais tarde."
+        });
+      }
+    } finally {      
       setIsLoading(false)
     }
   }

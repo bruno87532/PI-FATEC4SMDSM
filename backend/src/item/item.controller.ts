@@ -1,52 +1,45 @@
-import { Controller, Post, UseGuards, Request, Body, UsePipes, ValidationPipe, Delete, Patch, Param, Get } from '@nestjs/common';
-import { ItemService } from './item.service';
-import { AuthGuard } from '@nestjs/passport';
-import { CreateItemDto } from './dto/create-item.dto';
-import { plainToInstance } from 'class-transformer';
-import { ItemResponseDto } from './dto/item-response.dto';
+import { Controller, UseGuards, ValidationPipe, UsePipes, Body, Post, Request, Delete, Patch, Param } from "@nestjs/common";
+import { CreateItemDto } from "./dto/create-item.dto";
+import { itemservice } from "./item.service";
+import { AuthGuard } from "@nestjs/passport";
+import { GetAllItensByIdCartsDto } from "./dto/get-all-itens-by-id-cart.dto";
 
 @Controller('item')
 export class ItemController {
-  constructor(
-    private readonly itemService: ItemService) {}
+  constructor(private readonly itemservice: itemservice) { }
 
-  @Post()
   @UseGuards(AuthGuard("jwt"))
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
-  async createItem(
-    @Request() req,
-    @Body() data: CreateItemDto
-  ) {
-    return plainToInstance(ItemResponseDto, await this.itemService.createItem(req.user.userId, data.idProduct))
-  }
-
-  @Patch("/increment/:id") 
-  @UseGuards(AuthGuard("jwt"))
-  async incrementQuantityItem(@Request() req, @Param("id") id: string) {
-    return plainToInstance(ItemResponseDto, await this.itemService.incrementQuantityItem(req.user.userId, id))
-  }
-
-  @Patch("/decrement/:id") 
-  @UseGuards(AuthGuard("jwt"))
-  async decrementQuantityItem(@Request() req, @Param("id") id: string) {
-    return plainToInstance(ItemResponseDto, await this.itemService.decrementQuantityItem(req.user.userId, id))
+  @Post()
+  async createItem(@Body() data: CreateItemDto, @Request() req) {
+    return await this.itemservice.createItem(data, req.user.userId)
   }
 
   @UseGuards(AuthGuard("jwt"))
-  @Delete(":id")
-  async deleteItem(@Request() req, @Param("id") id: string) {
-    return plainToInstance(ItemResponseDto, await this.itemService.deleteItem(req.user.userId, id)) 
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  @Delete("/:id")
+  async deleteItem(@Param("id") id: string, @Request() req) {
+    return await this.itemservice.deleteItem(id, req.user.userId)
   }
 
   @UseGuards(AuthGuard("jwt"))
-  @Delete()
-  async deleteAllItens(@Request() req) {
-    return await this.itemService.deleteAllItens(req.user.userId)
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  @Patch("/increment/:id")
+  async incrementItem(@Param("id") id: string, @Request() req) {
+    return await this.itemservice.incrementItem(id, req.user.userId)
   }
 
-  @Get()
   @UseGuards(AuthGuard("jwt"))
-  async getAllItensByIdUser(@Request() req) {
-    return plainToInstance(ItemResponseDto, await this.itemService.getAllItensByIdUser(req.user.userId))
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  @Patch("/decrement/:id")
+  async decrementItem(@Param("id") id: string, @Request() req) {
+    return await this.itemservice.decrementItem(id, req.user.userId)
+  }
+
+  @UsePipes(AuthGuard("jwt"))
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  @Post("/get-all-itens-by-id-carts")
+  async getAllIItensByIdCarts(@Body() data: GetAllItensByIdCartsDto) {
+    return await this.itemservice.getAllitemsByIdCarts(data)
   }
 }

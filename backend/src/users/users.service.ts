@@ -7,6 +7,7 @@ import * as bcrypt from 'bcryptjs';
 import { DataUpdateUser } from 'src/interfaces/user.interface';
 import { HaveUserWithAdvertiserNameDto } from './dto/have-user-with-advertiser-name.dto';
 import { EmailIsEqualDto } from './dto/email-is-equal.dto';
+import { getAdvertiserNameByIdsDto } from './dto/get-advertiser-name-by-ids.dto';
 
 @Injectable()
 export class UsersService {
@@ -189,6 +190,26 @@ export class UsersService {
     } catch (error) {
       console.error("An error ocurred while fethcing user", error)
       throw new InternalServerErrorException("An error ocurred while fethcing user")
+    }
+  }
+
+  async getAdvertiserNameByIds(data: getAdvertiserNameByIdsDto) {
+    try {
+      const users = await this.prismaService.user.findMany({
+        where: {
+          id: {
+            in: data.ids
+          }
+        }
+      })
+
+      if (!users) throw new NotFoundException("Users not found")
+
+      return users
+    } catch (error) {
+      console.error ("An error ocurred while fetching users", error)
+      if (error instanceof HttpException)
+      throw new InternalServerErrorException("An error ocurred while fetching users")
     }
   }
 }
