@@ -10,6 +10,8 @@ import { HaveUserWithAdvertiserNameDto } from './dto/have-user-with-advertiser-n
 import { EmailIsEqualDto } from './dto/email-is-equal.dto';
 import { getAdvertiserNameByIdsDto } from './dto/get-advertiser-name-by-ids.dto';
 import { UserNameResponseDto } from './dto/user-name-response.dto';
+import { ConfirmationNumberDto } from './dto/confirmation-number.dto';
+import { VerifyNumberDto } from './dto/verify-number.dto';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -50,10 +52,24 @@ export class UsersController {
     return await this.usersService.haveUserWithAdvertiserName(data)
   }
 
-  @Post("/get-advertiser-names-by-ids") 
+  @Post("/get-advertiser-names-by-ids")
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
-  @HttpCode(HttpStatus.OK) 
+  @HttpCode(HttpStatus.OK)
   async getAdvertiserNamesByIds(@Body() data: getAdvertiserNameByIdsDto) {
     return plainToInstance(UserNameResponseDto, await this.usersService.getAdvertiserNameByIds(data), { excludeExtraneousValues: true })
+  }
+
+  @UseGuards(AuthGuard("jwt"))
+  @Patch("/confirmation-number")
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  async confirmationNumber(@Body() data: ConfirmationNumberDto, @Request() req) {
+    return await this.usersService.confirmationNumber(data, req.user.userId)
+  }
+
+  @UseGuards(AuthGuard("jwt"))
+  @Patch("/verify-number")
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  async verifyNumber(@Body() data: VerifyNumberDto, @Request() req) {
+    return await this.usersService.verifyNumber(data, req.user.userId)
   }
 }

@@ -8,12 +8,16 @@ import { DataUpdateUser } from 'src/interfaces/user.interface';
 import { HaveUserWithAdvertiserNameDto } from './dto/have-user-with-advertiser-name.dto';
 import { EmailIsEqualDto } from './dto/email-is-equal.dto';
 import { getAdvertiserNameByIdsDto } from './dto/get-advertiser-name-by-ids.dto';
+import { ConfirmationNumberDto } from './dto/confirmation-number.dto';
+import { EvolutionService } from 'src/evolution/evolution.service';
+import { VerifyNumberDto } from './dto/verify-number.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly emailService: EmailService,
+    private readonly evolutionService: EvolutionService,
   ) { }
 
   async createUser(data: { name: string; email: string }): Promise<User> {
@@ -207,9 +211,49 @@ export class UsersService {
 
       return users
     } catch (error) {
-      console.error ("An error ocurred while fetching users", error)
+      console.error("An error ocurred while fetching users", error)
       if (error instanceof HttpException)
-      throw new InternalServerErrorException("An error ocurred while fetching users")
+        throw new InternalServerErrorException("An error ocurred while fetching users")
+    }
+  }
+
+  async confirmationNumber(data: ConfirmationNumberDto, id: string) {
+    try {
+      const randomCodePhone = this.generateRandomCode()
+      const randomCodePhoneExpiration = this.generateExpirationTime()
+
+      const user = await this.updateUser(id, { randomCodePhone, randomCodePhoneExpiration })
+
+      const message = `Olá, ${user.name}. Obrigado pelo seu interesse para se juntar conosco\nSeu código de verificação: ${randomCodePhone}\nEste código tem uma duração de 5 minutos\nImportante: Nunca compartilhe este código com ninguém`
+
+      await this.evolutionService.sendMessage(data.phone, message)
+
+      return { message: "Message sent successfully" }
+    } catch (error) {
+      console.error("An error ocurred while saving confirmationCode", error)
+      throw new InternalServerErrorException("An error ocurred while saving confirmationCode")
+    }
+  }
+
+  async verifyNumber(data: VerifyNumberDto, id: string) {
+    try {
+      const user = await this.getUserById(id)
+      if (!user || !user.randomCodePhoneExpiration) throw new NotFoundException("User not found")
+      if (data.randomCode !== user.randomCodePhone) throw new BadRequestException("Invalid code")
+      const now = new Date().getTime()
+      const randomCodePhoneExpiration = new Date(user.randomCodePhoneExpiration).getTime()
+      if (now > randomCodePhoneExpiration) {
+        await this.confirmationNumber({ phone: data.phone }, id)
+        throw new BadRequestException("Expired code")
+      } 
+      
+      await this.updateUser(id, { phone: data.phone })
+
+      return { message: "User updated successfully" }
+    } catch (error) {
+      console.error("An error while veryfing number", error)
+      if (error instanceof HttpException) throw error
+      throw new InternalServerErrorException("An error while veryfing number")
     }
   }
 }

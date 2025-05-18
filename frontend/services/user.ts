@@ -145,4 +145,50 @@ export class userService {
       throw error
     }
   }
+
+  static async confirmationNumber(phone: string) {
+    try {
+      const res = await fetch(this.pathBackend + "/users/confirmation-number", {
+        headers: {
+          "Content-Type": "application/json"
+        },
+        method: "PATCH",
+        credentials: "include",
+        body: JSON.stringify({ phone })
+      })
+
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error)
+      }
+
+      return await res.json()
+    } catch (error) {
+      console.error("An error ocurred while saving confirmationNumber", error)
+      throw new Error("An error ocurred while saving confirmationNumber")
+    }
+  }
+
+   static async verifyNumber(phone: string, randomCode: string) {
+    try {
+      const res = await fetch(this.pathBackend + "/users/verify-number", {
+        headers: {
+          "Content-Type": "application/json"
+        },
+        method: "PATCH",
+        credentials: "include",
+        body: JSON.stringify({ phone, randomCode })
+      })
+
+      if (!res.ok) {
+        const error = await res.json()
+        throw new ApiError(error.message || "An error ocurred while verifyng number")
+      }
+
+      return await res.json()
+    } catch (error) {
+      console.error("An error ocurred while verifyng number", error)
+      throw error
+    }
+  }
 }

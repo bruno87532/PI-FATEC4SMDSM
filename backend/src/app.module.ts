@@ -19,9 +19,10 @@ import { ItemModule } from './item/item.module';
 import { HighlightProductsModule } from './highlight-products/highlit-products.module';
 import { SubscriptionCancellingModule } from './subscription-cancelling/subscription-cancelling.module';
 import { RecoverEmailModule } from './recover-email/recover-email.module';
+import { EvolutionModule } from './evolution/evolution.module';
 
 @Module({
-  imports: [UsersModule, PrismaModule, EmailModule, AuthModule, RecoverPasswordModule, StripeModule, PlanModule, SubscriptionModule, ProductModule, GoogleDriveModule, CategoryModule, ItemModule, SubCategoryModule, CartModule, StreamToBufferModule, HighlightProductsModule, SubscriptionCancellingModule, RecoverEmailModule],
+  imports: [UsersModule, PrismaModule, EmailModule, AuthModule, RecoverPasswordModule, StripeModule, PlanModule, SubscriptionModule, ProductModule, GoogleDriveModule, CategoryModule, ItemModule, SubCategoryModule, CartModule, StreamToBufferModule, HighlightProductsModule, SubscriptionCancellingModule, RecoverEmailModule, EvolutionModule],
   controllers: [AppController],
   providers: [AppService],
 })

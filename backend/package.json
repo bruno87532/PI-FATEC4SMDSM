@@ -30,6 +30,7 @@
     "@nestjs/platform-express": "^11.0.16",
     "@nestjs/typeorm": "^11.0.0",
     "@prisma/client": "^6.5.0",
+    "@solufy/evolution-sdk": "^0.2.1",
     "@stripe/stripe-js": "^6.0.0",
     "apis": "^0.1.2",
     "bcrypt": "^5.1.1",

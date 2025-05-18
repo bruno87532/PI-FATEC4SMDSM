@@ -8,4 +8,6 @@ export interface DataUpdateUser {
   name?: string;
   advertiserName?: string;
   email?: string;
+  randomCodePhone?: string;
+  randomCodePhoneExpiration?: Date;
 };

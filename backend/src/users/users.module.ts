@@ -4,6 +4,7 @@ import { UsersController } from './users.controller';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { EmailModule } from 'src/email/email.module';
 import { AuthModule } from 'src/auth/auth.module';
+import { EvolutionModule } from 'src/evolution/evolution.module';
 
 @Module({
   providers: [UsersService],
@@ -11,6 +12,7 @@ import { AuthModule } from 'src/auth/auth.module';
   imports: [
     PrismaModule, 
     EmailModule, 
+    EvolutionModule,
     forwardRef(() => AuthModule)
   ],
   exports: [UsersService]

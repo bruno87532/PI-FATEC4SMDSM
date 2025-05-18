@@ -32,7 +32,6 @@ export class itemservice {
       }
 
       await this.productService.decrementStockProduct(data.idProduct, 1)
-      console.log(idCart)
       const item = await this.prismaService.item.create({
         data: {
           quantity: 1,

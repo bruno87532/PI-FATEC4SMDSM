@@ -8,7 +8,11 @@ import { userService } from "@/services/user";
 import { maskPhone } from "@/utils/mask-phone";
 import { useUser } from "@/app/context/user-context";
 
-export const UseUserPayment = (setIsUserAdvertiser: React.Dispatch<React.SetStateAction<boolean>>) => {
+export const UseUserPayment = (
+  setIsLoadingButton: React.Dispatch<React.SetStateAction<boolean>>,
+  setPhone: React.Dispatch<React.SetStateAction<string>>,
+  setStep: React.Dispatch<React.SetStateAction<number>>
+) => {
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const { user, setUser } = useUser()
@@ -74,9 +78,13 @@ export const UseUserPayment = (setIsUserAdvertiser: React.Dispatch<React.SetStat
 
   const handleSubmit = async (data: FormSchemaType) => {
     setIsLoading(true)
+    setIsLoadingButton(true)
     try {
-      await userService.updateUser(data)
-      setIsUserAdvertiser(true)
+      const { phone, ...newData } = data
+      await userService.confirmationNumber(phone)
+      await userService.updateUser(newData)
+      setPhone(phone)
+      setStep(1)
     } catch (error) {
       toast({
         title: "Erro interno.",
@@ -84,6 +92,7 @@ export const UseUserPayment = (setIsUserAdvertiser: React.Dispatch<React.SetStat
       });
     } finally {
       setIsLoading(false)
+      setIsLoadingButton(false)
     }
   }
 

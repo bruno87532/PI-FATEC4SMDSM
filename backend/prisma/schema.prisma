@@ -19,28 +19,30 @@ datasource db {
 }
 
 model User {
-  id                   String           @id @default(uuid())
-  name                 String
-  email                String           @unique
-  phone                String?          @db.VarChar(11)
-  password             String?
-  randomCode           String?          @db.VarChar(6)
-  randomCodeExpiration DateTime
-  isActivate           DateTime?
-  advertiserName       String?          @unique
-  zipCode              String?
-  state                String?
-  city                 String?
-  neighborhood         String?
-  road                 String?
-  marketNumber         String?
-  typeUser             typeUser         @default(COMMON)
-  subscriptions        Subscription[]
-  products             Product[]
-  recoverPasswords     RecoverPassword? @relation
-  recoverEmail         RecoverEmail?    @relation
-  cart                 Cart[]           @relation("UserCart")
-  cartAdvertiser       Cart[]           @relation("AdvertiserCart")
+  id                        String           @id @default(uuid())
+  name                      String
+  email                     String           @unique
+  phone                     String?          @db.VarChar(11)
+  password                  String?
+  randomCode                String?          @db.VarChar(6)
+  randomCodeExpiration      DateTime
+  isActivate                DateTime?
+  advertiserName            String?          @unique
+  zipCode                   String?
+  state                     String?
+  city                      String?
+  neighborhood              String?
+  road                      String?
+  marketNumber              String?
+  randomCodePhone           String?
+  randomCodePhoneExpiration DateTime?
+  typeUser                  typeUser         @default(COMMON)
+  subscriptions             Subscription[]
+  products                  Product[]
+  recoverPasswords          RecoverPassword? @relation
+  recoverEmail              RecoverEmail?    @relation
+  cart                      Cart[]           @relation("UserCart")
+  cartAdvertiser            Cart[]           @relation("AdvertiserCart")
 }
 
 model Cart {

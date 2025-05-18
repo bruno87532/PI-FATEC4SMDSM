@@ -38,8 +38,6 @@ export const ProductCard: React.FC<{ product: ProductDb }> = ({ product }) => {
       let existingCartId: string | undefined = undefined
 
       for (const [cartId, items] of Object.entries(currentCart)) {
-        console.log(cartId)
-        console.log(items)
         const found = items.find((i) => i.idProduct === product.id)
         if (found) {
           existingItem = found
