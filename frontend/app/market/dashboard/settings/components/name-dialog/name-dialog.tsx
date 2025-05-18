@@ -63,7 +63,7 @@ export const NameDialog = () => {
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Editar Nome</DialogTitle>
-          <DialogDescription>Atualize seu nome completo. Clique em salvar quando terminar.</DialogDescription>
+          <DialogDescription>Atualize seu nome completo.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

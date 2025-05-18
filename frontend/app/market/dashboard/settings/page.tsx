@@ -13,6 +13,8 @@ import { useToast } from "@/hooks/use-toast"
 import { useEffect } from "react"
 import { userService } from "@/services/user"
 import { StepProvider } from "./components/email-dialog/components/context/step-context"
+import { ZipCodeDialog } from "./components/zip-code-dialog/zip-code-dialog"
+import { NumberDialog } from "./components/number-dialog/number-dialog"
 
 const Settings = () => {
   const { user, setUser } = useUserContext()
@@ -82,6 +84,79 @@ const Settings = () => {
                   <p className="text-sm text-muted-foreground">{user.phone ?? ""}</p>
                 </div>
                 <PhoneDialog />
+              </div>
+              <Separator />
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <h3 className="text-sm font-medium">CEP</h3>
+                  <p className="text-sm text-muted-foreground">{user.zipCode ?? ""}</p>
+                </div>
+                <ZipCodeDialog />
+              </div>
+              <Separator />
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <h3 className="text-sm font-medium">Estado</h3>
+                  <p className="text-sm text-muted-foreground">{user.state ?? ""}</p>
+                </div>
+                <ZipCodeDialog dataValue={{
+                  value: "estado",
+                  message: "Ao atualizá-lo, o estado será atualizado automaticamente",
+                  titleToast: "Estado alterado",
+                  descriptionToast: "Estado alterado com sucesso"
+                }} />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <h3 className="text-sm font-medium">Cidade</h3>
+                  <p className="text-sm text-muted-foreground">{user.city ?? ""}</p>
+                </div>
+                <ZipCodeDialog dataValue={{
+                  value: "cidade",
+                  message: "Ao atualizá-lo, a cidade será atualizada automaticamente",
+                  titleToast: "Cidade alterada",
+                  descriptionToast: "Cidade alterada com sucesso"
+                }} />
+              </div>
+              <Separator />
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <h3 className="text-sm font-medium">Bairro</h3>
+                  <p className="text-sm text-muted-foreground">{user.neighborhood ?? ""}</p>
+                </div>
+                <ZipCodeDialog dataValue={{
+                  value: "bairro",
+                  message: "Ao atualizá-lo, o bairro será atualizado automaticamente",
+                  titleToast: "Bairro alterado",
+                  descriptionToast: "Bairro alterado com sucesso"
+                }} />
+              </div>
+              <Separator />
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <h3 className="text-sm font-medium">Rua</h3>
+                  <p className="text-sm text-muted-foreground">{user.road ?? ""}</p>
+                </div>
+                <ZipCodeDialog dataValue={{
+                  value: "rua",
+                  message: "Ao atualizá-lo, a rua será atualizada automaticamente",
+                  titleToast: "Rua alterada",
+                  descriptionToast: "Rua alterada com sucesso"
+                }} />
+              </div>
+              <Separator />
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <h3 className="text-sm font-medium">Número</h3>
+                  <p className="text-sm text-muted-foreground">{user.marketNumber ?? ""}</p>
+                </div>
+                <NumberDialog />
               </div>
             </CardContent>
           </Card>
