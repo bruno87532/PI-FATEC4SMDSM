@@ -4,11 +4,15 @@ import { Button } from "@/components/ui/button"
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetClose } from "../ui/sheet"
 import { useCart } from "@/app/context/cart-context"
 import { useItem } from "./hook/use-item"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import type { ProductFromCart } from "@/type/product"
+import { useUser } from "@/app/context/user-context"
+import { FormDialog } from "./components/form-dialog/form-dialog"
 
 export const SideMenuCart = () => {
   const { cart, setCart } = useCart()
+  const { user, setUser } = useUser()
+  const [ isOpen, setIsOpen ] = useState<boolean>(false)
   const [data, setData] = useState<
     Record<
       string,
@@ -22,11 +26,30 @@ export const SideMenuCart = () => {
   >({})
   const { incrementItem, decrementItem, createItem, deleteItem } = useItem(setData)
 
-  // Verificar se o carrinho está vazio
+  const handlePurchase = () => {
+    console.log("aqui foi")
+    if (user &&
+      (!user.zipCode ||
+        !user.state ||
+        !user.city ||
+        !user.neighborhood ||
+        !user.road ||
+        !user.marketNumber)
+    ) {
+      setIsOpen(true)
+      return
+    }
+  }
+
+  useEffect(() => {
+    console.log(isOpen)
+  }, [isOpen])
+
   const isCartEmpty = !cart || Object.values(cart).every((items) => items.length === 0)
 
   return (
     <Sheet>
+      <FormDialog setIsOpen={setIsOpen} isOpen={isOpen} />
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
           <ShoppingCart className="h-5 w-5" />
@@ -72,7 +95,6 @@ export const SideMenuCart = () => {
                               size="icon"
                               className="h-6 w-6 rounded-full"
                               onClick={() => {
-                                // Encontrar o item no carrinho que corresponde a este produto
                                 const itemId = Object.values(cart || {})
                                   .flat()
                                   .find((item) => item.idProduct === product.id)?.id
@@ -88,7 +110,6 @@ export const SideMenuCart = () => {
                               size="icon"
                               className="h-6 w-6 rounded-full"
                               onClick={() => {
-                                // Encontrar o item no carrinho que corresponde a este produto
                                 const itemId = Object.values(cart || {})
                                   .flat()
                                   .find((item) => item.idProduct === product.id)?.id
@@ -110,7 +131,6 @@ export const SideMenuCart = () => {
                             size="sm"
                             className="text-red-500 h-6 mt-1"
                             onClick={() => {
-                              // Encontrar o item no carrinho que corresponde a este produto
                               const itemId = Object.values(cart || {})
                                 .flat()
                                 .find((item) => item.idProduct === product.id)?.id
@@ -130,7 +150,7 @@ export const SideMenuCart = () => {
                       <span>Total:</span>
                       <span>R$ {(advertiserData.totalPrice / 100).toFixed(2)}</span>
                     </div>
-                    <Button className="w-full bg-green-600 hover:bg-green-700">
+                    <Button onClick={handlePurchase} className="w-full bg-green-600 hover:bg-green-700">
                       Finalizar Pedido com {advertiserData.advertiserName}
                     </Button>
                   </div>

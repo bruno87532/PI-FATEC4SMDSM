@@ -3,7 +3,7 @@ export class HighlightProductsService {
 
   static async featuredProductsHome() {
     try {
-      const res = await fetch(this.pathBackend + "/highlight-products", {
+      const res = await fetch(this.pathBackend + "/highlight-products/home", {
         method: "GET",
         headers: {
           "Content-Type": "application/json"
@@ -11,6 +11,24 @@ export class HighlightProductsService {
       })
 
       if (!res.ok) throw new Error("An error ocurred while organized products for the home")
+
+      return await res.json()
+    } catch (error) {
+      console.error("An error ocurred while organized products for the home", error)
+      throw error
+    }
+  }
+
+  static async featuredProductsPage() {
+    try {
+      const res = await fetch(this.pathBackend + "/highlight-products/page", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+
+      if (!res.ok) throw new Error("An error ocurred while organized products for the page")
 
       return await res.json()
     } catch (error) {

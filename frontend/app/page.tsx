@@ -6,18 +6,21 @@ import { CategoryIcons } from "./components/category-icons/category-icons";
 import { SiteFooter } from "./components/site-footer/site-footer";
 import { CartProvider } from "./context/cart-context";
 import { UserProvider } from "./context/user-context";
+import { IsLoginOpenProvider } from "./context/is-login-open";
 
 export default function Home() {
   return (
     <main className="bg-white">
       <UserProvider>
         <CartProvider>
-          <SiteHeader />
-          <MainNav />
-          <CategoryIcons />
-          <MainBanner />
-          <ProductSection />
-          <SiteFooter />
+          <IsLoginOpenProvider>
+            <SiteHeader />
+            <MainNav />
+            <CategoryIcons />
+            <MainBanner />
+            <ProductSection />
+            <SiteFooter />
+          </IsLoginOpenProvider>
         </CartProvider>
       </UserProvider>
     </main>

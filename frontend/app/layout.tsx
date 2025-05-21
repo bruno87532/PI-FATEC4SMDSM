@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import { IsLoginOpenProvider } from "./context/is-login-open";
 import { UserProvider } from "./context/user-context";
 
 const geistSans = Geist({
@@ -26,14 +27,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <div className="min-h-screen bg-white">
-          {children}
-          <Toaster />
-        </div>
-      </body>
+      <IsLoginOpenProvider>
+        <UserProvider>
+          <body
+            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          >
+            <div className="min-h-screen bg-white">
+              {children}
+              <Toaster />
+            </div>
+          </body>
+        </UserProvider>
+      </IsLoginOpenProvider>
     </html>
   );
 }

@@ -8,7 +8,7 @@ import ProductMarket from "./components/product-market/product-market"
 import ProductSectionSkeleton from "./components/product-section-skeleton/product-section-skeleton"
 
 export const ProductSection = () => {
-  const {toast} = useToast()
+  const { toast } = useToast()
   const [products, setProducts] = useState<Record<string, Record<string, ProductDb[]>>>({})
   const [isLoading, setIsLoading] = useState(true)
 
@@ -17,16 +17,9 @@ export const ProductSection = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       setIsLoading(true)
-      try {
-        const fetchedProducts = await HighlightProductsService.featuredProductsHome()
-        setProducts(fetchedProducts)
-        setIsLoading(false)
-      } catch (error) {
-        toast({
-          title: "Erro interno.",
-          description: "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor, tente novamente mais tarde."
-        });
-      }
+      const fetchedProducts = await HighlightProductsService.featuredProductsHome()
+      setProducts(fetchedProducts)
+      setIsLoading(false)
     }
 
     fetchProducts()

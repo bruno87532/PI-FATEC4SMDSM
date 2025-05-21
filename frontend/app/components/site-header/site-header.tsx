@@ -8,14 +8,11 @@ import { useState } from "react"
 import { Dialog, DialogTrigger } from "@radix-ui/react-dialog"
 import { AuthDialog } from "../auth/auth-dialog"
 import { SideMenuCart } from "../side-menu-cart/side-menu-cart"
-import type { CartItem } from "../cart/cart-side-menu"
+import { useIsLoginOpen } from "@/app/context/is-login-open"
+import { set } from "date-fns"
 
 export const SiteHeader = () => {
-  const [isOpen, setIsOpen] = useState<boolean>(false)
-  const [cartitems, setCartitems] = useState<CartItem[]>([
-    { id: 1, name: "Maçã Fuji", price: 8.99, quantity: 2 },
-    { id: 2, name: "Leite Integral", price: 5.49, quantity: 1 },
-  ])
+  const { isLoginOpen, setIsLoginOpen } = useIsLoginOpen()
 
   return (
     <header className="w-full border-b max-w-6xl mx-auto">
@@ -53,9 +50,9 @@ export const SiteHeader = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
               <DialogTrigger asChild>
-                <Button onClick={() => setIsOpen(true)} variant="ghost" size="icon">
+                <Button onClick={() => setIsLoginOpen(true)} variant="ghost" size="icon">
                   <User className="h-5 w-5" />
                 </Button>
               </DialogTrigger>

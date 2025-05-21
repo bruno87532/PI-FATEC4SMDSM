@@ -16,10 +16,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const getUserById = async () => {
-      try {
-        const user = await userService.getUserById()
-        setUser(user)
-      } catch (error) { }
+      const user = await userService.getUserById()
+      setUser(user)
     }
 
     getUserById()

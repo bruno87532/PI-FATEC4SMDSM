@@ -18,7 +18,7 @@ export const PhoneDialog = () => {
   const { user, setUser } = useUser()
   const { toast } = useToast()
 
-  const formSchema = z.object({
+  const FormSchema = z.object({
     phone: z
       .preprocess((val) => {
         if (typeof val === "string") {
@@ -32,16 +32,16 @@ export const PhoneDialog = () => {
       )
   })
 
-  type formSchema = z.infer<typeof formSchema>
+  type FormSchema = z.infer<typeof FormSchema>
 
-  const form = useForm<formSchema>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<FormSchema>({
+    resolver: zodResolver(FormSchema),
     defaultValues: {
       phone: ""
     }
   })
 
-  const onSubmit = async (data: formSchema) => {
+  const onSubmit = async (data: FormSchema) => {
     try {
       const newData = {
         phone: data.phone.replace(/\D/g, "")

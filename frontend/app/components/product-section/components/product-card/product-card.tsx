@@ -11,8 +11,12 @@ import { useCart } from "@/app/context/cart-context"
 import { useToast } from "@/hooks/use-toast"
 import { itemService } from "@/services/item"
 import type { Item } from "@/type/item"
+import { useUser } from "@/app/context/user-context"
+import { useIsLoginOpen } from "@/app/context/is-login-open"
 
 export const ProductCard: React.FC<{ product: ProductDb }> = ({ product }) => {
+  const { user, setUser } = useUser()
+  const { isLoginOpen, setIsLoginOpen } = useIsLoginOpen()
   const { cart, setCart } = useCart()
   const { toast } = useToast()
   const [isAddingToCart, setIsAddingToCart] = useState(false)
@@ -30,6 +34,10 @@ export const ProductCard: React.FC<{ product: ProductDb }> = ({ product }) => {
   const regularPrice = (product.regularPrice / 100).toFixed(2)
 
   const addToCart = async () => {
+    if (!user) {
+      setIsLoginOpen(true)
+      return
+    }
     setIsAddingToCart(true)
     try {
       const currentCart: Record<string, Item[]> = cart ?? {}

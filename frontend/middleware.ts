@@ -13,7 +13,7 @@ export const middleware = async (request: NextRequest) => {
   const isMarketRoute = request.nextUrl.pathname.startsWith("/market")
   const isPurchaseConfirmationRoute = request.nextUrl.pathname.startsWith("/purchase-confirmation")
   const isPaymentsRoute = request.nextUrl.pathname.startsWith("/payments")
-
+  
   if (isMarketRoute) {
     try {
       if (!token) throw new Error("access_token not found")
