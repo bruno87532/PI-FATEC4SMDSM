@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards, UsePipes, ValidationPipe, Request, UseInterceptors, UploadedFile, Get, Param, Put } from '@nestjs/common';
+import { Body, Controller, Post, Query, UseGuards, UsePipes, ValidationPipe, Request, UseInterceptors, UploadedFile, Get, Param, Put } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateUpdateProductDto } from './dto/create-update-product.dto';
 import { ProductService } from './product.service';
@@ -58,10 +58,20 @@ export class ProductController {
     return await this.productService.getProductById(id)
   }
 
-  @Get("/me")
+  @Get("me")
   @UseGuards(AuthGuard("jwt"))
-  async getProductsByIdUser(@Request() req) {
-    return await this.productService.getProductsByIdUser(req.user.userId)
+  async getProductsByUser(
+    @Request() req,
+    @Query("page") page = "1",
+    @Query("limit") limit = "20"
+  ) {
+    const pageNum = parseInt(page, 10)
+    const limitNum = parseInt(limit, 10)
+    return this.productService.getProductsByUser(
+      req.user.userId,
+      pageNum,
+      limitNum
+    )
   }
 
   @Post("/delete-many") // Apesar de ser um DELETE, estou usando POST porque espera um corpo de requisição e para evitar incompatibilidade de cliente que não permite delete com body

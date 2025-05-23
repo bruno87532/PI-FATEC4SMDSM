@@ -17,6 +17,7 @@ import { ProductPromotion } from "./components/product-promotion/product-promoti
 import { Product } from "./schema/schema"
 import { useProductData } from "./hook/use-product-data"
 import { ApiError } from "@/type/error"
+import { ProductCsv } from "./components/product-csv/product-csv"
 
 export const ProductForm = ({ product }: { product?: ProductDb }) => {
   const { toast } = useToast()
@@ -108,6 +109,7 @@ export const ProductForm = ({ product }: { product?: ProductDb }) => {
           </Button>
         </div>
       </form>
+      <ProductCsv />
     </Form>
   )
 }

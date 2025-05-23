@@ -7,7 +7,7 @@ import { StreamToBufferService } from 'src/stream-to-buffer/stream-to-buffer.ser
 export class GoogleDriveService {
   constructor(
     @Inject("DRIVE_CLIENT") private readonly driveClient: drive_v3.Drive,
-    private readonly streamToBufferService: StreamToBufferService 
+    private readonly streamToBufferService: StreamToBufferService
   ) { }
 
   async uploadFile(file: Express.Multer.File) {
@@ -49,6 +49,7 @@ export class GoogleDriveService {
 
   async deleteFile(id: string) {
     try {
+      if (id === "1yyqC24eHfXlEq2Ob-ffMPkUkUKk36WAQ") return
       await this.driveClient.files.delete({
         fileId: id
       })

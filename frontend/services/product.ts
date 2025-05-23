@@ -25,6 +25,22 @@ export class productService {
     }
   }
 
+  static async csv(file: File) {
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+      await fetch(this.pathBackend + "/product/csv", {
+        credentials: "include",
+        method: "POST",
+        body: formData
+      })
+
+    } catch (error) {
+      console.error("An error ocurred while uploading csv", error)
+      throw error
+    }
+  }
+
   static async updateProduct(data: CreateOrUpdateProduct, id: string) {
     try {
       const formData = this.buildProductFormData(data)
@@ -34,7 +50,7 @@ export class productService {
         body: formData
       })
 
-      
+
       if (!res.ok) {
         const error = await res.json()
         throw new ApiError(error.message || "An error ocurred while creating product")
@@ -68,22 +84,17 @@ export class productService {
     return formData
   }
 
-  static async getProductsById(): Promise<ProductDb[]> {
-    try {
-      const res = await fetch(this.pathBackend + "/product/me", {
+  static async getProducts(page = 1, limit = 20): Promise<ProductDb[]> {
+    const res = await fetch(
+      `${this.pathBackend}/product/me?page=${page}&limit=${limit}`,
+      {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        credentials: "include"
-      })
-      if (!res.ok) throw new Error("An error ocurred while fetching products")
-
-      return await res.json();
-    } catch (error) {
-      console.error("An error ocurred while fetching products by id", error)
-      throw error
-    }
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      }
+    );
+    if (!res.ok) throw new Error("Erro ao buscar produtos");
+    return res.json();
   }
 
   static async deleteProductByIds(ids: string[]) {
@@ -130,7 +141,7 @@ export class productService {
       return await res.json()
     } catch (error) {
       console.error("An error ocurred while fetching products", error)
-      throw error 
+      throw error
     }
   }
 }

@@ -3,9 +3,10 @@ import { ProductController } from './product.controller';
 import { ProductService } from './product.service';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { GoogleDriveModule } from 'src/google-drive/google-drive.module';
+import { EmailModule } from 'src/email/email.module';
 
 @Module({
-  imports: [PrismaModule, GoogleDriveModule],
+  imports: [PrismaModule, GoogleDriveModule, EmailModule],
   controllers: [ProductController],
   providers: [ProductService],
   exports: [ProductService]

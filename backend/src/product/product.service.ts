@@ -6,16 +6,17 @@ import { Product } from '@prisma/client';
 import { GetProductsByIdsDto } from './dto/get-products-by-ids.dto';
 import { parse } from 'fast-csv';
 import * as fs from "fs";
-import { Product as ProductInterface } from 'src/interfaces/product.interface';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { once } from 'events';
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class ProductService {
   constructor(
     private readonly prismaService: PrismaService,
-    private readonly googleDriveService: GoogleDriveService
+    private readonly googleDriveService: GoogleDriveService,
+    private readonly emailService: EmailService,
   ) { }
 
   async createProduct(data: CreateUpdateProductDto, idUser: string, file: Express.Multer.File) {
@@ -76,6 +77,63 @@ export class ProductService {
     }
   }
 
+  async getProductsByUser(
+    userId: string,
+    page: number,
+    limit: number,
+  ) {
+    const skip = (page - 1) * limit;
+
+    try {
+      const products = await this.prismaService.product.findMany({
+        where: { idUser: userId },
+        skip,
+        take: limit,
+        orderBy: { id: 'asc' },                // ← garante que skip/take sejam aplicados
+        include: {
+          categorys: { select: { id: true } },
+          subCategorys: { select: { id: true } },
+        },
+      });
+
+      if (!products.length) {
+        throw new BadRequestException("Products not found");
+      }
+      return products;
+    } catch (err) {
+      console.error("Erro ao buscar produtos paginados", err);
+      if (err instanceof BadRequestException) throw err;
+      throw new InternalServerErrorException("Erro interno");
+    }
+  }
+  async deleteProductById(ids: string[], idUser: string) {
+    try {
+      const products = await this.prismaService.product.findMany({
+        where: {
+          id: { in: ids }
+        }
+      })
+      const allowed = products.every((product) => product.idUser === idUser)
+      if (!allowed) throw new ForbiddenException("You do not have permission to delete these products")
+
+      const deleted = await this.prismaService.product.deleteMany({
+        where: {
+          id: {
+            in: ids
+          }
+        }
+      })
+
+      if (deleted.count === 0) throw new BadRequestException("Products not found")
+
+      return deleted
+    } catch (error) {
+      console.error("An error ocurred while deleting product", error)
+      if (error instanceof HttpException) throw error
+      throw new InternalServerErrorException("An error ocurred while deleting product")
+    }
+  }
+
   async getProductsByIdUser(idUser: string) {
     try {
       const products = await this.prismaService.product.findMany({
@@ -102,34 +160,6 @@ export class ProductService {
       console.error("An error ocurred while fetching products", error)
       if (error instanceof HttpException) throw error
       throw new InternalServerErrorException("An error ocurred while fetching products")
-    }
-  }
-
-  async deleteProductById(ids: string[], idUser: string) {
-    try {
-      const products = await this.prismaService.product.findMany({
-        where: {
-          id: { in: ids }
-        }
-      })
-      const allowed = products.every((product) => product.idUser === idUser)
-      if (!allowed) throw new ForbiddenException("You do not have permission to delete these products")
-
-      const deleted = await this.prismaService.product.deleteMany({
-        where: {
-          id: {
-            in: ids
-          }
-        }
-      })
-
-      if (deleted.count === 0) throw new BadRequestException("Products not found")
-
-      return deleted
-    } catch (error) {
-      console.error("An error ocurred while deleting product", error)
-      if (error instanceof HttpException) throw error
-      throw new InternalServerErrorException("An error ocurred while deleting product")
     }
   }
 
@@ -226,8 +256,6 @@ export class ProductService {
 
     stream.on('data', async (row) => {
       stream.pause();
-
-      // Remove a descrição se estiver vazia ou for menor que 2 caracteres
       if (!row.description || row.description.trim().length < 2) {
         delete row.description;
       }
@@ -267,7 +295,6 @@ export class ProductService {
     });
 
     await once(stream, 'end');
-
     for (const product of products) {
       await this.prismaService.product.create({
         data: {

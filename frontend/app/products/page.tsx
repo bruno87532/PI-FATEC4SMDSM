@@ -5,7 +5,6 @@ import { MainNav } from "@/app/components/main-nav/main-nav"
 import { SiteFooter } from "@/app/components/site-footer/site-footer"
 import { CartProvider } from "@/app/context/cart-context"
 import { ProductGrid } from "./components/pruduct-grid"
-import { FilterSidebar } from "./components/filter-sidebar"
 import { Category } from "@/type/categories"
 import { useState, useEffect } from "react"
 import { Loader2 } from "lucide-react"
@@ -41,7 +40,6 @@ export default function ProductsPage() {
           <div className="max-w-6xl mx-auto">
             <div className="container mx-auto px-4 py-6">
               <div className="flex flex-col md:flex-row gap-6">
-                <FilterSidebar categories={categories} />
                 <ProductGrid />
               </div>
             </div>
