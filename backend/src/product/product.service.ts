@@ -4,6 +4,12 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { GoogleDriveService } from 'src/google-drive/google-drive.service';
 import { Product } from '@prisma/client';
 import { GetProductsByIdsDto } from './dto/get-products-by-ids.dto';
+import { parse } from 'fast-csv';
+import * as fs from "fs";
+import { Product as ProductInterface } from 'src/interfaces/product.interface';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
+import { once } from 'events';
 
 @Injectable()
 export class ProductService {
@@ -209,5 +215,80 @@ export class ProductService {
       if (error instanceof HttpException) throw error
       throw new InternalServerErrorException("An error ocurred while fetching products")
     }
-  } 
+  }
+
+  async uploadCsv(file: Express.Multer.File, idUser: string) {
+    const products: CreateUpdateProductDto[] = [];
+
+    const stream = fs
+      .createReadStream(file.path)
+      .pipe(parse({ headers: true, trim: true }));
+
+    stream.on('data', async (row) => {
+      stream.pause();
+
+      // Remove a descrição se estiver vazia ou for menor que 2 caracteres
+      if (!row.description || row.description.trim().length < 2) {
+        delete row.description;
+      }
+
+      const productData = {
+        ...row,
+        categorys: ["0"],
+        subCategorys: ["0"],
+      };
+
+      try {
+        const dto = plainToInstance(CreateUpdateProductDto, productData);
+        const errors = await validate(dto);
+
+        if (errors.length === 0) {
+          const product: CreateUpdateProductDto = {
+            categorys: ["0"],
+            subCategorys: ["0"],
+            name: dto.name,
+            ...(dto.description ? { description: dto.description } : {}),
+            regularPrice: dto.regularPrice,
+            ...(dto.promotionalPrice ? { promotionalPrice: dto.promotionalPrice } : {}),
+            ...(dto.promotionStart ? { promotionStart: new Date(dto.promotionStart) } : {}),
+            ...(dto.promotionExpiration ? { promotionExpiration: new Date(dto.promotionExpiration) } : {}),
+            stock: dto.stock,
+          };
+
+          products.push(product);
+        } else {
+          console.warn('Validation errors:', errors);
+        }
+      } catch (error) {
+        console.warn('Error processing line:', productData, error);
+      }
+
+      stream.resume();
+    });
+
+    await once(stream, 'end');
+
+    for (const product of products) {
+      await this.prismaService.product.create({
+        data: {
+          name: product.name,
+          description: product.description,
+          regularPrice: product.regularPrice,
+          promotionalPrice: product.promotionalPrice,
+          promotionStart: product.promotionStart,
+          promotionExpiration: product.promotionExpiration,
+          stock: product.stock,
+          idUser,
+          idDrive: "1yyqC24eHfXlEq2Ob-ffMPkUkUKk36WAQ",
+          categorys: {
+            connect: [{ id: "0" }],
+          },
+          subCategorys: {
+            connect: [{ id: "0" }],
+          },
+        },
+      });
+    }
+  }
+
 }

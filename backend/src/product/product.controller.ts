@@ -6,6 +6,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ValidateImagePipe } from 'src/common/pipes/validate-square-image.pipe';
 import { DeleteProductByIdsDto } from './dto/delete-product-by-ids.dto';
 import { GetProductsByIdsDto } from './dto/get-products-by-ids.dto';
+import { diskStorage } from 'multer';
 
 @Controller('product')
 export class ProductController {
@@ -31,6 +32,24 @@ export class ProductController {
     @Request() req,
   ) {
     return await this.productService.createProduct(data, req.user.userId, file)
+  }
+
+
+  @Post('/csv')
+  @UseGuards(AuthGuard("jwt"))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './csv',
+        filename: (req, file, cb) => {
+          const fileName = `${Date.now()}-${file.originalname}`;
+          cb(null, fileName);
+        },
+      }),
+    }),
+  )
+  async uploadCsv(@UploadedFile() file: Express.Multer.File, @Request() req) {
+    return await this.productService.uploadCsv(file, req.user.userId)
   }
 
   @Get("/me/:id")
