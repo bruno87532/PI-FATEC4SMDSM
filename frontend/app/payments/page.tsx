@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import { StripeService } from "@/services/stripe"
 import { useRouter } from "next/navigation"
 import { Layout, BarChart2, Search, Loader2 } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
 import {
   Dialog,
   DialogContent,
@@ -19,11 +18,27 @@ import {
   DialogClose,
 } from "@/components/ui/dialog"
 import { UserProvider } from "../context/user-context"
+import { useUser } from "../context/user-context"
 
 const Stripe = () => {
   const router = useRouter()
+  const [isAdvertiserUser, setIsAdvertiserUser] = useState<boolean>(false)
+  const { user, setUser } = useUser()
 
-  const { toast } = useToast()
+  if (
+    user &&
+    (user.zipCode ||
+      user.state ||
+      user.city ||
+      user.neighborhood ||
+      user.road ||
+      user.marketNumber ||
+      user.advertiserName ||
+      user.phone)
+  ) {
+    setIsAdvertiserUser(true)
+  }
+
   const monthly = ["Plano básico mensal", "Plano médio mensal", "Plano avançado mensal"]
   const yearly = ["Plano básico anual", "Plano médio anual", "Plano avançado anual"]
   const [plans, setPlans] = useState<Record<string, string>[] | undefined>(undefined)
@@ -32,16 +47,9 @@ const Stripe = () => {
 
   useEffect(() => {
     const fetchPlans = async () => {
-      try {
-        const plans = await planService.getPlan()
-        setPlans(plans)
-        setIsLoading(true)
-      } catch (error) {
-        toast({
-          title: "Erro interno.",
-          description: "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor, tente novamente mais tarde."
-        })
-      }
+      const plans = await planService.getPlan()
+      setPlans(plans)
+      setIsLoading(true)
     }
 
     fetchPlans()
@@ -117,7 +125,7 @@ const Stripe = () => {
                         <span className="text-3xl font-bold text-green-700">R$ {(74.99 + index * 5).toFixed(2)}</span>
                         <span className="text-sm text-gray-500">/mês</span>
                       </div>
-                      <p className="text-xs text-gray-400 mt-1">+ TAXAS E IMPOSTOS</p>
+                      <p className="text-xs text-gray-400 mt-1">TAXAS E IMPOSTOS JÁ INCLUSOS</p>
                     </div>
 
                     <div className="space-y-4 py-4">
@@ -127,12 +135,16 @@ const Stripe = () => {
                             <div className="flex items-start gap-2">
                               <Layout className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
                               <span className="text-sm text-gray-700">
-                                Posição de destaque na segunda coluna 1 hora por dia
+                                Aparece na aba de prudutos
                               </span>
                             </div>
                             <div className="flex items-start gap-2">
                               <BarChart2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                              <span className="text-sm text-gray-700">1 propaganda no banner principal por semana</span>
+                              <span className="text-sm text-gray-700">Cadastro de produtos ilimitados</span>
+                            </div>
+                            <div className="flex items-start gap-2">
+                              <Search className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                              <span className="text-sm text-gray-700">Destaque nível três nas pesquisas</span>
                             </div>
                           </>
                         )}
@@ -141,15 +153,15 @@ const Stripe = () => {
                           <>
                             <div className="flex items-start gap-2">
                               <Layout className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                              <span className="text-sm text-gray-700">Destaque na segunda coluna 2 horas por dia</span>
+                              <span className="text-sm text-gray-700">Aparece na aba principal e de produtos</span>
                             </div>
                             <div className="flex items-start gap-2">
                               <BarChart2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                              <span className="text-sm text-gray-700">3 propagandas por semana no banner principal</span>
+                              <span className="text-sm text-gray-700">Cadastro de produtos ilimitados</span>
                             </div>
                             <div className="flex items-start gap-2">
                               <Search className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                              <span className="text-sm text-gray-700">Destaque nível 2 nas pesquisas de produtos</span>
+                              <span className="text-sm text-gray-700">Destaque nível dois nas pesquisas de produtos</span>
                             </div>
                           </>
                         )}
@@ -159,18 +171,18 @@ const Stripe = () => {
                             <div className="flex items-start gap-2">
                               <Layout className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
                               <span className="text-sm text-gray-700">
-                                Destaque na primeira coluna por 3 horas por dia
+                                Aparece na aba principal e de produtos
                               </span>
                             </div>
                             <div className="flex items-start gap-2">
                               <BarChart2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
                               <span className="text-sm text-gray-700">
-                                5 dias de propagandas por semana no banner principal
+                                Cadastro de produtos ilimitados
                               </span>
                             </div>
                             <div className="flex items-start gap-2">
                               <Search className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                              <span className="text-sm text-gray-700">Destaque nível 3 nas pesquisas</span>
+                              <span className="text-sm text-gray-700">Destaque nível um nas pesquisas</span>
                             </div>
                           </>
                         )}
@@ -212,7 +224,7 @@ const Stripe = () => {
                         <span className="text-3xl font-bold text-green-700">R$ {(749.99 + index * 50).toFixed(2)}</span>
                         <span className="text-sm text-gray-500">/ano</span>
                       </div>
-                      <p className="text-xs text-gray-400 mt-1">+ TAXAS E IMPOSTOS</p>
+                      <p className="text-xs text-gray-400 mt-1">TAXAS E IMPOSTOS JÁ INCLUSOS</p>
                     </div>
 
                     <div className="space-y-4 py-4">
@@ -222,12 +234,16 @@ const Stripe = () => {
                             <div className="flex items-start gap-2">
                               <Layout className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
                               <span className="text-sm text-gray-700">
-                                Posição de destaque na segunda coluna 1 hora por dia
+                                Aparece na aba de produtos
                               </span>
                             </div>
                             <div className="flex items-start gap-2">
                               <BarChart2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                              <span className="text-sm text-gray-700">1 propaganda no banner principal por semana</span>
+                              <span className="text-sm text-gray-700">Cadastro de produtos ilimitados</span>
+                            </div>
+                            <div className="flex items-start gap-2">
+                              <Search className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                              <span className="text-sm text-gray-700">Destaque nível três nas pesquisas</span>
                             </div>
                           </>
                         )}
@@ -236,15 +252,15 @@ const Stripe = () => {
                           <>
                             <div className="flex items-start gap-2">
                               <Layout className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                              <span className="text-sm text-gray-700">Destaque na segunda coluna 2 horas por dia</span>
+                              <span className="text-sm text-gray-700">Aparece na aba principal e de produtos</span>
                             </div>
                             <div className="flex items-start gap-2">
                               <BarChart2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                              <span className="text-sm text-gray-700">3 propagandas por semana no banner principal</span>
+                              <span className="text-sm text-gray-700">Cadastro de produtos ilimitados</span>
                             </div>
                             <div className="flex items-start gap-2">
                               <Search className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                              <span className="text-sm text-gray-700">Destaque nível 2 nas pesquisas de produtos</span>
+                              <span className="text-sm text-gray-700">Destaque nível dois nas pesquisas</span>
                             </div>
                           </>
                         )}
@@ -254,18 +270,18 @@ const Stripe = () => {
                             <div className="flex items-start gap-2">
                               <Layout className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
                               <span className="text-sm text-gray-700">
-                                Destaque na primeira coluna por 3 horas por dia
+                                Aparece na aba principal e de produtos
                               </span>
                             </div>
                             <div className="flex items-start gap-2">
                               <BarChart2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
                               <span className="text-sm text-gray-700">
-                                5 dias de propagandas por semana no banner principal
+                                Cadastro de produtos ilimitados
                               </span>
                             </div>
                             <div className="flex items-start gap-2">
                               <Search className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                              <span className="text-sm text-gray-700">Destaque nível 3 nas pesquisas</span>
+                              <span className="text-sm text-gray-700">Destaque nível um nas pesquisas</span>
                             </div>
                           </>
                         )}
@@ -278,46 +294,48 @@ const Stripe = () => {
                       >
                         <DialogPrice price={plan.idPrice} />
                       </div>
-                      <button className="text-gray-500 hover:text-green-700 text-xs w-full">PULAR TESTE GRATUITO</button>
                     </div>
                   </div>
                 )
               })}
             </TabsContent>
           </Tabs>
+          {
+            isAdvertiserUser && (
+              <div className="mt-12 text-center">
+                <Button
+                  onClick={cancelSubscription}
+                  className="border-green-600 text-green-600 hover:bg-green-600 hover:text-white transition-colors"
+                  variant="outline"
+                >
+                  Cancelar assinatura
+                </Button>
 
-          <div className="mt-12 text-center">
-            <Button
-              onClick={cancelSubscription}
-              className="border-green-600 text-green-600 hover:bg-green-600 hover:text-white transition-colors"
-              variant="outline"
-            >
-              Cancelar assinatura
-            </Button>
-
-            <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle className="text-center text-xl text-green-700">Cancelar assinatura</DialogTitle>
-                  <DialogDescription className="text-center pt-2">
-                    Você tem certeza que deseja cancelar sua assinatura?
-                    <p className="mt-2 font-medium">Sua assinatura ficará ativa até o fim do período contratado.</p>
-                    <p className="mt-2 font-medium">Não haverá mais cobranças recorrentes.</p>
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter className="flex flex-row justify-center gap-2 sm:justify-center">
-                  <DialogClose asChild>
-                    <Button variant="outline" className="border-green-600 text-green-600">
-                      Voltar
-                    </Button>
-                  </DialogClose>
-                  <Button onClick={confirmCancelSubscription} className="bg-red-500 hover:bg-red-600 text-white">
-                    Confirmar cancelamento
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
+                <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle className="text-center text-xl text-green-700">Cancelar assinatura</DialogTitle>
+                      <DialogDescription className="text-center pt-2">
+                        Você tem certeza que deseja cancelar sua assinatura?
+                        <p className="mt-2 font-medium">Sua assinatura ficará ativa até o fim do período contratado.</p>
+                        <p className="mt-2 font-medium">Não haverá mais cobranças recorrentes.</p>
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="flex flex-row justify-center gap-2 sm:justify-center">
+                      <DialogClose asChild>
+                        <Button variant="outline" className="border-green-600 text-green-600">
+                          Voltar
+                        </Button>
+                      </DialogClose>
+                      <Button onClick={confirmCancelSubscription} className="bg-red-500 hover:bg-red-600 text-white">
+                        Confirmar cancelamento
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            )
+          }
 
           <p className="text-center text-sm text-gray-500 mt-12 max-w-3xl mx-auto">
             A assinatura será renovada automaticamente pelo valor indicado no plano selecionado, salvo cancelamento.

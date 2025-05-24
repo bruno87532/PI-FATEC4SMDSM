@@ -3,27 +3,18 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { CheckCircle } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { authService } from "@/services/auth"
 import { Loader2 } from "lucide-react"
 
 const PurchaseConfirmation = () => {
-  const { toast } = useToast()
   const [homeIsLoading, setHomeIsLoading] = useState<boolean>(false)
   const [admIsLoading, setAdmIsLoading] = useState<boolean>(false)
 
   useEffect(() => {
     const renewToken = async () => {
-      try {
-        await authService.renewToken()
-      } catch (error) {
-        toast({
-          title: "Erro interno.",
-          description: "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor, tente novamente mais tarde."
-        });
-      }
+      await authService.renewToken()
     }
 
     renewToken()
@@ -53,7 +44,7 @@ const PurchaseConfirmation = () => {
                   setHomeIsLoading(false)
                 }}
               >
-                { admIsLoading ? <Loader2 className="animate-spin h-6 w-6" /> : "Ir para o painel administrativo" }
+                {admIsLoading ? <Loader2 className="animate-spin h-6 w-6" /> : "Ir para o painel administrativo"}
               </Button>
             </Link>
 
@@ -67,7 +58,7 @@ const PurchaseConfirmation = () => {
                   setHomeIsLoading(true)
                 }}
               >
-                { homeIsLoading ? <Loader2 className="animate-spin h-6 w-6" /> : "Voltar para a página inicial" }
+                {homeIsLoading ? <Loader2 className="animate-spin h-6 w-6" /> : "Voltar para a página inicial"}
               </Button>
             </Link>
           </div>

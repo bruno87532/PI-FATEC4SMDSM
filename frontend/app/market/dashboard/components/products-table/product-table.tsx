@@ -94,23 +94,15 @@ export const ProductsTable = () => {
   }
 
   const handleDeleteProduct = async (ids: string[]) => {
-    try {
-      await productService.deleteProductByIds(ids)
-      setProducts(products.filter(p => !ids.includes(p.id)))
-      const isMany = ids.length > 1
-      toast({
-        title: isMany ? "Produtos deletados" : "Produto deletado",
-        description: isMany
-          ? "Seus produtos foram deletados com sucesso"
-          : "Seu produto foi deletado com sucesso"
-      })
-    } catch (error) {
-      toast({
-        title: "Erro interno.",
-        description: "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor, tente novamente mais tarde."
-      })
-      console.error("Erro ao deletar produtos", error)
-    }
+    await productService.deleteProductByIds(ids)
+    setProducts(products.filter(p => !ids.includes(p.id)))
+    const isMany = ids.length > 1
+    toast({
+      title: isMany ? "Produtos deletados" : "Produto deletado",
+      description: isMany
+        ? "Seus produtos foram deletados com sucesso"
+        : "Seu produto foi deletado com sucesso"
+    })
     setProductToDelete(null)
     setSelectedProducts([])
   }

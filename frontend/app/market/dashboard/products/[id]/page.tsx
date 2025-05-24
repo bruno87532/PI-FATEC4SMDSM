@@ -16,17 +16,10 @@ const EditProductPage = () => {
 
   useEffect(() => {
     const getProductById = async () => {
-      try {
-        if (typeof id !== "string") throw new Error("The id must be a string")
-        const productDb = await productService.getProductById(id)
-        setProduct(productDb)
-        setIsLoading(false)
-      } catch (error) {
-        toast({
-          title: "Erro interno.",
-          description: "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor, tente novamente mais tarde."
-        });
-      }
+      if (typeof id !== "string") throw new Error("The id must be a string")
+      const productDb = await productService.getProductById(id)
+      setProduct(productDb)
+      setIsLoading(false)
     }
 
     getProductById()

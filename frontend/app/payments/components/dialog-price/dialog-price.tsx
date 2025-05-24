@@ -14,7 +14,6 @@ import { useCallback, useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { StripeService } from "@/services/stripe"
 import { subscriptionService } from "@/services/subscription"
-import { useToast } from "@/hooks/use-toast"
 import { FormDialog } from "./components/form-dialog/form-dialog"
 import { CancelImmediately } from "./components/cancel-immediately/cancel-immediately"
 import { Loader2 } from "lucide-react"
@@ -28,7 +27,6 @@ export const DialogPrice = ({ price }: { price: string }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [isUserAdvertiser, setIsUserAdvertiser] = useState<boolean>(true)
   const [isSubscriptionActivate, setIsSubscriptionActivate] = useState<boolean>(false)
-  const { toast } = useToast()
 
   const fetchClientSecret = useCallback(() => StripeService.createCheckout(price), [price])
   const options = { fetchClientSecret }
@@ -47,30 +45,22 @@ export const DialogPrice = ({ price }: { price: string }) => {
     }
 
     const isAdvertiser = async () => {
-      try {
-        if (
-          user &&
-          (!user.zipCode ||
-            !user.state ||
-            !user.city ||
-            !user.neighborhood ||
-            !user.road ||
-            !user.marketNumber ||
-            !user.advertiserName ||
-            !user.phone)
-        ) {
-          setIsUserAdvertiser(false)
-        } else {
-          setIsUserAdvertiser(true)
-        }
-        setUser(user)
-      } catch (error) {
-        toast({
-          title: "Erro interno.",
-          description:
-            "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor, tente novamente mais tarde.",
-        })
+      if (
+        user &&
+        (!user.zipCode ||
+          !user.state ||
+          !user.city ||
+          !user.neighborhood ||
+          !user.road ||
+          !user.marketNumber ||
+          !user.advertiserName ||
+          !user.phone)
+      ) {
+        setIsUserAdvertiser(false)
+      } else {
+        setIsUserAdvertiser(true)
       }
+      setUser(user)
     }
 
     getSubscriptionActiveByIdUser()

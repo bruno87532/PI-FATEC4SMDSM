@@ -9,11 +9,9 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useUser } from "@/app/context/user-context"
-import { useToast } from "@/hooks/use-toast"
 import { userService } from "@/services/user"
 
 export const NameDialog = () => {
-  const { toast } = useToast()
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const { user, setUser } = useUser()
 
@@ -31,28 +29,20 @@ export const NameDialog = () => {
   })
 
   const onSubmit = async (data: formSchema) => {
-    try {
-      await userService.updateUser(data)
-      setUser((prev) => {
-        if (!prev) return null
+    await userService.updateUser(data)
+    setUser((prev) => {
+      if (!prev) return null
 
-        return {
-          ...prev,
-          name: data.name
-        }
-      })
-      toast({
-        title: "Nome alterado",
-        description: "Nome alterado com sucesso"
-      })
-    } catch (error) {
-      toast({
-        title: "Erro interno.",
-        description: "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor, tente novamente mais tarde."
-      });
-    } finally {
-      setIsOpen(false)
-    }
+      return {
+        ...prev,
+        name: data.name
+      }
+    })
+    toast({
+      title: "Nome alterado",
+      description: "Nome alterado com sucesso"
+    })
+    setIsOpen(false)
   }
 
   return (

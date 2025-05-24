@@ -193,9 +193,20 @@ export class AuthService {
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 1000 * 60 * 60 * 24
-    })
-
+    })  
+    
     return { message: "Login successfully", statusCode: 200 }
+  }
+
+  async logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie("access_token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    })
+    console.log("aqui foi")
+    
+    return { message: "Logout successfully" }
   }
 
   private async createPayload(user: User) {

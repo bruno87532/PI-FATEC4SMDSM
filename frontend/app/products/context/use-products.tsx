@@ -19,8 +19,9 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     const fetchProducts = async () => {
       const fetchedProducts = await HighlightProductsService.featuredProductsPage()
-      setProducts(fetchedProducts)
       setIsLoading(false)
+      if (!fetchedProducts) return
+      setProducts(fetchedProducts)
     }
 
     fetchProducts()

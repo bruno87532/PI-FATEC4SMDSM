@@ -14,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { authService } from "@/services/auth"
 
 export const UserNav = () => {
   const { user, setUser } = useUser()
@@ -28,6 +29,12 @@ export const UserNav = () => {
       avatar = nameSplit[0][0]
     }
     avatar.toUpperCase()
+  }
+
+  const handleClick = async () => {
+    await authService.logout()
+    setUser(null)
+    window.location.href = "/"
   }
 
   return (
@@ -58,7 +65,7 @@ export const UserNav = () => {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={handleClick}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Sair</span>
         </DropdownMenuItem>

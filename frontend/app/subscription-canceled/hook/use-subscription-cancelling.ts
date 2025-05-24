@@ -22,19 +22,14 @@ export const useSubscriptionCancelling = ({ setIsLoadingReason, setIsLoadingReac
         title: "Opinião enviada",
         description: "Muito obrigado pela sua opinião, ela é muito importante para nós!"
       })
-      setIsLoadingReason(null)
     } catch (error) {
       if (error instanceof ApiError && error.message === "Daily creation limit exceeded") {
         toast({
           title: "Limite de requisição excedido",
           description: "É possível enviar apenas um feedback de cancelamento de assinatura por dia"
         })
-      } else {
-        toast({
-          title: "Erro interno.",
-          description: "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor, tente novamente mais tarde."
-        });
       }
+    } finally {
       setIsLoadingReason(null)
     }
   }

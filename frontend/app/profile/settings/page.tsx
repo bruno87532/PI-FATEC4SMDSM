@@ -6,7 +6,6 @@ import { Separator } from "@radix-ui/react-dropdown-menu"
 import { EmailDialog } from "@/components/utils/email-dialog/email-dialog"
 import { Loader2 } from "lucide-react"
 import { useUser as useUserContext } from "@/app/context/user-context"
-import { useToast } from "@/hooks/use-toast"
 import { useEffect } from "react"
 import { userService } from "@/services/user"
 import { StepProvider } from "@/components/utils/email-dialog/components/context/step-context"
@@ -17,19 +16,10 @@ import { PasswordDialog } from "@/components/utils/password-dialog/password-dial
 
 const Settings = () => {
   const { user, setUser } = useUserContext()
-  const { toast } = useToast()
   useEffect(() => {
     const getUserById = async () => {
-      try {
-        const user = await userService.getUserById()
-        setUser(user)
-      } catch (error) {
-        toast({
-          title: "Erro interno.",
-          description:
-            "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor, tente novamente mais tarde.",
-        })
-      }
+      const user = await userService.getUserById()
+      setUser(user)
     }
 
     getUserById()

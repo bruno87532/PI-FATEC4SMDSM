@@ -71,11 +71,6 @@ export const ProductForm = ({ product }: { product?: ProductDb }) => {
           type: "manual", 
           message: "A imagem deve ter dimensões iguais"
         })
-      } else {
-        toast({
-          title: "Erro interno.",
-          description: "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor, tente novamente mais tarde."
-        });
       }
     } finally {      
       setIsLoading(false)

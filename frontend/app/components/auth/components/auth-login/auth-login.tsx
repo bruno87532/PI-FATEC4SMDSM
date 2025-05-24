@@ -36,7 +36,7 @@ export const AuthLogin = () => {
     try {
       setIsLoading(true)
       await authService.login(data)
-      alert("Login feito com sucesso!! Este alert é temporário, só até criar uma tela.")
+      window.location.href = "/products"
     } catch (error) {
       if (error instanceof ApiError && error.message === "Invalid email or password") {
         loginForm.setError("password", {

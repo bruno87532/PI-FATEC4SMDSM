@@ -171,6 +171,18 @@ export class authService {
     return await res.json()
   }
 
+  static async logout() {
+    const res = await fetch(this.pathBackend + "/auth/logout", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      credentials: "include"
+    })
+
+    return await res.json()
+  }
+
   static async alterPassword(data: { oldPassword: string, newPassword: string }) {
     const res = await fetch(this.pathBackend + "/auth/alter-password", {
       method: "PATCH",

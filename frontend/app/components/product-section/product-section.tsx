@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { HighlightProductsService } from "@/services/highlight-products"
-import { useToast } from "@/hooks/use-toast"
 import type { ProductDb } from "@/type/product"
 import ProductMarket from "./components/product-market/product-market"
 import ProductSectionSkeleton from "./components/product-section-skeleton/product-section-skeleton"
@@ -20,8 +19,9 @@ export const ProductSection = () => {
     const fetchProducts = async () => {
       setIsLoading(true)
       const fetchedProducts = await HighlightProductsService.featuredProductsHome()
-      setProducts(fetchedProducts)
       setIsLoading(false)
+      if (!fetchedProducts) return
+      setProducts(fetchedProducts)
     }
 
     fetchProducts()

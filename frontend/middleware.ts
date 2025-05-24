@@ -15,6 +15,7 @@ export const middleware = async (request: NextRequest) => {
   const isPaymentsRoute = request.nextUrl.pathname.startsWith("/payments")
   const isProfileRoute = request.nextUrl.pathname.startsWith("/profile")
   const isProfileSettingsRoute = request.nextUrl.pathname.startsWith("/profile/settings")
+  const isProductRoute = request.nextUrl.pathname.startsWith("/products")
 
   if (isMarketRoute) {
     try {
@@ -45,7 +46,7 @@ export const middleware = async (request: NextRequest) => {
     }
   }
 
-  if (isPurchaseConfirmationRoute || isPaymentsRoute) {
+  if (isPurchaseConfirmationRoute || isPaymentsRoute || isProductRoute) {
     try {
       if (!token) throw new Error("access_token not found")
       const { payload } = await jwtVerify(token, new TextEncoder().encode(process.env.JWT_SECRET))

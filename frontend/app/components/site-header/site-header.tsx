@@ -12,8 +12,12 @@ import { AuthDialog } from "../auth/auth-dialog"
 import { SideMenuCart } from "../side-menu-cart/side-menu-cart"
 import { useIsLoginOpen } from "@/app/context/is-login-open"
 import { useSearch } from "@/app/context/search-context"
+import { useUser } from "@/app/context/user-context"
+import { UserNav as UserNavAdvertiser } from "@/app/market/dashboard/components/user-nav/user-nav"
+import { UserNav as UserNavUser } from "@/app/profile/settings/components/user-nav/user-nav"
 
 export const SiteHeader = () => {
+  const { user, setUser } = useUser()
   const { isLoginOpen, setIsLoginOpen } = useIsLoginOpen()
   const [searchQuery, setSearchQuery] = useState("")
   const { search, setSearch } = useSearch()
@@ -53,8 +57,9 @@ export const SiteHeader = () => {
             </div>
           </form>
 
+
           <div className="flex items-center gap-2">
-            <Link href="/payments" className="shrink-0">
+            <Link href="/payments" className={`shrink-0 ${!user || user?.advertiserName ? 'invisible' : ''}`}>
               <Button
                 variant="outline"
                 size="sm"
@@ -70,14 +75,28 @@ export const SiteHeader = () => {
               <Search className="h-5 w-5" />
             </Button>
 
-            <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
-              <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="Fazer login ou acessar conta">
-                  <User className="h-5 w-5" />
-                </Button>
-              </DialogTrigger>
-              <AuthDialog />
-            </Dialog>
+            {
+              !user ? (
+                <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="ghost" size="icon" aria-label="Fazer login ou acessar conta">
+                      <User className="h-5 w-5" />
+                    </Button>
+                  </DialogTrigger>
+                  <AuthDialog />
+                </Dialog>
+              ) : (
+                <div className="ml-auto flex items-center space-x-4">
+                  {
+                    user.advertiserName ? (
+                      <UserNavAdvertiser />
+                    ) : (
+                      <UserNavUser />
+                    )
+                  }
+                </div>
+              )
+            }
 
             <SideMenuCart />
           </div>

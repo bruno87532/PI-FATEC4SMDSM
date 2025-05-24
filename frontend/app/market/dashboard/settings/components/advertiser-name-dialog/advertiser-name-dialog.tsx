@@ -34,37 +34,27 @@ export const AdvertiserNameDialog = () => {
   })
 
   const onSubmit = async (data: formSchema) => {
-    try {
-      setIsLoading(true)
-      const res = await userService.haveUserWithAdvertiserName(data.advertiserName)
-      if (res.haveUser) {
-        form.setError("advertiserName", {
-          type: "manual",
-          message: "Nome de anunciante já cadastrado."
-        })
-      } else {
-        await userService.updateUser(data)
-        setUser((prev) => {
-          if (!prev) return prev
-          return {
-            ...prev,
-            advertiserName: data.advertiserName
-          }
-        })
-        toast({
-          title: "Nome alterado",
-          description: "Nome de anunciante alterado com sucesso"
-        })
-        setIsOpen(false)
-      }
-
-    } catch (error) {
+    setIsLoading(true)
+    const res = await userService.haveUserWithAdvertiserName(data.advertiserName)
+    if (res.haveUser) {
+      form.setError("advertiserName", {
+        type: "manual",
+        message: "Nome de anunciante já cadastrado."
+      })
+    } else {
+      await userService.updateUser(data)
+      setUser((prev) => {
+        if (!prev) return prev
+        return {
+          ...prev,
+          advertiserName: data.advertiserName
+        }
+      })
       toast({
-        title: "Erro interno.",
-        description: "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor, tente novamente mais tarde."
-      });
+        title: "Nome alterado",
+        description: "Nome de anunciante alterado com sucesso"
+      })
       setIsOpen(false)
-    } finally {
       setIsLoading(false)
     }
   }

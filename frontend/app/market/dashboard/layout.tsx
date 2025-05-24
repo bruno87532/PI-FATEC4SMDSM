@@ -12,7 +12,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
       <div className="flex min-h-screen flex-col">
         <header className="sticky top-0 z-10 border-b bg-background">
           <div className="flex h-16 items-center px-4 md:px-6">
-            <div className="font-bold text-xl mr-6">MercadoAnúncios</div>
+            <div className="font-bold text-xl mr-6">ConfiaMercado</div>
             <nav className="hidden md:flex flex-1 items-center space-x-4 lg:space-x-6">
               <Link
                 href="/market/dashboard/products"

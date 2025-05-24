@@ -29,7 +29,6 @@ export function ProductGrid() {
     return <ProductSectionSkeleton />
   }
 
-
   return (
     <div className="container mx-auto py-8 max-w-6xl">
       {Object.keys(products).length === 0 ? (

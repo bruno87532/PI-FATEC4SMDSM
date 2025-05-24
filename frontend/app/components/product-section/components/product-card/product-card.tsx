@@ -92,12 +92,6 @@ export const ProductCard: React.FC<{ product: ProductDb }> = ({ product }) => {
           description:
             "Não foi possível adicionar o produto, produto sem estoque.",
         })
-      } else {
-        toast({
-          title: "Erro interno.",
-          description:
-            "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor, tente novamente mais tarde.",
-        })
       }
     } finally {
       setIsAddingToCart(false)

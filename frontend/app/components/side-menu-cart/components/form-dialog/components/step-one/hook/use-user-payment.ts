@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useToast } from "@/hooks/use-toast";
 import React, { useState } from "react";
 import { viacep } from "@/services/viacep";
 import { userService } from "@/services/user";
@@ -13,7 +12,6 @@ export const UseUserPayment = (
   setPhone: React.Dispatch<React.SetStateAction<string>>,
   setStep: React.Dispatch<React.SetStateAction<number>>
 ) => {
-  const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const { user, setUser } = useUser()
 
@@ -77,21 +75,13 @@ export const UseUserPayment = (
   const handleSubmit = async (data: FormSchemaType) => {
     setIsLoading(true)
     setIsLoadingButton(true)
-    try {
-      const { phone, ...newData } = data
-      await userService.confirmationNumber(phone)
-      await userService.updateUser(newData)
-      setPhone(phone)
-      setStep(1)
-    } catch (error) {
-      toast({
-        title: "Erro interno.",
-        description: "Ocorreu um erro interno e não foi possível prosseguir com a sua solicitação. Por favor, tente novamente mais tarde."
-      });
-    } finally {
-      setIsLoading(false)
-      setIsLoadingButton(false)
-    }
+    const { phone, ...newData } = data
+    await userService.confirmationNumber(phone)
+    await userService.updateUser(newData)
+    setPhone(phone)
+    setStep(1)
+    setIsLoading(false)
+    setIsLoadingButton(false)
   }
 
   const states = {

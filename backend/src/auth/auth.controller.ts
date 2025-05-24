@@ -81,6 +81,11 @@ export class AuthController {
     return await this.authService.login(req, res)
   }
 
+  @Get("/logout")
+  async logout(@Res({ passthrough: true }) res: Response) {
+    return await this.authService.logout(res)
+  }
+
   @UseGuards(AuthGuard("jwt"))
   @Get("/renew-token")
   async renewToken(@Request() req, @Res({ passthrough: true }) res: Response) {

@@ -102,10 +102,10 @@ export class ProductService {
         throw new BadRequestException("Products not found");
       }
       return products;
-    } catch (err) {
-      console.error("Erro ao buscar produtos paginados", err);
-      if (err instanceof BadRequestException) throw err;
-      throw new InternalServerErrorException("Erro interno");
+    } catch (error) {
+      console.error("An error ocurred while getProductsByUser", error);
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException("An error ocurred while getProductsByUser");
     }
   }
   async deleteProductById(ids: string[], idUser: string) {
