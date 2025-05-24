@@ -1,3 +1,5 @@
+"use client"
+
 import React, { createContext, useEffect, useContext, useState } from "react";
 import { ProductDb } from "@/type/product";
 import { HighlightProductsService } from "@/services/highlight-products";
@@ -14,10 +16,9 @@ const ProductContext = createContext<ProductContext | undefined>(undefined)
 export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Record<string, Record<string, ProductDb[]>>>({})
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  console.log(products)
   useEffect(() => {
     const fetchProducts = async () => {
-      const fetchedProducts = await HighlightProductsService.featuredProductsHome()
+      const fetchedProducts = await HighlightProductsService.featuredProductsPage()
       setProducts(fetchedProducts)
       setIsLoading(false)
     }

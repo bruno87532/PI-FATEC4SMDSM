@@ -15,8 +15,6 @@ export default function Home() {
         <CartProvider>
           <IsLoginOpenProvider>
             <SiteHeader />
-            <MainNav />
-            <CategoryIcons />
             <MainBanner />
             <ProductSection />
             <SiteFooter />

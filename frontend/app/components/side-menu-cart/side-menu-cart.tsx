@@ -12,7 +12,7 @@ import { FormDialog } from "./components/form-dialog/form-dialog"
 export const SideMenuCart = () => {
   const { cart, setCart } = useCart()
   const { user, setUser } = useUser()
-  const [ isOpen, setIsOpen ] = useState<boolean>(false)
+  const [isOpen, setIsOpen] = useState<boolean>(false)
   const [data, setData] = useState<
     Record<
       string,
@@ -27,23 +27,16 @@ export const SideMenuCart = () => {
   const { incrementItem, decrementItem, createItem, deleteItem } = useItem(setData)
 
   const handlePurchase = () => {
-    console.log("aqui foi")
-    if (user &&
-      (!user.zipCode ||
-        !user.state ||
-        !user.city ||
-        !user.neighborhood ||
-        !user.road ||
-        !user.marketNumber)
+    if (
+      user &&
+      (!user.zipCode || !user.state || !user.city || !user.neighborhood || !user.road || !user.marketNumber)
     ) {
       setIsOpen(true)
       return
     }
   }
 
-  useEffect(() => {
-    console.log(isOpen)
-  }, [isOpen])
+  useEffect(() => {}, [isOpen])
 
   const isCartEmpty = !cart || Object.values(cart).every((items) => items.length === 0)
 
@@ -99,7 +92,14 @@ export const SideMenuCart = () => {
                                   .flat()
                                   .find((item) => item.idProduct === product.id)?.id
 
-                                if (itemId) decrementItem(itemId)
+                                if (itemId) {
+                                  // Se a quantidade for 1, remove o item completamente
+                                  if (product.quantity === 1) {
+                                    deleteItem(itemId)
+                                  } else {
+                                    decrementItem(itemId)
+                                  }
+                                }
                               }}
                             >
                               -

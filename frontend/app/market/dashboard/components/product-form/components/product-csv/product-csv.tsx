@@ -50,18 +50,11 @@ export const ProductCsv = () => {
       title: "Processamento iniciado",
       description:
         "O processo de importação foi iniciado. Isso pode levar alguns minutos. Você receberá um email com o relatório quando finalizado.",
-      duration: 5000,
+      duration: 10000,
     })
 
     try {
-      await productService.csv(file)
-
-      toast({
-        title: "Importação concluída",
-        description: "O arquivo foi processado com sucesso. Verifique seu email para o relatório detalhado.",
-        variant: "default",
-      })
-
+      productService.csv(file)
       setIsOpen(false)
       setFile(null)
       setShowProcessingMessage(false)

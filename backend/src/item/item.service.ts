@@ -107,6 +107,7 @@ export class itemservice {
   async decrementItem(id: string, idUser: string) {
     try {
       const item = await this.getItemById(id)
+
       const idCart = item.idCart
       const cart = await this.cartService.getCartById(idCart)
 

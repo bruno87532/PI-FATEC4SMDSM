@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { IsLoginOpenProvider } from "./context/is-login-open";
 import { UserProvider } from "./context/user-context";
+import { SearchProvider } from "./context/search-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,14 +30,16 @@ export default function RootLayout({
     <html lang="en">
       <IsLoginOpenProvider>
         <UserProvider>
-          <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-          >
-            <div className="min-h-screen bg-white">
-              {children}
-              <Toaster />
-            </div>
-          </body>
+          <SearchProvider>
+            <body
+              className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+            >
+              <div className="min-h-screen bg-white">
+                {children}
+                <Toaster />
+              </div>
+            </body>
+          </SearchProvider>
         </UserProvider>
       </IsLoginOpenProvider>
     </html>

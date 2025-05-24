@@ -36,7 +36,6 @@ export default function ProductsPage() {
       <CartProvider>
         <ProductProvider>
           <SiteHeader />
-          <MainNav />
           <div className="max-w-6xl mx-auto">
             <div className="container mx-auto px-4 py-6">
               <div className="flex flex-col md:flex-row gap-6">

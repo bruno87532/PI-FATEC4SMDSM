@@ -9,6 +9,7 @@ import * as fs from "fs";
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { once } from 'events';
+import { UsersService } from 'src/users/users.service';
 import { EmailService } from 'src/email/email.service';
 
 @Injectable()
@@ -17,6 +18,7 @@ export class ProductService {
     private readonly prismaService: PrismaService,
     private readonly googleDriveService: GoogleDriveService,
     private readonly emailService: EmailService,
+    private readonly usersService: UsersService,
   ) { }
 
   async createProduct(data: CreateUpdateProductDto, idUser: string, file: Express.Multer.File) {
@@ -89,7 +91,7 @@ export class ProductService {
         where: { idUser: userId },
         skip,
         take: limit,
-        orderBy: { id: 'asc' },                // ← garante que skip/take sejam aplicados
+        orderBy: { id: 'asc' },
         include: {
           categorys: { select: { id: true } },
           subCategorys: { select: { id: true } },
@@ -138,6 +140,7 @@ export class ProductService {
     try {
       const products = await this.prismaService.product.findMany({
         where: { idUser },
+        take: 1000,
         include: {
           categorys: {
             select: {
@@ -149,7 +152,7 @@ export class ProductService {
               id: true
             }
           }
-        }
+        },
       })
 
       if (!products || products.length === 0) {
@@ -248,7 +251,10 @@ export class ProductService {
   }
 
   async uploadCsv(file: Express.Multer.File, idUser: string) {
+    let quantityImport = 0
+    let quantityNoImport = 0
     const products: CreateUpdateProductDto[] = [];
+    const user = await this.usersService.getUserById(idUser)
 
     const stream = fs
       .createReadStream(file.path)
@@ -271,6 +277,7 @@ export class ProductService {
         const errors = await validate(dto);
 
         if (errors.length === 0) {
+          quantityImport += 1
           const product: CreateUpdateProductDto = {
             categorys: ["0"],
             subCategorys: ["0"],
@@ -285,7 +292,7 @@ export class ProductService {
 
           products.push(product);
         } else {
-          console.warn('Validation errors:', errors);
+          quantityNoImport += 1
         }
       } catch (error) {
         console.warn('Error processing line:', productData, error);
@@ -316,6 +323,39 @@ export class ProductService {
         },
       });
     }
+
+    await this.emailService.sendEmail(
+      {
+        to: user.email,
+        template: "report",
+        subject: "Recuperação de senha",
+      },
+      {
+        quantityImport: quantityImport.toString(),
+        quantityNoImport: quantityNoImport.toString(),
+        year: new Date().getFullYear().toString()
+      }
+    )
   }
 
+  async getProductsByPartialNameId(idUser: string, partialName: string) {
+    try {
+      const products = await this.prismaService.product.findMany({
+        where: {
+          idUser,
+          name: {
+            contains: partialName,
+            mode: "insensitive"
+          }
+        }
+      })
+
+      if (!products) throw new NotFoundException("Products not found")
+
+      return products
+    } catch (error) {
+      console.error("An error ocurred while fetching products", error)
+      throw new InternalServerErrorException("An error ocurred while fetching products")
+    }
+  }
 }
