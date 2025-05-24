@@ -6,9 +6,13 @@ import { AuthModule } from 'src/auth/auth.module';
 import { SubscriptionModule } from 'src/subscription/subscription.module';
 import { PlanModule } from 'src/plan/plan.module';
 import { UsersModule } from 'src/users/users.module';
+import { CartModule } from 'src/cart/cart.module';
+import { ItemModule } from 'src/item/item.module';
+import { ProductModule } from 'src/product/product.module';
+import { EvolutionModule } from 'src/evolution/evolution.module';
 
 @Module({
-  imports: [AuthModule, SubscriptionModule, PlanModule, UsersModule],
+  imports: [AuthModule, SubscriptionModule, PlanModule, UsersModule, CartModule, ItemModule, ProductModule, EvolutionModule],
   providers: [
     StripeService,
     {

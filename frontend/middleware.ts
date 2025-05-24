@@ -13,7 +13,9 @@ export const middleware = async (request: NextRequest) => {
   const isMarketRoute = request.nextUrl.pathname.startsWith("/market")
   const isPurchaseConfirmationRoute = request.nextUrl.pathname.startsWith("/purchase-confirmation")
   const isPaymentsRoute = request.nextUrl.pathname.startsWith("/payments")
-  
+  const isProfileRoute = request.nextUrl.pathname.startsWith("/profile")
+  const isProfileSettingsRoute = request.nextUrl.pathname.startsWith("/profile/settings")
+
   if (isMarketRoute) {
     try {
       if (!token) throw new Error("access_token not found")
@@ -23,6 +25,20 @@ export const middleware = async (request: NextRequest) => {
       if (!newPayload.isAdvertiser) throw new Error("access denied")
       if (newPayload.exp && newPayload.exp < currentTime) throw new Error("token expired")
 
+    } catch (error) {
+      console.error("An error ocurred while checking the token", error)
+      return NextResponse.redirect(new URL("/", request.url))
+    }
+  }
+
+  if (isProfileRoute || isProfileSettingsRoute) {
+    try {
+      if (!token) throw new Error("access_token not found")
+      const { payload } = await jwtVerify(token, new TextEncoder().encode(process.env.JWT_SECRET))
+      const newPayload = payload as Payload
+
+      if (newPayload.isAdvertiser) throw new Error("access denied")
+      if (newPayload.exp && newPayload.exp < currentTime) throw new Error("token expired")
     } catch (error) {
       console.error("An error ocurred while checking the token", error)
       return NextResponse.redirect(new URL("/", request.url))

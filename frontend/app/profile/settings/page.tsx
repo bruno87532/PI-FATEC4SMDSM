@@ -1,10 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { AdvertiserNameDialog } from "./components/advertiser-name-dialog/advertiser-name-dialog"
 import { PhoneDialog } from "@/components/utils/phone-dialog/phone-dialog"
-import { NameDialog } from "@/components/utils/name-dialog/name-dialog"
-import { PasswordDialog } from "@/components/utils/password-dialog/password-dialog"
 import { Separator } from "@radix-ui/react-dropdown-menu"
 import { EmailDialog } from "@/components/utils/email-dialog/email-dialog"
 import { Loader2 } from "lucide-react"
@@ -12,9 +9,11 @@ import { useUser as useUserContext } from "@/app/context/user-context"
 import { useToast } from "@/hooks/use-toast"
 import { useEffect } from "react"
 import { userService } from "@/services/user"
+import { StepProvider } from "@/components/utils/email-dialog/components/context/step-context"
 import { NumberDialog } from "@/components/utils/number-dialog/number-dialog"
 import { ZipCodeDialog } from "@/components/utils/zip-code-dialog/zip-code-dialog"
-import { StepProvider } from "@/components/utils/email-dialog/components/context/step-context"
+import { NameDialog } from "@/components/utils/name-dialog/name-dialog"
+import { PasswordDialog } from "@/components/utils/password-dialog/password-dialog"
 
 const Settings = () => {
   const { user, setUser } = useUserContext()
@@ -56,7 +55,7 @@ const Settings = () => {
             <CardHeader>
               <CardTitle>Informações Pessoais</CardTitle>
               <CardDescription>
-                Atualize suas informações pessoais.item
+                Atualize suas informações pessoais.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -66,15 +65,6 @@ const Settings = () => {
                   <p className="text-sm text-muted-foreground">{user.name}</p>
                 </div>
                 <NameDialog />
-              </div>
-              <Separator />
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <h3 className="text-sm font-medium">Nome de Anunciante</h3>
-                  <p className="text-sm text-muted-foreground">{user.advertiserName}</p>
-                </div>
-                <AdvertiserNameDialog />
               </div>
               <Separator />
 

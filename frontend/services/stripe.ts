@@ -15,6 +15,30 @@ export class StripeService {
         throw new Error("Failed to create checkout");
       }
       const data = await res.json();
+      console.log(data.client_secret)
+      return data.client_secret;
+    } catch (error) {
+      console.error("An error ocurred while creating checkout")
+      throw error
+    }
+  }
+
+  static async createPurchase(totalPrice: number, idUserAdvertiser: string) {
+    try {
+      console.log(idUserAdvertiser)
+      const res = await fetch(this.pathBackend + "/stripe/create-purchase", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ totalPrice, idUserAdvertiser })
+      });
+      if (!res.ok) {
+        throw new Error("Failed to create checkout");
+      }
+      const data = await res.json();
+      console.log(data.client_secret)
       return data.client_secret;
     } catch (error) {
       console.error("An error ocurred while creating checkout")

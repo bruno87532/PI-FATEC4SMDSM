@@ -2,7 +2,7 @@
 
 import { Form, FormField, FormControl, FormLabel, FormMessage, FormItem } from "@/components/ui/form"
 import { useForm } from "react-hook-form"
-import { DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { DialogTitle, DialogDescription, DialogFooter, DialogContent } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
 import { z } from "zod"
@@ -11,51 +11,59 @@ import React, { useState } from "react"
 import { userService } from "@/services/user"
 import { ApiError } from "@/type/error"
 import { Loader2 } from "lucide-react"
+import { useUser } from "@/app/context/user-context"
+import { useToast } from "@/hooks/use-toast"
 
-const stepTwoSchema = z.object({
-  otp: z
-    .string()
-    .min(6, {
-      message: "O código deve ter no mínimo 6 caracteres.",
-    })
-    .max(6, {
-      message: "O código deve ter no máximo 6 caracteres.",
-    }),
+const StepTwoSchema = z.object({
+  otp: z.string().length(6, "O código deve ter 6 dígitos")
 })
 
-type StepTwoSchema = z.infer<typeof stepTwoSchema>
+type StepTwoSchema = z.infer<typeof StepTwoSchema>
 
 export const StepTwo: React.FC<{
-  setStep: React.Dispatch<React.SetStateAction<number>>
-  phone: string
-  setIsUserComplete: React.Dispatch<React.SetStateAction<boolean>>
-  onComplete?: () => void
-}> = ({ setStep, phone, setIsUserComplete, onComplete }) => {
-  const [isLoading, setIsLoading] = useState(false)
+  setStep: React.Dispatch<React.SetStateAction<number>>;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  phone: string;
+}> = ({ setStep, phone, setIsOpen }) => {
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const { toast } = useToast()
+  const { user, setUser } = useUser()
 
   const stepTwoForm = useForm<StepTwoSchema>({
-    resolver: zodResolver(stepTwoSchema),
+    resolver: zodResolver(StepTwoSchema),
     defaultValues: {
-      otp: "",
-    },
+      otp: ""
+    }
   })
 
   const handleSubmit = async (data: StepTwoSchema) => {
     try {
       setIsLoading(true)
       await userService.verifyNumber(phone, data.otp)
-      setIsUserComplete(true)
-      onComplete?.()
+      setUser((user) => {
+        if (!user) return null
+
+        return {
+          ...user,
+          phone,
+        }
+      })
+      setStep(0)
+      toast({
+        title: "Telefone alterado",
+        description: "Telefone alterado com sucesso"
+      })
+      setIsOpen(false)
     } catch (error) {
       if (error instanceof ApiError && error.message === "Invalid code") {
         stepTwoForm.setError("otp", {
           type: "manual",
-          message: "Código inválido",
+          message: "Código inválido"
         })
       } else if (error instanceof ApiError && error.message === "Expired code") {
         stepTwoForm.setError("otp", {
           type: "manual",
-          message: "Código expirado. Foi encaminhado um novo código para o seu whatsapp",
+          message: "Código expirado. Foi encaminhado um novo código para o seu whatsapp"
         })
       }
     } finally {
@@ -63,16 +71,15 @@ export const StepTwo: React.FC<{
     }
   }
 
-
   return (
-    <div className="max-h-[70vh] overflow-y-auto px-1 py-2">
-      <DialogTitle className="text-xl font-bold text-green-700 mb-2">Verificação do WhatsApp</DialogTitle>
-      <DialogDescription className="mb-4 text-gray-600">
+    <DialogContent className="sm:max-w-[500px]">
+      <DialogTitle className="text-xl font-bold">Verificação do WhatsApp</DialogTitle>
+      <DialogDescription>
         Enviamos um código de 6 dígitos para o seu WhatsApp. Por favor, insira o código abaixo para confirmar seu
         número.
       </DialogDescription>
 
-      <div className="flex flex-col items-center justify-center space-y-4 py-4">
+      <div className="flex flex-col items-center justify-center">
         <Form {...stepTwoForm}>
           <form onSubmit={stepTwoForm.handleSubmit(handleSubmit)}>
             <FormField
@@ -103,14 +110,14 @@ export const StepTwo: React.FC<{
               <Button
                 type="button"
                 variant="outline"
-                className="border-green-600 text-green-600 hover:bg-green-600 hover:text-white transition-colors rounded-full"
+                className="hover:text-white transition-colors rounded-full"
                 onClick={() => setStep(0)}
               >
                 Voltar
               </Button>
               <Button
                 disabled={isLoading}
-                className="bg-green-600 hover:bg-green-700 text-white rounded-full"
+                className="text-white rounded-full"
               >
                 {isLoading ? <Loader2 className="animate-spin h-6 w-6" /> : "Verificar"}
               </Button>
@@ -118,6 +125,6 @@ export const StepTwo: React.FC<{
           </form>
         </Form>
       </div>
-    </div>
+    </DialogContent>
   )
 }

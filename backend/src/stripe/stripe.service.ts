@@ -4,6 +4,11 @@ import { SubscriptionService } from 'src/subscription/subscription.service';
 import { PlanService } from 'src/plan/plan.service';
 import { UsersService } from 'src/users/users.service';
 import { Subscription } from '@prisma/client';
+import { CreatePurchaseDto } from './dto/create-purchase.dto';
+import { itemservice } from 'src/item/item.service';
+import { CartService } from 'src/cart/cart.service';
+import { ProductService } from 'src/product/product.service';
+import { EvolutionService } from 'src/evolution/evolution.service';
 
 @Injectable()
 export class StripeService {
@@ -11,7 +16,11 @@ export class StripeService {
     @Inject("STRIPE_CLIENT") private readonly stripe: Stripe,
     private readonly subscriptionService: SubscriptionService,
     private readonly planService: PlanService,
-    private readonly usersService: UsersService
+    private readonly usersService: UsersService,
+    private readonly itemService: itemservice, 
+    private readonly cartService: CartService,
+    private readonly productService: ProductService,
+    private readonly evolutionService: EvolutionService
   ) { }
 
   // ---- Início da lógica de criação de checkout ---- //
@@ -40,8 +49,37 @@ export class StripeService {
     }
   }
 
-  // ---- Fim da lógica de criação de checkout ---- //
-  // ---- Início da lógica de processar pagamento ---- //
+  async createPurchase(data: CreatePurchaseDto, idUser: string) {
+    try {
+      const session = await this.stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        mode: "payment",
+        line_items: [
+          {
+            price_data: {
+              currency: "brl",
+              product_data: {
+                name: "Finalizar compra",
+              },
+              unit_amount: data.totalPrice
+            },
+            quantity: 1
+          }
+        ],
+        metadata: {
+          id: idUser,
+          idAdvertiser: data.idUserAdvertiser,
+        },
+        ui_mode: "embedded",
+        return_url: `${process.env.PATH_FRONTEND}/purchase-cart-confirmation?payment-confirmation&session_id={CHECKOUT_SESSION_ID}`
+      })
+
+      return session
+    } catch (error) {
+      console.error("An error ocurred while creating checkout stripe", error)
+      throw new InternalServerErrorException("An error ocurred while creating checkout stripe")
+    }
+  }
 
   async paymentSucessfully(data: Buffer, signature: string) {
     const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET ?? ""
@@ -57,7 +95,11 @@ export class StripeService {
       switch (event.type) {
         case "checkout.session.completed":
           const session: Stripe.Checkout.Session = event.data.object
-          await this.handleCheckoutSessionCompleted(session)
+          if (session.metadata?.idAdvertiser) {
+            await this.handlePurchase(session)
+          } else {
+            await this.handleCheckoutSessionCompleted(session)
+          }
           break
         case "invoice.payment_succeeded":
           const invoice: Stripe.Invoice = event.data.object
@@ -72,6 +114,38 @@ export class StripeService {
     } catch (error) {
       console.error("An error ocurred while handling the webhook stripe", error)
       throw new InternalServerErrorException("An error ocurred while handling the webhook stripe")
+    }
+  }
+
+  private async handlePurchase(session: Stripe.Checkout.Session) {
+    try {
+      if (!session.metadata) throw new BadRequestException("metadata is required")
+      if (!session.metadata.idAdvertiser || ! session.metadata.id) throw new BadRequestException("idAdvertiser and id are required")
+      
+      const idAdvertiser = session.metadata.idAdvertiser
+      const id = session.metadata.id
+
+      const user = await this.usersService.getUserById(id)
+      const advertiser = await this.usersService.getUserById(idAdvertiser)
+      const cart = await this.cartService.getCartByIdAdvertiser(id, idAdvertiser)
+      const itens = await this.itemService.getAllitemsByIdCarts({ idCarts: [cart.id] })
+
+      let template = `O(a) ${user.name}, residente no endereço:\nCidade: ${user.city}\nBairro: ${user.neighborhood}\nRua: ${user.road}\nNúmero: ${user.marketNumber}\nNúmero de telefone: ${user.phone}\nComprou os seguintes produtos:\n`
+      let ids: string[] = []
+
+      for (const item of itens) {
+        console.log(item)
+        ids.push(item.id)
+        const product = await this.productService.getProductById(item.idProduct)
+        template += `Produto: ${product.name}\nQuantidade: ${item.quantity}\n`
+      }
+      console.log(ids)
+      await this.itemService.deleteItens(ids)
+      await this.evolutionService.sendMessage(advertiser.phone!, template)
+
+    } catch (error) {
+      console.error("Error while processing the checkout session", error)
+      throw new InternalServerErrorException("Error while processing the checkout session")
     }
   }
 
@@ -131,9 +205,6 @@ export class StripeService {
       throw new InternalServerErrorException("Error while processing the customer subscription deleted")
     }
   }
-  // ---- Fim da lógica de processar pagamento ---- //
-  // ---- Início da lógica de solicitação de cancelamento de assinatura ---- //
-
   async cancelSubscription(idUser: string) {
     try {
       const arraySubscription = await this.subscriptionService.getSubscriptionsByIdUser(idUser)
@@ -161,13 +232,10 @@ export class StripeService {
         isActivate: false
       })
       await this.stripe.subscriptions.cancel(subscription.idStripe)
-    } catch(error) {
+    } catch (error) {
       console.error("There is no active subscription")
     }
   }
-
-  // ---- Fim da lógica de solicitação de cancelamento de assinatura ---- //
-  // ---- Início da lógica de reativação de assinatura ---- //
 
   async reactivateSubscription(idUser: string) {
     try {
@@ -195,7 +263,4 @@ export class StripeService {
       throw new InternalServerErrorException("An error ocurred while reactiving subscription");
     }
   }
-
-
-  // ---- Fim da lógica de reativação de assinatura ---- //
 }

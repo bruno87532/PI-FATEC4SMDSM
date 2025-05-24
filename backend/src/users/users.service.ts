@@ -224,7 +224,7 @@ export class UsersService {
 
       const user = await this.updateUser(id, { randomCodePhone, randomCodePhoneExpiration })
 
-      const message = `Olá, ${user.name}. Obrigado pelo seu interesse para se juntar conosco\nSeu código de verificação: ${randomCodePhone}\nEste código tem uma duração de 5 minutos\nImportante: Nunca compartilhe este código com ninguém`
+      const message = `Olá, ${user.name}.\nSeu código de verificação: ${randomCodePhone}\nEste código tem uma duração de 5 minutos\nImportante: Nunca compartilhe este código com ninguém`
 
       await this.evolutionService.sendMessage(data.phone, message)
 

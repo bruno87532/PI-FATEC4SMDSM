@@ -64,7 +64,7 @@ export const NumberDialog = () => {
               name="marketNumber"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nome</FormLabel>
+                  <FormLabel>Número</FormLabel>
                   <FormControl>
                     <Input placeholder="Seu número" {...field} />
                   </FormControl>

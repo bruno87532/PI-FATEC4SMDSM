@@ -4,6 +4,7 @@ import { CreateItemDto } from "./dto/create-item.dto";
 import { ProductService } from "src/product/product.service";
 import { CartService } from "src/cart/cart.service";
 import { GetAllItensByIdCartsDto } from "./dto/get-all-itens-by-id-cart.dto";
+import { Item } from "@prisma/client";
 
 @Injectable()
 export class itemservice {
@@ -135,7 +136,7 @@ export class itemservice {
     }
   }
 
-  async getAllitemsByIdCarts(data: GetAllItensByIdCartsDto) {
+  async getAllitemsByIdCarts(data: GetAllItensByIdCartsDto): Promise<Item[]> {
     try {
       const items = await this.prismaService.item.findMany({
         where: {
@@ -150,6 +151,25 @@ export class itemservice {
       return items
     } catch (error) {
       console.error("An error ocurred while fetching items")
+      throw new InternalServerErrorException("An error ocurred while fetching items")
     }
   }
+
+  async deleteItens(ids: string[]) {
+    try {
+      const deleted = await this.prismaService.item.deleteMany({
+        where: {
+          id: {
+            in: ids
+          }
+        }
+      })
+      console.log(deleted)
+
+      return deleted
+    } catch (error) {
+      console.error("An error ocurred while deleting itens", error)
+      throw new InternalServerErrorException("An error ocurred while deleting itens")
+    }
+  } 
 }

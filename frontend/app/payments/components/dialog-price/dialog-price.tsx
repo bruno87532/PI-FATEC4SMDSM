@@ -32,6 +32,9 @@ export const DialogPrice = ({ price }: { price: string }) => {
 
   const fetchClientSecret = useCallback(() => StripeService.createCheckout(price), [price])
   const options = { fetchClientSecret }
+  useEffect(() => {
+    console.log(options)
+  }, [options])
 
   useEffect(() => {
     const getSubscriptionActiveByIdUser = async () => {
