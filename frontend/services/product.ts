@@ -84,9 +84,9 @@ export class productService {
     return formData
   }
 
-  static async getProducts(page = 1, limit = 20): Promise<ProductDb[]> {
+  static async getProducts(page = 1, limit = 20, partialName = ""): Promise<ProductDb[]> {
     const res = await fetch(
-      `${this.pathBackend}/product/me?page=${page}&limit=${limit}`,
+      `${this.pathBackend}/product/me?page=${page}&limit=${limit}${partialName ? `&partialName=${partialName}`: ""}`,
       {
         method: "GET",
         headers: { "Content-Type": "application/json" },

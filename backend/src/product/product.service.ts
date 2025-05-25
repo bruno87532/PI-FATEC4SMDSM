@@ -123,20 +123,41 @@ export class ProductService {
     userId: string,
     page: number,
     limit: number,
+    partialName?: string
   ) {
     const skip = (page - 1) * limit;
+    let products: Product[] = []
 
     try {
-      const products = await this.prismaService.product.findMany({
-        where: { idUser: userId },
-        skip,
-        take: limit,
-        orderBy: { id: 'asc' },
-        include: {
-          categorys: { select: { id: true } },
-          subCategorys: { select: { id: true } },
-        },
-      });
+      if (partialName) {
+        products = await this.prismaService.product.findMany({
+          where: { 
+            idUser: userId,
+            name: {
+              contains: partialName,
+              mode: "insensitive"
+            } 
+          },
+          skip,
+          take: limit,
+          orderBy: { id: 'asc' },
+          include: {
+            categorys: { select: { id: true } },
+            subCategorys: { select: { id: true } },
+          },
+        });
+      } else {
+        products = await this.prismaService.product.findMany({
+          where: { idUser: userId },
+          skip,
+          take: limit,
+          orderBy: { id: 'asc' },
+          include: {
+            categorys: { select: { id: true } },
+            subCategorys: { select: { id: true } },
+          },
+        });
+      }
 
       if (!products.length) {
         throw new BadRequestException("Products not found");

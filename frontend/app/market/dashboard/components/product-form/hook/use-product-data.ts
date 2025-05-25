@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react"
 import { googleDriveService } from "@/services/google-drive"
 import { ProductDb } from "@/type/product"
 
-export const useProductData = (product: ProductDb | undefined, setIsPromotional: React.Dispatch<React.SetStateAction<boolean>>) => {
-  const [file, setFile] = useState<File | undefined>()
+export const useProductData = (
+  product: ProductDb | undefined, setIsPromotional: React.Dispatch<React.SetStateAction<boolean>>,
+  setFile: React.Dispatch<React.SetStateAction<File | undefined>>
+) => {
   const [loading, setLoading] = useState(true)
 
   const regularPriceDb = product && product.regularPrice.toString().length === 1
@@ -59,7 +61,6 @@ export const useProductData = (product: ProductDb | undefined, setIsPromotional:
     regularPriceDb,
     categoryDb,
     subCategoryDb,
-    file,
     loading,
     ...promotion
   }

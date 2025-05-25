@@ -63,14 +63,16 @@ export class ProductController {
   async getProductsByUser(
     @Request() req,
     @Query("page") page = "1",
-    @Query("limit") limit = "20"
+    @Query("limit") limit = "20",
+    @Query("partialName") partialName = ""
   ) {
     const pageNum = parseInt(page, 10)
     const limitNum = parseInt(limit, 10)
     return this.productService.getProductsByUser(
       req.user.userId,
       pageNum,
-      limitNum
+      limitNum,
+      partialName
     )
   }
 

@@ -25,15 +25,14 @@ export const ProductsTable = () => {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
 
-  // PAGINAÇÃO
   const [currentPage, setCurrentPage] = useState(1)
-  const limit = 20
+  const limit = 2
 
   useEffect(() => {
     const fetchPage = async () => {
       setIsLoading(true)
       try {
-        const rawProducts: ProductDb[] = await productService.getProducts(currentPage, limit)
+        const rawProducts: ProductDb[] = await productService.getProducts(currentPage, limit, searchQuery)
         const [categoriesData, subCategoriesData] = await Promise.all([
           categoryService.getCategories(),
           subCategoryService.getSubCategories(),
@@ -71,7 +70,7 @@ export const ProductsTable = () => {
     }
 
     fetchPage()
-  }, [currentPage])
+  }, [currentPage, searchQuery])
 
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchQuery.toLowerCase())

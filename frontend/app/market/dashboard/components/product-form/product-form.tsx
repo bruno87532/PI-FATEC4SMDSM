@@ -22,13 +22,14 @@ import { useRouter } from "next/navigation"
 
 export const ProductForm = ({ product }: { product?: ProductDb }) => {
   const { toast } = useToast()
+  const [file, setFile] = useState<File | undefined>()
   const router = useRouter()
 
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isPromotional, setIsPromotional] = useState<boolean>(false)
 
   const ProductSchema = createSchema(isPromotional)
-  const { regularPriceDb, categoryDb, subCategoryDb, file, promotionalPrice, promotionExpiration, promotionStart, loading } = useProductData(product, setIsPromotional)
+  const { regularPriceDb, categoryDb, subCategoryDb, promotionalPrice, promotionExpiration, promotionStart, loading } = useProductData(product, setIsPromotional, setFile)
 
   const productForm = useForm<Product>({
     resolver: zodResolver(ProductSchema),
@@ -67,6 +68,7 @@ export const ProductForm = ({ product }: { product?: ProductDb }) => {
         title,
         description
       })
+      setFile(undefined)
       productForm.reset()
       if (product) {
         router.push("/market/dashboard")
@@ -74,11 +76,11 @@ export const ProductForm = ({ product }: { product?: ProductDb }) => {
     } catch (error) {
       if (error instanceof ApiError && error.message === "The image and width must be equal") {
         productForm.setError("file", {
-          type: "manual", 
+          type: "manual",
           message: "A imagem deve ter dimensões iguais"
         })
       }
-    } finally {      
+    } finally {
       setIsLoading(false)
     }
   }
