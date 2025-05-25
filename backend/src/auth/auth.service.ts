@@ -247,9 +247,11 @@ export class AuthService {
   async sendChangeEmail(data: RecoverDto, idUser: string) {
     try {
       const { email } = data
+      const userAccount = await this.usersService.getUserById(idUser)
 
       try {
         const user = await this.usersService.getUserByEmail(email)
+
         if (user) throw new BadRequestException("Email already registered")
       } catch (error) {
         if (error instanceof BadRequestException) {
@@ -262,7 +264,7 @@ export class AuthService {
 
       await this.emailService.sendEmail(
         {
-          to: email,
+          to: userAccount.email,
           template: "recover-email",
           subject: "Recuperação de email",
         },

@@ -10,10 +10,12 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useUser } from "@/app/context/user-context"
 import { userService } from "@/services/user"
+import { useToast } from "@/hooks/use-toast"
 
 export const NameDialog = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const { user, setUser } = useUser()
+  const { toast } = useToast()
 
   const formSchema = z.object({
     name: z.string().min(1, { message: "O nome deve ter pelo menos 1 caracter" })

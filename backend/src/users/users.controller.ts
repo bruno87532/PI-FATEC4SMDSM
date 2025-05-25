@@ -34,7 +34,7 @@ export class UsersController {
   @UseGuards(AuthGuard("jwt"))
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   async updateUser(@Request() req, @Body() data: UpdateUserDto) {
-    return await this.usersService.updateUser(req.user.userId, data)
+    return plainToInstance(UserResponseDto, await this.usersService.updateUser(req.user.userId, data))
   }
 
   @UseGuards(AuthGuard("jwt"))

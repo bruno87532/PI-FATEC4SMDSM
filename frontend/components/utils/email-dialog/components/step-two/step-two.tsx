@@ -10,6 +10,7 @@ import { Loader2 } from "lucide-react"
 import React, { useState } from "react"
 import { useStep } from "../context/step-context"
 import { useToast } from "@/hooks/use-toast"
+import { useUser } from "@/app/context/user-context"
 
 const StepTwoSchema = z.object({
   otp: z.string().length(6, "O código deve ter 6 dígitos.")
@@ -17,8 +18,9 @@ const StepTwoSchema = z.object({
 
 type StepTwo = z.infer<typeof StepTwoSchema>
 
-export const StepTwo = ({ setIsOpen }: { setIsOpen: React.Dispatch<React.SetStateAction<boolean>> }) => {
+export const StepTwo: React.FC<{ setIsOpen: React.Dispatch<React.SetStateAction<boolean>>, email: string }> = ({ setIsOpen, email }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const { user, setUser } = useUser()
   const { step, setStep } = useStep()
   const { toast } = useToast()
 
@@ -42,9 +44,28 @@ export const StepTwo = ({ setIsOpen }: { setIsOpen: React.Dispatch<React.SetStat
         title: "Email alterado",
         description: "Seu email foi alterado com sucesso"
       })
+      let emailCensored = ""
+      const [name, domain] = email.split("@")
+      if (name.length <= 4) {
+        emailCensored = `${name.replace(/./g, "*")}@${domain}`
+      } {
+        const start = name.slice(0, 2);
+        const middle = name.slice(2, -2).replace(/./g, "*")
+        const end = name.slice(-2)
+  
+        emailCensored = `${start}${middle}${end}@${domain}`
+      }
+      setUser((prev) => {
+        if (!prev) return null
+        return {
+          ...prev,
+          email: emailCensored
+        }
+      })
+      setStep(1)
       setIsOpen(false)
     } catch (error) {
-      if (error instanceof ApiError && error.message === "Invalid code") {
+      if (error instanceof ApiError && (error.message === "Invalid code" || error.message === "Recover email not found")) {
         stepTwoForm.setError("otp", {
           type: "manual",
           message: "Código de verificação inválido."
@@ -65,7 +86,7 @@ export const StepTwo = ({ setIsOpen }: { setIsOpen: React.Dispatch<React.SetStat
     <Form {...stepTwoForm}>
       <form onSubmit={stepTwoForm.handleSubmit(handleSubmit)} className="space-y-4">
         <div className="text-center">
-          <p className="text-sm text-muted-foreground mb-4">
+          <p className="text-sm text-muted-foreground">
             Enviamos um código de verificação para o seu email.
           </p>
         </div>

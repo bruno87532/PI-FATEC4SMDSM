@@ -35,23 +35,63 @@ export class ProductService {
 
   async updateProduct(data: CreateUpdateProductDto, id: string, idUser: string, file: Express.Multer.File) {
     try {
-      const product = await this.getProductById(id)
-      if (!product) throw new BadRequestException("Product not found")
-      if (product.idUser !== idUser) throw new ForbiddenException("You do not have permission to update this product")
+      const product = await this.getProductById(id);
+      if (!product) throw new BadRequestException("Product not found");
+      if (product.idUser !== idUser) throw new ForbiddenException("You do not have permission to update this product");
 
-      await this.googleDriveService.deleteFile(product.idDrive)
-      const productData = await this.prepareProduct(file, idUser, data)
-      const updated = await this.prismaService.product.update({
+      await this.googleDriveService.deleteFile(product.idDrive);
+
+      const { updateData, categorys, subCategorys } = await this.prepareUpdateProduct(file, idUser, data);
+
+      await this.prismaService.product.update({
         where: { id },
-        data: productData
-      })
+        data: updateData,
+      });
+
+      await this.prismaService.product.update({
+        where: { id },
+        data: {
+          categorys: {
+            set: categorys.map(id => ({ id })),
+          },
+          subCategorys: {
+            set: subCategorys.map(id => ({ id })),
+          },
+        },
+      });
 
     } catch (error) {
-      console.error("An error ocurred while updating product", error)
-      if (error instanceof HttpException) throw error
-      throw new InternalServerErrorException("An error ocurred while updating product")
+      console.error("An error occurred while updating product", error);
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException("An error occurred while updating product");
     }
   }
+
+
+  private async prepareUpdateProduct(file: Express.Multer.File, idUser: string, data: CreateUpdateProductDto) {
+    try {
+      const uploaded = await this.googleDriveService.uploadFile(file);
+      const idDrive = uploaded.data.id!;
+      await this.googleDriveService.makePublicFile(idDrive);
+
+      const { categorys, subCategorys, ...rest } = data;
+
+      return {
+        updateData: {
+          ...rest,
+          idUser,
+          idDrive,
+        },
+        categorys,
+        subCategorys,
+      };
+    } catch (error) {
+      console.error("An error occurred while uploading picture to Drive", error);
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException("An error occurred while uploading picture to Drive");
+    }
+  }
+
 
   private async prepareProduct(file: Express.Multer.File, idUser: string, data: CreateUpdateProductDto) {
     try {

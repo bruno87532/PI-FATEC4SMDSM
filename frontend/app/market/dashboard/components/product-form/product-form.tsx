@@ -2,7 +2,7 @@
 
 import { Loader2 } from "lucide-react"
 import type React from "react"
-import { useState, useRef } from "react"
+import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
@@ -18,9 +18,11 @@ import { Product } from "./schema/schema"
 import { useProductData } from "./hook/use-product-data"
 import { ApiError } from "@/type/error"
 import { ProductCsv } from "./components/product-csv/product-csv"
+import { useRouter } from "next/navigation"
 
 export const ProductForm = ({ product }: { product?: ProductDb }) => {
   const { toast } = useToast()
+  const router = useRouter()
 
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isPromotional, setIsPromotional] = useState<boolean>(false)
@@ -65,6 +67,10 @@ export const ProductForm = ({ product }: { product?: ProductDb }) => {
         title,
         description
       })
+      productForm.reset()
+      if (product) {
+        router.push("/market/dashboard")
+      }
     } catch (error) {
       if (error instanceof ApiError && error.message === "The image and width must be equal") {
         productForm.setError("file", {
@@ -77,7 +83,11 @@ export const ProductForm = ({ product }: { product?: ProductDb }) => {
     }
   }
 
-  if (loading) return <Loader2 className="animate-spin h-10 w-10" />
+  if (loading) return (
+    <div className="flex justify-center items-center h-screen">
+      <Loader2 className="animate-spin h-10 w-10" />
+    </div>
+  )
 
   return (
     <Form {...productForm}>
@@ -100,7 +110,7 @@ export const ProductForm = ({ product }: { product?: ProductDb }) => {
           </Button>
           <Button type="submit" disabled={isLoading} >
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {!isLoading && "Criar produto"}
+            {!isLoading && `${product ? "Editar" : "Criar"} produto`}
           </Button>
         </div>
       </form>

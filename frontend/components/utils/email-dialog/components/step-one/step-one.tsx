@@ -4,7 +4,7 @@ import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Input } from "@/components/ui/input"
-import React from "react"
+import React, { ReactPortal } from "react"
 import { userService } from "@/services/user"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
@@ -19,7 +19,7 @@ const StepOneSchema = z.object({
 
 type StepOne = z.infer<typeof StepOneSchema>
 
-export const StepOne = () => {
+export const StepOne: React.FC<{ setEmail: React.Dispatch<React.SetStateAction<string>> }> = ({ setEmail }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const { setStep, step } = useStep()
 
@@ -43,6 +43,7 @@ export const StepOne = () => {
           })
         } else {
           await authService.authRecoverEmail(data.newEmail)
+          setEmail(data.newEmail)
           setStep(2)
         }
       } else {

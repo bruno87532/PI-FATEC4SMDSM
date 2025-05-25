@@ -167,6 +167,7 @@ export const ProductDetails: React.FC<{ productForm: UseFormReturn<ProductType>;
                     options={categories}
                     onValueChange={
                       (value) => {
+                        console.log(value)
                         field.onChange(value)
                         handleCategoriesChange(value)
                       }
@@ -193,7 +194,10 @@ export const ProductDetails: React.FC<{ productForm: UseFormReturn<ProductType>;
                     defaultValue={productForm.getValues().subCategorys ?? []}
                     disabled={subCategories?.length === 0}
                     options={subCategories ?? []}
-                    onValueChange={(value) => field.onChange(value)}
+                    onValueChange={(value) => {
+                      field.onChange(value)
+                      console.log(value)
+                    }}
                     placeholder="Sub categorias do produto"
                     variant="inverted"
                     animation={2}

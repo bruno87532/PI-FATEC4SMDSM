@@ -1,3 +1,5 @@
+"use client"
+
 import { Dialog, DialogTrigger, DialogDescription, DialogHeader, DialogContent, DialogFooter, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
@@ -7,6 +9,7 @@ import { useStep } from "./components/context/step-context"
 
 export const EmailDialog = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [email, setEmail] = useState<string>("")
   const { setStep, step } = useStep()
   
   const handleOpenChange = (isOpen: boolean) => {
@@ -25,11 +28,11 @@ export const EmailDialog = () => {
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Editar Email</DialogTitle>
-          <DialogDescription className="text-center">Atualize seu email. Este número será usado fazer login.</DialogDescription>
+          <DialogDescription className="text-center">Atualize seu email. Este email será usado fazer login.</DialogDescription>
         </DialogHeader>
         {step === 1 ?
-          <StepOne /> :
-          <StepTwo setIsOpen={setIsOpen} />
+          <StepOne setEmail={setEmail}/> :
+          <StepTwo email={email} setIsOpen={setIsOpen} />
         }
       </DialogContent>
     </Dialog>

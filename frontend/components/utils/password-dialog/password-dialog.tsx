@@ -59,6 +59,7 @@ export const PasswordDialog = () => {
       const { oldPassword, newPassword } = data
       setIsLoading(true)
       await authService.alterPassword({ oldPassword, newPassword })
+      form.reset()
       toast({
         title: "Senha alterada",
         description: "Sua senha foi alterada com sucesso"

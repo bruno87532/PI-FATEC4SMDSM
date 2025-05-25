@@ -6,17 +6,30 @@ export const useProductData = (product: ProductDb | undefined, setIsPromotional:
   const [file, setFile] = useState<File | undefined>()
   const [loading, setLoading] = useState(true)
 
-  const regularPriceDb = product
-    ? ((product.regularPrice % 100) === 0
-      ? product.regularPrice.toString() + ".00"
-      : (product.regularPrice % 100) < 10
-        ? product.regularPrice.toString().slice(0, -2) + ".0" + product.regularPrice.toString().slice(-1)
-        : product.regularPrice.toString().slice(0, -2) + "." + product.regularPrice.toString().slice(-2))
-    : undefined
+  const regularPriceDb = product && product.regularPrice.toString().length === 1
+    ? "00.0" + product.regularPrice.toString() :
+    product && product.regularPrice.toString().length === 2 ?
+      "00." + product.regularPrice.toString() :
+      product && product.regularPrice.toString().length === 3 ?
+        "0" + product.regularPrice.toString().slice(0, 1) + "." + product.regularPrice.toString().slice(-2) :
+        product && product.regularPrice.toString().length >= 4 ?
+          product.regularPrice.toString().slice(0, -2) + "." + product.regularPrice.toString().slice(-2) :
+          undefined
 
   const hasPromotion = product && product.promotionExpiration && new Date(product.promotionExpiration).getTime() > new Date().getTime()
+
+  const promotionalPrice = hasPromotion && product.promotionalPrice && product.promotionalPrice.toString().length === 1
+    ? "00.0" + product.promotionalPrice.toString() :
+    hasPromotion && product.promotionalPrice && product.promotionalPrice.toString().length === 2 ?
+      "00." + product.promotionalPrice.toString() :
+      hasPromotion && product.promotionalPrice && product.promotionalPrice.toString().length === 3 ?
+        "0" + product.promotionalPrice.toString().slice(0, 1) + "." + product.promotionalPrice.toString().slice(-2) :
+        hasPromotion && product.promotionalPrice && product.promotionalPrice.toString().length >= 4 ?
+          product.promotionalPrice.toString().slice(0, -2) + "." + product.promotionalPrice.toString().slice(-2) :
+          undefined
+
   const promotion = hasPromotion ? {
-    promotionalPrice: product.promotionalPrice,
+    promotionalPrice: promotionalPrice,
     promotionStart: product.promotionStart,
     promotionExpiration: product.promotionExpiration
   } : {}

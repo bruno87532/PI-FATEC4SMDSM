@@ -64,7 +64,25 @@ export const createSchema = (isPromotional: boolean) =>
     promotionExpiration: baseSchema.promotionExpiration.refine((val) => {
       const now = new Date()
       now.setHours(0, 0, 0, 0)
-      if (isPromotional && val && now.getTime() < now.getTime()) return false
+      if (isPromotional && val && val.getTime() < now.getTime()) return false
       return true
     }, { message: "A data de expiração deve ser futura" }),
+  }).refine((data) => {
+    if (data.promotionExpiration && data.promotionStart) {
+      if (data.promotionExpiration.getTime() <= data.promotionStart.getTime()) {
+        return false
+      }
+    }
+    return true
+  }, {
+    message: "A data de fim da promoção deve ser maior que a de início",
+    path: ["promotionExpiration"]
+  }).refine((data) => {
+    if (data.promotionalPrice && data.promotionalPrice >= data.regularPrice) {
+      return false
+    }
+    return true
+  }, {
+    message: "O preço promocional deve ser menor que o preço normal",
+    path: ["promotionalPrice"]
   })

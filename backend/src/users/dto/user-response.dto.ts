@@ -1,51 +1,71 @@
-import { Exclude, Expose } from "class-transformer";
+import { Exclude, Expose, Transform } from "class-transformer";
 
 export class UserResponseDto {
-    @Expose()
-    id: string
+  @Expose()
+  id: string
 
-    @Expose()
-    name: string
+  @Expose()
+  name: string
 
-    @Expose()
-    advertiserName: string | null
+  @Expose()
+  advertiserName: string | null
 
-    @Expose()
-    email: string 
+  @Expose()
+  @Transform(({ value }) => {
+    if (!value || typeof value !== "string") return value
+    const [name, domain] = value.split("@")
+    if (!name || !domain) return value
+    if (name.length <= 4) {
+      return `${name.replace(/./g, "*")}@${domain}`
+    }
 
-    @Expose()
-    phone: string | null
+    const start = name.slice(0, 2);
+    const middle = name.slice(2, -2).replace(/./g, "*")
+    const end = name.slice(-2)
 
-    @Expose()
-    zipCode: string | null
+    return `${start}${middle}${end}@${domain}`
+  })
+  email: string
 
-    @Expose()
-    state: string | null
+  @Expose()
+  phone: string | null
 
-    @Expose()
-    city: string | null
+  @Expose()
+  zipCode: string | null
 
-    @Expose()
-    neighborhood: string | null
+  @Expose()
+  state: string | null
 
-    @Expose()
-    road: string | null
+  @Expose()
+  city: string | null
 
-    @Expose()
-    marketNumber: string | null
+  @Expose()
+  neighborhood: string | null
 
-    @Exclude()
-    password: string
+  @Expose()
+  road: string | null
 
-    @Exclude()
-    typeUser: string
+  @Expose()
+  marketNumber: string | null
 
-    @Exclude()
-    randomCode: string
+  @Exclude()
+  password: string
 
-    @Exclude()
-    isActivate: Date
+  @Exclude()
+  typeUser: string
 
-    @Exclude()
-    randomCodeExpiration: Date
+  @Exclude()
+  randomCode: string
+
+  @Exclude()
+  isActivate: Date
+
+  @Exclude()
+  randomCodeExpiration: Date
+
+  @Exclude()
+  randomCodePhone: String
+
+  @Exclude()
+  rancomCodePhoneExpiration: Date
 }

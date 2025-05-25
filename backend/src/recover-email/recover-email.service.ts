@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { randomInt } from 'crypto';
 import { RecoverEmail } from '@prisma/client';
@@ -55,7 +55,8 @@ export class RecoverEmailService {
 
       return recoverEmail
     } catch (error) {
-      console.error("An error ocurred while fetching recoverEmail by randomCode", randomCode)
+      console.error("An error ocurred while fetching recoverEmail by randomCode")
+      if (error instanceof HttpException) throw error
       throw new InternalServerErrorException("An error ocurred while fetching recoverEmail by randomCode")
     }
   }

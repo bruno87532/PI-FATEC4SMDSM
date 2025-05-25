@@ -151,11 +151,7 @@ const Settings = () => {
                 <div className="space-y-1">
                   <h3 className="text-sm font-medium">Email</h3>
                   <p className="text-sm text-muted-foreground">
-                    {user.email.slice(0, 2) +
-                      user.email.slice(2).split("@")[0].slice(0, -2).replace(/./g, "*") +
-                      user.email.split("@")[0].slice(-2) +
-                      "@" +
-                      user.email.split("@")[1]}
+                    {user.email}
                   </p>
                 </div>
                 <EmailDialog />
