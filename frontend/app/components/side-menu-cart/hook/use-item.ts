@@ -6,7 +6,6 @@ import type { Item } from "@/type/item"
 import { itemService } from "@/services/item"
 import { useToast } from "@/hooks/use-toast"
 import { ApiError } from "@/type/error"
-import { CartService } from "@/services/cart"
 import { productService } from "@/services/product"
 import { userService } from "@/services/user"
 import { ProductFromCart } from "@/type/product"
@@ -33,7 +32,7 @@ export const useItem = (
     }
     return allUser
   }
-  
+
   useEffect(() => {
     const getProductsByIds = async () => {
       if (!cart) return
@@ -119,17 +118,26 @@ export const useItem = (
 
   const incrementItem = useCallback(async (id: string) => {
     if (!cart) return
+    try {
+      await itemService.incrementItem(id)
+      const updatedCart: Record<string, Item[]> = {}
 
-    await itemService.incrementItem(id)
-    const updatedCart: Record<string, Item[]> = {}
-
-    Object.entries(cart).forEach(([idCart, itens]) => {
-      updatedCart[idCart] = itens.map(item => {
-        return item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+      Object.entries(cart).forEach(([idCart, itens]) => {
+        updatedCart[idCart] = itens.map(item => {
+          return item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+        })
       })
-    })
 
-    setCart(updatedCart)
+      setCart(updatedCart)
+    } catch (error) {
+      if (error instanceof ApiError && error.message === "Product out of stock") {
+        toast({
+          title: "Produto fora de estoque",
+          description:
+            "Não foi possível adicionar o produto, produto sem estoque.",
+        })
+      }
+    }
   }, [cart, setCart])
 
   const deleteItem = useCallback(async (id: string) => {

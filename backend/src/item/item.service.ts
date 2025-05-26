@@ -1,4 +1,4 @@
-import { HttpException, Injectable, InternalServerErrorException, ConflictException, NotFoundException, ForbiddenException } from "@nestjs/common";
+import { HttpException, Injectable, InternalServerErrorException, ConflictException, NotFoundException, ForbiddenException, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { CreateItemDto } from "./dto/create-item.dto";
 import { ProductService } from "src/product/product.service";
@@ -84,6 +84,8 @@ export class itemservice {
   async incrementItem(id: string, idUser: string) {
     try {
       const item = await this.getItemById(id)
+      const product = await this.productService.getProductById(item.idProduct)
+      if (product.stock === 0) throw new BadRequestException("Product out of stock")
       const idCart = item.idCart
       const cart = await this.cartService.getCartById(idCart)
       if (idUser !== cart.idUser) throw new NotFoundException("You do not have access to this feature")

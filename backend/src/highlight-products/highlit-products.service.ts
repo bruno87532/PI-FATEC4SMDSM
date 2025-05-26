@@ -66,12 +66,14 @@ export class HighlightProductsService {
     const productsArr = await Promise.all(
       subscriptionsArr.map(subscriptions =>
         Promise.all(
-          subscriptions.map(subscription =>
-            this.productService.getProductsByIdUser(subscription.idUser)
-          )
+          subscriptions.map(async subscription => {
+            const products = await this.productService.getProductsByIdUser(subscription.idUser);
+            return products.filter(product => product.stock > 0); // filtra os produtos aqui
+          })
         )
       )
     );
+
 
     const result: Record<string, Record<string, any[]>> = {};
 
@@ -144,12 +146,14 @@ export class HighlightProductsService {
     const productsArr = await Promise.all(
       subscriptionsArr.map(subscriptions =>
         Promise.all(
-          subscriptions.map(subscription =>
-            this.productService.getProductsByPartialNameId(subscription.idUser, partialName)
-          )
+          subscriptions.map(async subscription => {
+            const products = await this.productService.getProductsByIdUser(subscription.idUser);
+            return products.filter(product => product.stock > 0); 
+          })
         )
       )
     );
+
 
     const result: Record<string, Record<string, any[]>> = {};
 

@@ -1,11 +1,10 @@
 "use client"
 
 import type React from "react"
-
 import type { ProductDb } from "@/type/product"
 import { usePagination } from "../../hooks/use-pagination"
 import { useMemo } from "react"
-import { ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react"
+import { ShoppingCart, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ProductCard } from "../product-card/product-card"
 
@@ -28,61 +27,58 @@ const ProductMarket: React.FC<ProductMarketProps> = ({ market, products, product
   }, [products, currentPage, productsPerPage])
 
   return (
-    <div className="mb-12">
-      <div className="flex items-center justify-between mb-6">
-        <div className="bg-green-50 border border-green-200 outline outline-1 outline-black/20 rounded-full px-3 py-1.5 flex items-center justify-between flex-1 mr-3 shadow-sm">
-          <div className="flex items-center gap-2">
-            <ShoppingCart className="text-green-600 h-5 w-5" />
-            <h2 className="text-xl font-bold text-green-700">{market}</h2>
+    <div className="bg-white rounded-3xl p-8 shadow-lg border border-gray-100">
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
+            <ShoppingCart className="text-white h-6 w-6" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">{market}</h2>
+            <p className="text-gray-500">Produtos selecionados especialmente para você</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <a
-            href="#"
-            className="text-green-600 text-sm font-medium hover:underline"
-            aria-label={`Ver mais produtos de ${market}`}
-          >
-            Ver mais
-          </a>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              className="h-8 w-8 rounded-full p-0"
-              aria-label="Página anterior"
-              onClick={prevPage}
-              disabled={currentPage === 0}
-            >
-              <ChevronLeft className="h-4 w-4" />
-              <span className="sr-only">Página anterior</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="h-8 w-8 rounded-full p-0"
-              aria-label="Próxima página"
-              onClick={nextPage}
-              disabled={currentPage === totalPages - 1}
-            >
-              <ChevronRight className="h-4 w-4" />
-              <span className="sr-only">Próxima página</span>
-            </Button>
-          </div>
+
+        <div className="flex items-center gap-4">
+          {totalPages > 1 && (
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-10 w-10 rounded-full border-gray-200 hover:border-green-500 hover:bg-green-50"
+                onClick={prevPage}
+                disabled={currentPage === 0}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-10 w-10 rounded-full border-gray-200 hover:border-green-500 hover:bg-green-50"
+                onClick={nextPage}
+                disabled={currentPage === totalPages - 1}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         {displayedProducts.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
 
       {totalPages > 1 && (
-        <div className="flex justify-center gap-2 mt-6" role="navigation" aria-label="Paginação de produtos">
+        <div className="flex justify-center gap-2 mt-8" role="navigation" aria-label="Paginação de produtos">
           {Array.from({ length: totalPages }).map((_, i) => (
             <button
               key={i}
               onClick={() => goToPage(i)}
-              className={`h-2.5 w-2.5 rounded-full transition-colors ${
-                i === currentPage ? "bg-green-600" : "bg-gray-300 hover:bg-gray-400"
+              className={`h-3 w-8 rounded-full transition-all duration-300 ${
+                i === currentPage ? "bg-green-600 shadow-lg" : "bg-gray-200 hover:bg-gray-300"
               }`}
               aria-label={`Ir para página ${i + 1}`}
               aria-current={i === currentPage ? "page" : undefined}
