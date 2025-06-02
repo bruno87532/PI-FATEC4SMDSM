@@ -147,7 +147,7 @@ export class HighlightProductsService {
       subscriptionsArr.map(subscriptions =>
         Promise.all(
           subscriptions.map(async subscription => {
-            const products = await this.productService.getProductsByIdUser(subscription.idUser);
+            const products = await this.productService.getProductsByPartialNameId(subscription.idUser, partialName);
             return products.filter(product => product.stock > 0); 
           })
         )

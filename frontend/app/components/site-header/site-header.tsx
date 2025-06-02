@@ -22,10 +22,9 @@ export const SiteHeader = () => {
   const { search, setSearch } = useSearch()
 
   const handleSearch = (e: React.FormEvent) => {
-    setSearch(searchQuery)
+    console.log(search)
     e.preventDefault()
     if (searchQuery.trim()) {
-      // Handle search
     }
   }
 
@@ -33,7 +32,6 @@ export const SiteHeader = () => {
     <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
       <div className="container mx-auto px-4 py-4 max-w-7xl">
         <div className="flex items-center justify-between gap-6">
-          {/* Logo */}
           <Link
             href="/"
             className="flex items-center gap-2 font-bold text-2xl bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent hover:from-green-700 hover:to-emerald-700 transition-all duration-200"
@@ -45,33 +43,24 @@ export const SiteHeader = () => {
             PI4DSM
           </Link>
 
-          {/* Search Bar - Desktop */}
           <form onSubmit={handleSearch} className="hidden md:flex items-center flex-1 max-w-2xl mx-8">
             <div className="relative w-full group">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-green-600 transition-colors" />
               <Input
                 type="search"
-                placeholder="Busque por produtos, mercados ou categorias..."
+                placeholder="Pesquisar produtos..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 pr-4 h-12 bg-gray-50 border-gray-200 rounded-xl focus:bg-white focus:border-green-500 focus:ring-2 focus:ring-green-100 transition-all duration-200"
+                onChange={(e) => {
+                  setSearch(e.target.value)
+                  setSearchQuery(e.target.value)
+                }}
+                className="pl-10 pr-4"
                 aria-label="Campo de pesquisa"
               />
-              {searchQuery && (
-                <Button
-                  type="submit"
-                  size="sm"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-green-600 hover:bg-green-700 rounded-lg"
-                >
-                  Buscar
-                </Button>
-              )}
             </div>
           </form>
 
-          {/* Actions */}
           <div className="flex items-center gap-3">
-            {/* Premium Button */}
             <Link href="/payments" className={`shrink-0 ${!user || user?.advertiserName ? "invisible" : ""}`}>
               <Button
                 size="sm"
@@ -83,7 +72,6 @@ export const SiteHeader = () => {
               </Button>
             </Link>
 
-            {/* Mobile Search */}
             <Button
               variant="ghost"
               size="icon"
@@ -92,8 +80,6 @@ export const SiteHeader = () => {
             >
               <Search className="h-5 w-5" />
             </Button>
-
-            {/* User Account */}
             {!user ? (
               <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
                 <DialogTrigger asChild>
@@ -109,12 +95,10 @@ export const SiteHeader = () => {
               </div>
             )}
 
-            {/* Cart */}
             <SideMenuCart />
           </div>
         </div>
 
-        {/* Mobile Search */}
         <form onSubmit={handleSearch} className="md:hidden mt-4">
           <div className="relative group">
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-green-600 transition-colors" />
@@ -122,7 +106,10 @@ export const SiteHeader = () => {
               type="search"
               placeholder="Busque por produtos..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value)
+                setSearch(e.target.value)
+              }}
               className="pl-12 pr-4 h-12 bg-gray-50 border-gray-200 rounded-xl focus:bg-white focus:border-green-500 focus:ring-2 focus:ring-green-100 transition-all duration-200"
               aria-label="Campo de pesquisa mobile"
             />

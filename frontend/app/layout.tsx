@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { IsLoginOpenProvider } from "./context/is-login-open";
 import { UserProvider } from "./context/user-context";
 import { SearchProvider } from "./context/search-context";
+import { CategoryProvider } from "./context/category-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,14 +32,16 @@ export default function RootLayout({
       <IsLoginOpenProvider>
         <UserProvider>
           <SearchProvider>
-            <body
-              className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-            >
-              <div className="min-h-screen bg-white">
-                {children}
-                <Toaster />
-              </div>
-            </body>
+            <CategoryProvider>
+              <body
+                className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+              >
+                <div className="min-h-screen bg-white">
+                  {children}
+                  <Toaster />
+                </div>
+              </body>
+            </CategoryProvider>
           </SearchProvider>
         </UserProvider>
       </IsLoginOpenProvider>
