@@ -11,6 +11,7 @@ import React, { useState } from "react"
 import { userService } from "@/services/user"
 import { ApiError } from "@/type/error"
 import { Loader2 } from "lucide-react"
+import { useUser } from "@/app/context/user-context"
 
 const stepTwoSchema = z.object({
   otp: z
@@ -30,8 +31,10 @@ export const StepTwo: React.FC<{
   phone: string
   setIsUserComplete: React.Dispatch<React.SetStateAction<boolean>>
   onComplete?: () => void
-}> = ({ setStep, phone, setIsUserComplete, onComplete }) => {
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
+}> = ({ setStep, phone, setIsUserComplete, onComplete, setIsOpen }) => {
   const [isLoading, setIsLoading] = useState(false)
+  const { user, setUser } = useUser()
 
   const stepTwoForm = useForm<StepTwoSchema>({
     resolver: zodResolver(stepTwoSchema),
@@ -45,6 +48,17 @@ export const StepTwo: React.FC<{
       setIsLoading(true)
       await userService.verifyNumber(phone, data.otp)
       setIsUserComplete(true)
+      setUser(
+        (prev) => {
+          if (!prev) return null
+          return {
+            ...prev,
+            phone
+          }
+        }
+      )
+      setIsOpen(false)
+      setIsOpen(true)
       onComplete?.()
     } catch (error) {
       if (error instanceof ApiError && error.message === "Invalid code") {

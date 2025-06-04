@@ -10,6 +10,7 @@ import { useState } from "react"
 import { Select, SelectTrigger, SelectGroup, SelectContent, SelectValue, SelectItem } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
+import { useUser } from "@/app/context/user-context"
 
 export const StepOne: React.FC<{
   setStep: React.Dispatch<React.SetStateAction<number>>

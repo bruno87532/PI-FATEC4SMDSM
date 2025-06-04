@@ -72,10 +72,9 @@ export const SideMenuCart = () => {
         if (sheetCloseRef.current) {
           sheetCloseRef.current.click()
         }
-
-        sheetCloseRef.current?.click()
       } 
     } catch (error) {
+      console.error(error)
     }
   }
 
@@ -238,7 +237,7 @@ export const SideMenuCart = () => {
       </Sheet>
       <CheckoutModal />
 
-      <FormDialog setIsOpen={setIsOpen} isOpen={isOpen} />
+      <FormDialog setIsOpen={setIsOpen} isOpen={isOpen} onComplete={() => setShowCheckout(true)} />
     </>
   )
 }

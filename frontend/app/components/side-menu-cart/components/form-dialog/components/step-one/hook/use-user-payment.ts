@@ -76,6 +76,13 @@ export const UseUserPayment = (
     setIsLoading(true)
     setIsLoadingButton(true)
     const { phone, ...newData } = data
+    setUser((prev) => {
+      if (!prev) return null
+      return {
+        ...prev,
+        ...data
+      }
+    })
     await userService.confirmationNumber(phone)
     await userService.updateUser(newData)
     setPhone(phone)

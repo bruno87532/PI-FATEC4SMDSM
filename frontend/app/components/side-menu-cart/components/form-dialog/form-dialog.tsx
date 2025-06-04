@@ -8,16 +8,31 @@ import { Dialog, DialogContent } from "@/components/ui/dialog"
 export const FormDialog: React.FC<{
   isOpen: boolean
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
-}> = ({ isOpen, setIsOpen }) => {
+  onComplete: () => void
+}> = ({ isOpen, setIsOpen, onComplete }) => {
   const [step, setStep] = useState<number>(0)
   const [phone, setPhone] = useState<string>("")
   const [isUserComplete, setIsUserComplete] = useState<boolean>(false)
+
+  const handleComplete = () => {
+    setIsUserComplete(true)
+    onComplete() 
+    setIsOpen(false) 
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent>
         {step === 0 && <StepOne setStep={setStep} setPhone={setPhone} />}
-        {step === 1 && <StepTwo setStep={setStep} phone={phone} setIsUserComplete={setIsUserComplete} />}
+        {step === 1 && (
+          <StepTwo
+            setIsOpen={setIsOpen}
+            setStep={setStep}
+            phone={phone}
+            setIsUserComplete={setIsUserComplete}
+            onComplete={handleComplete} 
+          />
+        )}
       </DialogContent>
     </Dialog>
   )
