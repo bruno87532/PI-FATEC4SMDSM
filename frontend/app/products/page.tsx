@@ -1,5 +1,4 @@
 import { SiteHeader } from "@/app/components/site-header/site-header"
-import { MainNav } from "@/app/components/main-nav/main-nav"
 import { SiteFooter } from "@/app/components/site-footer/site-footer"
 import { CartProvider } from "@/app/context/cart-context"
 import { ProductGrid } from "./components/pruduct-grid"

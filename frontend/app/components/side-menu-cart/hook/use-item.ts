@@ -1,7 +1,7 @@
 "use client"
 
 import { useCart } from "@/app/context/cart-context"
-import { useEffect, useCallback, useState } from "react"
+import { useEffect, useCallback } from "react"
 import type { Item } from "@/type/item"
 import { itemService } from "@/services/item"
 import { useToast } from "@/hooks/use-toast"
@@ -20,13 +20,12 @@ type GroupedData = Record<string, {
 export const useItem = (
   setData: React.Dispatch<React.SetStateAction<GroupedData>>
 ) => {
-  const [idCarts, setIdCarts] = useState<string[] | null>(null)
   const { cart, setCart } = useCart()
   const { toast } = useToast()
 
   const getAdvertiserNameByIds = async (ids: string[]) => {
     const names = await userService.getAdvertiserNamesByIds(ids)
-    let allUser: Record<string, string> = {}
+    const allUser: Record<string, string> = {}
     for (const name of names) {
       allUser[name.id] = name.advertiserName
     }
@@ -80,7 +79,7 @@ export const useItem = (
     }
 
     getProductsByIds()
-  }, [cart])
+  }, [cart, setData])
 
   const createItem = useCallback(async (idProduct: string) => {
     if (!cart) return
@@ -138,7 +137,7 @@ export const useItem = (
         })
       }
     }
-  }, [cart, setCart])
+  }, [cart, setCart, toast])
 
   const deleteItem = useCallback(async (id: string) => {
     if (!cart) return

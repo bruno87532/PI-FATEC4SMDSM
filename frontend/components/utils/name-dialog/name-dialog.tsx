@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast"
 
 export const NameDialog = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
-  const { user, setUser } = useUser()
+  const { setUser } = useUser()
   const { toast } = useToast()
 
   const formSchema = z.object({

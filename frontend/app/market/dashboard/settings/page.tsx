@@ -24,7 +24,7 @@ const Settings = () => {
     }
 
     getUserById()
-  }, [])
+  }, [setUser])
 
   if (!user)
     return (

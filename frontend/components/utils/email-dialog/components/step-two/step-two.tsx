@@ -20,8 +20,8 @@ type StepTwo = z.infer<typeof StepTwoSchema>
 
 export const StepTwo: React.FC<{ setIsOpen: React.Dispatch<React.SetStateAction<boolean>>, email: string }> = ({ setIsOpen, email }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const { user, setUser } = useUser()
-  const { step, setStep } = useStep()
+  const { setUser } = useUser()
+  const { setStep } = useStep()
   const { toast } = useToast()
 
   const resetRegister = () => {

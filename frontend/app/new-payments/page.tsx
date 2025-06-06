@@ -5,29 +5,15 @@ import { planService } from "@/services/plan"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@radix-ui/react-tabs"
 import { DialogPrice } from "./components/dialog-price/dialog-price"
 import { Button } from "@/components/ui/button"
-import { StripeService } from "@/services/stripe"
-import { useRouter } from "next/navigation"
 import { Layout, BarChart2, Search, Loader2, AlertCircle } from "lucide-react"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 const Stripe = () => {
-  const router = useRouter()
-
   const monthly = ["Plano básico mensal", "Plano médio mensal", "Plano avançado mensal"]
   const yearly = ["Plano básico anual", "Plano médio anual", "Plano avançado anual"]
   const [plans, setPlans] = useState<Record<string, string>[] | undefined>(undefined)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
-  const [showCancelDialog, setShowCancelDialog] = useState(false)
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -46,19 +32,6 @@ const Stripe = () => {
 
     fetchPlans()
   }, [])
-
-  const cancelSubscription = async () => {
-    setShowCancelDialog(true)
-  }
-
-  const confirmCancelSubscription = async () => {
-    try {
-      await StripeService.cancelSubscription()
-      router.push("/subscription-canceled")
-    } catch (err) {
-      console.error("Erro ao cancelar assinatura:", err)
-    }
-  }
 
   if (isLoading) {
     return (
@@ -312,39 +285,6 @@ const Stripe = () => {
             })}
           </TabsContent>
         </Tabs>
-
-        <div className="mt-12 text-center">
-          <Button
-            onClick={cancelSubscription}
-            className="border-green-600 text-green-600 hover:bg-green-600 hover:text-white transition-colors"
-            variant="outline"
-          >
-            Cancelar assinatura
-          </Button>
-
-          <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle className="text-center text-xl text-green-700">Cancelar assinatura</DialogTitle>
-                <DialogDescription className="text-center pt-2">
-                  Você tem certeza que deseja cancelar sua assinatura?
-                  <p className="mt-2 font-medium">Sua assinatura ficará ativa até o fim do período contratado.</p>
-                  <p className="mt-2 font-medium">Não haverá mais cobranças recorrentes.</p>
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter className="flex flex-row justify-center gap-2 sm:justify-center">
-                <DialogClose asChild>
-                  <Button variant="outline" className="border-green-600 text-green-600">
-                    Voltar
-                  </Button>
-                </DialogClose>
-                <Button onClick={confirmCancelSubscription} className="bg-red-500 hover:bg-red-600 text-white">
-                  Confirmar cancelamento
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
 
         <p className="text-center text-sm text-gray-500 mt-12 max-w-3xl mx-auto">
           A assinatura será renovada automaticamente pelo valor indicado no plano selecionado, salvo cancelamento.

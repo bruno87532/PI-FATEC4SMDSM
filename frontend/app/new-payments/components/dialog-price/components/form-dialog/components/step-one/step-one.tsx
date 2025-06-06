@@ -1,22 +1,19 @@
-"use client"
-
 import { DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Form, FormField, FormLabel, FormControl, FormMessage, FormItem } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { maskPhone } from "@/utils/mask-phone"
 import { UseUserPayment } from "./hook/use-user-payment"
-import type React from "react"
-import { useState } from "react"
+import React, { useState } from "react"
 import { Select, SelectTrigger, SelectGroup, SelectContent, SelectValue, SelectItem } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 
-export const StepOne: React.FC<{
-  setStep: React.Dispatch<React.SetStateAction<number>>
-  setPhone: React.Dispatch<React.SetStateAction<string>>
+export const StepOne: React.FC<{ 
+  setStep: React.Dispatch<React.SetStateAction<number>>,
+  setPhone: React.Dispatch<React.SetStateAction<string>>, 
 }> = ({ setStep, setPhone }) => {
   const [isLoadingButton, setIsLoadingButton] = useState<boolean>(false)
-
+ 
   const { isLoading, states, form, handleChangeCep, handleSubmit } = UseUserPayment(
     setIsLoadingButton,
     setPhone,
@@ -25,14 +22,27 @@ export const StepOne: React.FC<{
 
   return (
     <div className="max-h-[70vh] overflow-y-auto px-1 py-2">
-      <DialogTitle className="text-xl font-bold text-green-700 mb-2">Informações para comprar</DialogTitle>
+      <DialogTitle className="text-xl font-bold text-green-700 mb-2">Informações para anúncio</DialogTitle>
       <DialogDescription className="mb-4 text-gray-600">
-        Por favor, preencha os dados abaixo para o estabelecimento realizar a entrega da mercadoria.
+        Por favor, preencha os dados abaixo para prosseguir com a sua assinatura.
       </DialogDescription>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-3">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <FormField
+              control={form.control}
+              name="advertiserName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium text-gray-700">Nome do mercado</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Nome do mercado" className="h-9" />
+                  </FormControl>
+                  <FormMessage className="text-xs" />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="phone"
@@ -48,13 +58,15 @@ export const StepOne: React.FC<{
                         field.onChange(maskedValue)
                       }}
                       value={field.value}
-                      className="h-9"
                     />
                   </FormControl>
                   <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <FormField
               control={form.control}
               name="zipCode"
@@ -76,9 +88,6 @@ export const StepOne: React.FC<{
                 </FormItem>
               )}
             />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <FormField
               control={form.control}
               name="state"
@@ -105,6 +114,9 @@ export const StepOne: React.FC<{
                 </FormItem>
               )}
             />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <FormField
               control={form.control}
               name="city"
@@ -112,15 +124,12 @@ export const StepOne: React.FC<{
                 <FormItem>
                   <FormLabel className="text-sm font-medium text-gray-700">Cidade</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Sua cidade" className="h-9" />
+                    <Input {...field} placeholder="Cidade do mercado" className="h-9" />
                   </FormControl>
                   <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <FormField
               control={form.control}
               name="neighborhood"
@@ -128,42 +137,43 @@ export const StepOne: React.FC<{
                 <FormItem>
                   <FormLabel className="text-sm font-medium text-gray-700">Bairro</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Seu bairro" className="h-9" />
+                    <Input {...field} placeholder="Bairro do mercado" className="h-9" />
                   </FormControl>
                   <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
-            <div className="grid grid-cols-3 gap-3">
-              <div className="col-span-2">
-                <FormField
-                  control={form.control}
-                  name="road"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium text-gray-700">Rua</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="Sua rua" className="h-9" />
-                      </FormControl>
-                      <FormMessage className="text-xs" />
-                    </FormItem>
-                  )}
-                />
-              </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div className="col-span-2">
               <FormField
                 control={form.control}
-                name="marketNumber"
+                name="road"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">Número</FormLabel>
+                    <FormLabel className="text-sm font-medium text-gray-700">Rua</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Nº" className="h-9" />
+                      <Input {...field} placeholder="Rua do mercado" className="h-9" />
                     </FormControl>
                     <FormMessage className="text-xs" />
                   </FormItem>
                 )}
               />
             </div>
+            <FormField
+              control={form.control}
+              name="marketNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium text-gray-700">Número</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Nº" className="h-9" />
+                  </FormControl>
+                  <FormMessage className="text-xs" />
+                </FormItem>
+              )}
+            />
           </div>
 
           <DialogFooter className="mt-4 pt-3 border-t border-green-100">
@@ -179,7 +189,7 @@ export const StepOne: React.FC<{
               disabled={isLoading}
               className="bg-green-600 hover:bg-green-700 text-white rounded-full"
             >
-              {isLoadingButton ? <Loader2 className="animate-spin h-6 w-6" /> : "Prosseguir"}
+              { isLoadingButton ? <Loader2 className="animate-spin h-6 w-6" /> : "Prosseguir" }
             </Button>
           </DialogFooter>
         </form>

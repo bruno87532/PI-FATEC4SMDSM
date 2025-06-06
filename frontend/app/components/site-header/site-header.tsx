@@ -14,10 +14,11 @@ import { UserNav as UserNavAdvertiser } from "@/app/market/dashboard/components/
 import { UserNav as UserNavUser } from "@/app/profile/settings/components/user-nav/user-nav"
 import { SideMenuCart } from "../side-menu-cart/side-menu-cart"
 import { useSearch } from "@/app/context/search-context"
+import Image from "next/image"
 
 export const SiteHeader = () => {
   const [searchQuery, setSearchQuery] = useState("")
-  const { user, setUser } = useUser()
+  const { user } = useUser()
   const { isLoginOpen, setIsLoginOpen } = useIsLoginOpen()
   const { search, setSearch } = useSearch()
 
@@ -32,16 +33,7 @@ export const SiteHeader = () => {
     <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
       <div className="container mx-auto px-4 py-4 max-w-7xl">
         <div className="flex items-center justify-between gap-6">
-          <Link
-            href="/"
-            className="flex items-center gap-2 font-bold text-2xl bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent hover:from-green-700 hover:to-emerald-700 transition-all duration-200"
-            aria-label="Página inicial do PI4DSM"
-          >
-            <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">P</span>
-            </div>
-            PI4DSM
-          </Link>
+          <Image alt="Logo do site" src="/images/logo.png" width={75} height={75} />
 
           <form onSubmit={handleSearch} className="hidden md:flex items-center flex-1 max-w-2xl mx-8">
             <div className="relative w-full group">

@@ -101,7 +101,7 @@ export const ProductCsv = () => {
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              <strong>Importante:</strong> As categorias e subcategorias ficarão como "sem categoria" inicialmente, mas
+              <strong>Importante:</strong> As categorias e subcategorias ficarão como &quot;sem categoria&quot; inicialmente, mas
               podem ser atualizadas posteriormente. As imagens ficarão em branco e também podem ser adicionadas depois.
             </AlertDescription>
           </Alert>

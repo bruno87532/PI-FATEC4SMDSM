@@ -29,12 +29,11 @@ type StepTwoSchema = z.infer<typeof stepTwoSchema>
 export const StepTwo: React.FC<{
   setStep: React.Dispatch<React.SetStateAction<number>>
   phone: string
-  setIsUserComplete: React.Dispatch<React.SetStateAction<boolean>>
   onComplete?: () => void
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
-}> = ({ setStep, phone, setIsUserComplete, onComplete, setIsOpen }) => {
+}> = ({ setStep, phone, onComplete, setIsOpen }) => {
   const [isLoading, setIsLoading] = useState(false)
-  const { user, setUser } = useUser()
+  const { setUser } = useUser()
 
   const stepTwoForm = useForm<StepTwoSchema>({
     resolver: zodResolver(stepTwoSchema),
@@ -47,7 +46,6 @@ export const StepTwo: React.FC<{
     try {
       setIsLoading(true)
       await userService.verifyNumber(phone, data.otp)
-      setIsUserComplete(true)
       setUser(
         (prev) => {
           if (!prev) return null

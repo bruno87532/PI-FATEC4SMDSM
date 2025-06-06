@@ -39,7 +39,7 @@ export const useSubscriptionCancelling = ({ setIsLoadingReason, setIsLoadingReac
       setIsLoadingReactivated(true)
       StripeService.reactivateSubscription()
       router.push("/subscription-reactivated")
-    } catch (error) {
+    } catch {
       setIsLoadingReactivated(false)
     }
   }

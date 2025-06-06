@@ -1,6 +1,6 @@
 "use client"
 
-import { Dialog, DialogTrigger, DialogDescription, DialogHeader, DialogContent, DialogFooter, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogTrigger, DialogDescription, DialogHeader, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { StepOne } from "./components/step-one/step-one"

@@ -5,14 +5,14 @@ import * as cookieParser from "cookie-parser"
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
+  app.setGlobalPrefix('api');
   app.enableCors({
-    origin: "http://localhost:3000",
+    origin: process.env.ORIGIN,
     methods: "GET, POST, PUT, PATCH, DELETE",
     allowedHeaders: "Content-Type",
     credentials: true
   })
-  app.use("/stripe/payment-successfully", bodyParser.raw({ type: "application/json" }))
+  app.use("/api/stripe/payment-successfully", bodyParser.raw({ type: "application/json" }))
   app.use(cookieParser())
   await app.listen(process.env.PORT ?? 3001);
 }

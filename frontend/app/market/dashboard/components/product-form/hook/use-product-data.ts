@@ -55,7 +55,7 @@ export const useProductData = (
       setLoading(false)
     }
     getImage()
-  }, [product])
+  }, [product, setFile])
 
   return {
     regularPriceDb,

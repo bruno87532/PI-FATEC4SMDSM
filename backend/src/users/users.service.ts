@@ -25,7 +25,7 @@ export class UsersService {
       const user = await this.prismaService.user.findUnique({
         where: { email: data.email }
       })
-      if (user && !user.isActivate) await this.prismaService.user.delete({
+      if (user && !user.password) await this.prismaService.user.delete({
         where: { email: data.email }
       })
 

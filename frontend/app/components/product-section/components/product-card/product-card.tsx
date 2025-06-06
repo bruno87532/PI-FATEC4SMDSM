@@ -15,8 +15,8 @@ import { useUser } from "@/app/context/user-context"
 import { useIsLoginOpen } from "@/app/context/is-login-open"
 
 export const ProductCard: React.FC<{ product: ProductDb }> = ({ product }) => {
-  const { user, setUser } = useUser()
-  const { isLoginOpen, setIsLoginOpen } = useIsLoginOpen()
+  const { user } = useUser()
+  const { setIsLoginOpen } = useIsLoginOpen()
   const { cart, setCart } = useCart()
   const { toast } = useToast()
   const [isAddingToCart, setIsAddingToCart] = useState(false)

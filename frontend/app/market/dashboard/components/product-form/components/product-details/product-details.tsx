@@ -70,7 +70,7 @@ export const ProductDetails: React.FC<{ productForm: UseFormReturn<ProductType>;
       }
       setSubCategories(data)
     }
-  }, [idCategories])
+  }, [idCategories, subCategoriesData])
 
   const handleCategoriesChange = (ids: string[]) => {
     const data = []

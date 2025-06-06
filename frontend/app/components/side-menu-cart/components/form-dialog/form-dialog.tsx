@@ -12,10 +12,8 @@ export const FormDialog: React.FC<{
 }> = ({ isOpen, setIsOpen, onComplete }) => {
   const [step, setStep] = useState<number>(0)
   const [phone, setPhone] = useState<string>("")
-  const [isUserComplete, setIsUserComplete] = useState<boolean>(false)
 
   const handleComplete = () => {
-    setIsUserComplete(true)
     onComplete() 
     setIsOpen(false) 
   }
@@ -29,7 +27,6 @@ export const FormDialog: React.FC<{
             setIsOpen={setIsOpen}
             setStep={setStep}
             phone={phone}
-            setIsUserComplete={setIsUserComplete}
             onComplete={handleComplete} 
           />
         )}

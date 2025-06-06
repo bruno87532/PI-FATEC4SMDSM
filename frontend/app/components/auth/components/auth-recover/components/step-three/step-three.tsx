@@ -11,7 +11,6 @@ import { useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
 import { useAuthRecoverContext } from "../../auth-recover-context"
 import { useAuthContext } from "@/app/components/auth/auth-context"
-import { ApiError } from "@/type/error"
 import { authService } from "@/services/auth"
 import { Loader2 } from "lucide-react"
 
@@ -32,7 +31,7 @@ type StepThree = z.infer<typeof StepThreeSchema>
 
 export const StepThree = () => {
   const { setActiveTab } = useAuthContext()
-  const { setRecoverStep, idUser, randomCode } = useAuthRecoverContext()
+  const { setRecoverStep, idUser } = useAuthRecoverContext()
 
   const [showPassword, setShowPassword] = useState<boolean>(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false)
@@ -63,7 +62,7 @@ export const StepThree = () => {
       })
       setRecoverStep(1)
       setActiveTab("login")
-    } catch (error) {
+    } catch {
       setIsLoading(false)
     }
   }

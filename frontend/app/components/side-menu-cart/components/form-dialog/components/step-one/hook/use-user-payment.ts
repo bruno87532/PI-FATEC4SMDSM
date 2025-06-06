@@ -66,8 +66,8 @@ export const UseUserPayment = (
       } else {
         form.setValue("road", data.logradouro)
         form.setValue("state", data.uf)
-        form.setValue("neighborhood", data.bairro),
-          form.setValue("city", data.localidade)
+        form.setValue("neighborhood", data.bairro)
+        form.setValue("city", data.localidade)
       }
     }
   }

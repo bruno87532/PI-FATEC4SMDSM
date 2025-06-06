@@ -43,8 +43,7 @@ const baseSchema = {
     .refine((file) => file.type.startsWith('image/'), { message: 'O arquivo deve ser uma imagem.' })
 }
 
-const baseZodSchema = z.object(baseSchema)
-export type Product = z.infer<typeof baseZodSchema>
+export type Product = z.infer<z.ZodObject<typeof baseSchema>>
 
 export const createSchema = (isPromotional: boolean) =>
   z.object({

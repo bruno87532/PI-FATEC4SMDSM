@@ -4,7 +4,7 @@ import type React from "react"
 import type { ProductDb } from "@/type/product"
 import { usePagination } from "../../hooks/use-pagination"
 import { useMemo } from "react"
-import { ShoppingCart, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react"
+import { ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ProductCard } from "../product-card/product-card"
 

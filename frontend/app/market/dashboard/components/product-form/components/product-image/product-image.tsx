@@ -22,7 +22,7 @@ export const ProductImage: React.FC<{ productForm: UseFormReturn<Product>, image
       }
       reader.readAsDataURL(image)
     }
-  }, [image])
+  }, [image, productForm])
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]

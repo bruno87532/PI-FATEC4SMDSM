@@ -74,6 +74,7 @@ export function ProductGrid() {
     searchLower,
     selectedCategoryIds,
     selectedSubcategoryIds,
+    search,
   ])
 
   if (isLoading || !products) {

@@ -14,7 +14,7 @@ import { useUser } from "@/app/context/user-context"
 import { Loader2 } from "lucide-react"
 
 export const AdvertiserNameDialog = () => {
-  const { user, setUser } = useUser()
+  const { setUser } = useUser()
   const { toast } = useToast()
 
   const [isOpen, setIsOpen] = useState<boolean>(false)

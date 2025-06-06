@@ -36,7 +36,7 @@ export const SideMenuCart = () => {
   const [showCheckout, setShowCheckout] = useState(false)
   const sheetCloseRef = useRef<HTMLButtonElement>(null)
 
-  const { incrementItem, decrementItem, createItem, deleteItem } = useItem(setData)
+  const { incrementItem, decrementItem, deleteItem } = useItem(setData)
 
   const handlePurchase = async (totalPrice: number, idUserAdvertiser: string) => {
     if (

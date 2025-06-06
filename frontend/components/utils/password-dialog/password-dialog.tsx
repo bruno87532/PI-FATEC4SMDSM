@@ -3,7 +3,7 @@
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogDescription, DialogFooter, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Form, FormLabel, FormMessage, FormControl, FormItem, FormField, FormDescription } from "@/components/ui/form"
+import { Form, FormLabel, FormMessage, FormControl, FormItem, FormField } from "@/components/ui/form"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"

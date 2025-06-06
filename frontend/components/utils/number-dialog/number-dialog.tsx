@@ -21,7 +21,7 @@ type FormSchema = z.infer<typeof FormSchema>
 export const NumberDialog = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const { toast } = useToast()
-  const { user, setUser } = useUser()
+  const { setUser } = useUser()
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(FormSchema),

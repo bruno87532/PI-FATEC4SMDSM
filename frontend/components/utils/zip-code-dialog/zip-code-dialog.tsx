@@ -55,7 +55,7 @@ export const ZipCodeDialog: React.FC<{ dataValue?: {
   const [addressData, setAddressData] = useState<AddressData | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [invalidCep, setInvalidCep] = useState<boolean>(false)
-  const { user, setUser } = useUser()
+  const { setUser } = useUser()
   const { toast } = useToast()
 
   const form = useForm<FormSchema>({
@@ -88,7 +88,7 @@ export const ZipCodeDialog: React.FC<{ dataValue?: {
     }
   }
 
-  const handleSubmit = async (data: FormSchema) => {
+  const handleSubmit = async () => {
     try {
       if (invalidCep) {
         form.setError("zipCode", {
@@ -99,7 +99,7 @@ export const ZipCodeDialog: React.FC<{ dataValue?: {
       }
       setIsLoading(true)
       setIsConfirmOpen(true)
-    } catch (error) {
+    } catch {
       form.setError("zipCode", {
         type: "manual",
         message: "Erro ao buscar o CEP",

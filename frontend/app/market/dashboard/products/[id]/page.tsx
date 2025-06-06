@@ -4,14 +4,12 @@ import { useEffect, useState } from "react"
 import { ProductForm } from "../../components/product-form/product-form"
 import { useParams } from "next/navigation"
 import { productService } from "@/services/product"
-import { useToast } from "@/hooks/use-toast"
 import { ProductDb } from "@/type/product"
 import { Loader2 } from "lucide-react"
 
 const EditProductPage = () => {
   const { id } = useParams()
   const [product, setProduct] = useState<ProductDb | null>(null)
-  const { toast } = useToast()
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
   useEffect(() => {
@@ -23,7 +21,7 @@ const EditProductPage = () => {
     }
 
     getProductById()
-  }, [])
+  }, [id])
 
   return (
     <div className="flex flex-col gap-4 p-4 md:p-8">

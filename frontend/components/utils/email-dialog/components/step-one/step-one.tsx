@@ -4,7 +4,7 @@ import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Input } from "@/components/ui/input"
-import React, { ReactPortal } from "react"
+import React from "react"
 import { userService } from "@/services/user"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
@@ -21,7 +21,7 @@ type StepOne = z.infer<typeof StepOneSchema>
 
 export const StepOne: React.FC<{ setEmail: React.Dispatch<React.SetStateAction<string>> }> = ({ setEmail }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const { setStep, step } = useStep()
+  const { setStep } = useStep()
 
   const stepOneForm = useForm<StepOne>({
     resolver: zodResolver(StepOneSchema),

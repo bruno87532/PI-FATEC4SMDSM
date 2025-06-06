@@ -10,7 +10,6 @@ import { Loader2 } from "lucide-react"
 
 const PurchaseConfirmation = () => {
   const [homeIsLoading, setHomeIsLoading] = useState<boolean>(false)
-  const [admIsLoading, setAdmIsLoading] = useState<boolean>(false)
 
   useEffect(() => {
     const renewToken = async () => {
@@ -41,7 +40,6 @@ const PurchaseConfirmation = () => {
                 variant="outline"
                 className="border-gray-900 text-gray-800 hover:bg-gray-900 hover:text-gray-300 w-full"
                 onClick={() => {
-                  setAdmIsLoading(false)
                   setHomeIsLoading(true)
                 }}
               >

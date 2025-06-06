@@ -15,11 +15,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { authService } from "@/services/auth"
-import { useRouter } from "next/navigation"
 
 export const UserNav = () => {
   const { user, setUser } = useUser()
-  const router = useRouter()
   
   const handleClick = async () => {
     await authService.logout()

@@ -54,7 +54,7 @@ export const StepThree = () => {
       })
       setRegisterStep(1)
       setActiveTab("login")
-    } catch (error) {
+    } catch {
       setIsLoading(false)
     }
   }
