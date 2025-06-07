@@ -9,7 +9,7 @@ import { EvolutionClient } from '@solufy/evolution-sdk';
       provide: "EVOLUTION_CLIENT",
       useFactory: () => {
         return new EvolutionClient({
-          serverUrl: "https://bruno-pi.r4jlrq.easypanel.host/",
+          serverUrl: "https://bruno-evolution-api.r4jlrq.easypanel.host/",
           instance: process.env.INSTANCE_NAME ?? "",
           token: process.env.API_KEY_EVOLUTION ?? ""
         })

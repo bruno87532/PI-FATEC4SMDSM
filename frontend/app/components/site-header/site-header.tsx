@@ -2,7 +2,7 @@
 
 import type React from "react"
 import Link from "next/link"
-import { Search, User, Crown } from "lucide-react"
+import { Search, User, Crown, ShoppingBag } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
@@ -53,6 +53,15 @@ export const SiteHeader = () => {
           </form>
 
           <div className="flex items-center gap-3">
+            {user && (
+              <Link href="/products">
+                <Button variant="ghost" size="sm" className="hidden sm:flex items-center hover:bg-gray-100 rounded-xl">
+                  <ShoppingBag className="h-4 w-4 mr-2" />
+                  <span>Ver Produtos</span>
+                </Button>
+              </Link>
+            )}
+
             <Link href="/payments" className={`shrink-0 ${!user || user?.advertiserName ? "invisible" : ""}`}>
               <Button
                 size="sm"
@@ -83,7 +92,7 @@ export const SiteHeader = () => {
               </Dialog>
             ) : (
               <div className="ml-auto flex items-center space-x-4">
-                {user.advertiserName ? <UserNavAdvertiser /> : <UserNavUser />}
+                {user.typeUser === "ADVERTISER" ? <UserNavAdvertiser /> : <UserNavUser />}
               </div>
             )}
 
@@ -107,6 +116,21 @@ export const SiteHeader = () => {
             />
           </div>
         </form>
+
+        {user && (
+          <div className="sm:hidden mt-3 flex justify-center">
+            <Link href="/products" className="w-full">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full flex items-center justify-center hover:bg-gray-100 rounded-xl"
+              >
+                <ShoppingBag className="h-4 w-4 mr-2" />
+                <span>Ver Todos os Produtos</span>
+              </Button>
+            </Link>
+          </div>
+        )}
       </div>
     </header>
   )

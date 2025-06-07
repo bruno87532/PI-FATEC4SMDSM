@@ -51,7 +51,7 @@ export class UserResponseDto {
   @Exclude()
   password: string
 
-  @Exclude()
+  @Expose()
   typeUser: string
 
   @Exclude()

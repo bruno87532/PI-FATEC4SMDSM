@@ -198,8 +198,11 @@ export class StripeService {
   private async handleCustomerSubscriptionDeleted(subscription: Stripe.Subscription) {
     try {
       const idStripe = subscription.id
-      const id = (await this.subscriptionService.getSubscriptionByIdStripe(idStripe)).id
-      await this.subscriptionService.updateSubscription(id, { isActivate: false })
+      const subscriptionDb = await this.subscriptionService.getSubscriptionByIdStripe(idStripe)
+      const idSubscription = subscriptionDb.id
+      const idUser = subscriptionDb.idUser
+      await this.usersService.updateUser(idUser, { typeUser: "COMMON" })
+      await this.subscriptionService.updateSubscription(idSubscription, { isActivate: false })
     } catch (error) {
       console.error("Error while processing the customer subscription deleted", error)
       throw new InternalServerErrorException("Error while processing the customer subscription deleted")
@@ -228,6 +231,7 @@ export class StripeService {
   private async unsubscribeImmediately(idUser: string) {
     try {
       const subscription = await this.subscriptionService.getSubscriptionActiveByIdUser(idUser)
+      await this.usersService.updateUser(idUser, { typeUser: "COMMON" })
       await this.subscriptionService.updateSubscription(subscription.id, {
         isActivate: false
       })

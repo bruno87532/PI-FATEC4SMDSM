@@ -10,4 +10,5 @@ export type User = {
   road: string | null;
   state: string | null;
   zipCode: string | null;
+  typeUser: "COMMON" | "ADVERTISER" | null;
 }
