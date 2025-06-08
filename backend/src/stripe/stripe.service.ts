@@ -134,12 +134,10 @@ export class StripeService {
       let ids: string[] = []
 
       for (const item of itens) {
-        console.log(item)
         ids.push(item.id)
         const product = await this.productService.getProductById(item.idProduct)
         template += `Produto: ${product.name}\nQuantidade: ${item.quantity}\n`
       }
-      console.log(ids)
       await this.itemService.deleteItens(ids)
       await this.evolutionService.sendMessage(advertiser.phone!, template)
 

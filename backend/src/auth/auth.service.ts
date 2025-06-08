@@ -204,7 +204,6 @@ export class AuthService {
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
     })
-    console.log("aqui foi")
     
     return { message: "Logout successfully" }
   }

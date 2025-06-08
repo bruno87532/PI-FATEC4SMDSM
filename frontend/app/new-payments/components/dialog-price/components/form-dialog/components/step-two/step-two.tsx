@@ -2,27 +2,28 @@
 
 import { Form, FormField, FormControl, FormLabel, FormMessage, FormItem } from "@/components/ui/form"
 import { useForm } from "react-hook-form"
-import { DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import React, { useState } from "react"
+import type React from "react"
+import { useState } from "react"
 import { userService } from "@/services/user"
 import { ApiError } from "@/type/error"
 import { Loader2 } from "lucide-react"
 import { useUser } from "@/app/context/user-context"
 
 const StepTwoSchema = z.object({
-  otp: z.string().length(6, "O código deve ter 6 dígitos")
+  otp: z.string().length(6, "O código deve ter 6 dígitos"),
 })
 
 type StepTwoSchema = z.infer<typeof StepTwoSchema>
 
 export const StepTwo: React.FC<{
-  setStep: React.Dispatch<React.SetStateAction<number>>;
-  phone: string;
-  setIsUserAdvertiser: React.Dispatch<React.SetStateAction<boolean>>;
+  setStep: React.Dispatch<React.SetStateAction<number>>
+  phone: string
+  setIsUserAdvertiser: React.Dispatch<React.SetStateAction<boolean>>
 }> = ({ setStep, phone, setIsUserAdvertiser }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const { setUser } = useUser()
@@ -30,8 +31,8 @@ export const StepTwo: React.FC<{
   const stepTwoForm = useForm<StepTwoSchema>({
     resolver: zodResolver(StepTwoSchema),
     defaultValues: {
-      otp: ""
-    }
+      otp: "",
+    },
   })
 
   const handleSubmit = async (data: StepTwoSchema) => {
@@ -43,19 +44,19 @@ export const StepTwo: React.FC<{
         if (!prev) return null
         return {
           ...prev,
-          phone
+          phone,
         }
       })
     } catch (error) {
       if (error instanceof ApiError && error.message === "Invalid code") {
         stepTwoForm.setError("otp", {
           type: "manual",
-          message: "Código inválido"
+          message: "Código inválido",
         })
       } else if (error instanceof ApiError && error.message === "Expired code") {
         stepTwoForm.setError("otp", {
           type: "manual",
-          message: "Código expirado. Foi encaminhado um novo código para o seu whatsapp"
+          message: "Código expirado. Foi encaminhado um novo código para o seu whatsapp",
         })
       }
     } finally {
@@ -73,7 +74,7 @@ export const StepTwo: React.FC<{
 
       <div className="flex flex-col items-center justify-center space-y-4 py-4">
         <Form {...stepTwoForm}>
-          <form onSubmit={stepTwoForm.handleSubmit(handleSubmit)}>
+          <form onSubmit={stepTwoForm.handleSubmit(handleSubmit)} className="w-full">
             <FormField
               control={stepTwoForm.control}
               name="otp"
@@ -94,26 +95,25 @@ export const StepTwo: React.FC<{
                       </InputOTP>
                     </div>
                   </FormControl>
-                  <FormMessage className="text-center"/>
+                  <FormMessage className="text-center" />
                 </FormItem>
               )}
             />
-            <DialogFooter className="mt-4 pt-3 border-t border-green-100">
-              <Button
-                type="button"
-                variant="outline"
-                className="border-green-600 text-green-600 hover:bg-green-600 hover:text-white transition-colors rounded-full"
-                onClick={() => setStep(0)}
-              >
-                Voltar
-              </Button>
-              <Button
-                disabled={isLoading}
-                className="bg-green-600 hover:bg-green-700 text-white rounded-full"
-              >
-                { isLoading ? <Loader2 className="animate-spin h-6 w-6" /> : "Verificar" }
-              </Button>
-            </DialogFooter>
+            <div className="mt-6 pt-4 border-t border-green-100 flex justify-center">
+              <div className="flex items-center gap-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="border-green-600 text-green-600 hover:bg-green-600 hover:text-white transition-colors rounded-full"
+                  onClick={() => setStep(0)}
+                >
+                  Voltar
+                </Button>
+                <Button disabled={isLoading} className="bg-green-600 hover:bg-green-700 text-white rounded-full">
+                  {isLoading ? <Loader2 className="animate-spin h-6 w-6" /> : "Verificar"}
+                </Button>
+              </div>
+            </div>
           </form>
         </Form>
       </div>

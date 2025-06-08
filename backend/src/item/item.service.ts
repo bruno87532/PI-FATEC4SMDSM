@@ -166,7 +166,6 @@ export class itemservice {
           }
         }
       })
-      console.log(deleted)
 
       return deleted
     } catch (error) {

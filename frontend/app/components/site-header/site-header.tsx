@@ -23,7 +23,6 @@ export const SiteHeader = () => {
   const { search, setSearch } = useSearch()
 
   const handleSearch = (e: React.FormEvent) => {
-    console.log(search)
     e.preventDefault()
     if (searchQuery.trim()) {
     }

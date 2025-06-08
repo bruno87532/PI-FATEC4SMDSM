@@ -67,7 +67,7 @@ export const createSchema = (isPromotional: boolean) =>
       return true
     }, { message: "A data de expiração deve ser futura" }),
   }).refine((data) => {
-    if (data.promotionExpiration && data.promotionStart) {
+    if (isPromotional && data.promotionExpiration && data.promotionStart) {
       if (data.promotionExpiration.getTime() <= data.promotionStart.getTime()) {
         return false
       }

@@ -26,7 +26,7 @@ export const ProductsTable = () => {
   const { toast } = useToast()
 
   const [currentPage, setCurrentPage] = useState(1)
-  const limit = 2
+  const limit = 5
 
   useEffect(() => {
     const fetchPage = async () => {
