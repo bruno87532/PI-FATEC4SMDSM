@@ -27,6 +27,7 @@ export const ProductForm = ({ product }: { product?: ProductDb }) => {
 
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isPromotional, setIsPromotional] = useState<boolean>(false)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
 
   const ProductSchema = createSchema(isPromotional)
   const { regularPriceDb, categoryDb, subCategoryDb, promotionalPrice, promotionExpiration, promotionStart, loading } = useProductData(product, setIsPromotional, setFile)
@@ -68,6 +69,7 @@ export const ProductForm = ({ product }: { product?: ProductDb }) => {
         title,
         description
       })
+      setImagePreview(null)
       setFile(undefined)
       productForm.reset()
       if (product) {
@@ -97,7 +99,7 @@ export const ProductForm = ({ product }: { product?: ProductDb }) => {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
           <ProductDetails productForm={productForm} idCategories={categoryDb} />
           <div className="space-y-8">
-            <ProductImage image={file} productForm={productForm} />
+            <ProductImage image={file} productForm={productForm} imagePreview={imagePreview} setImagePreview={setImagePreview} />
             <ProductPromotion
               isPromotional={isPromotional}
               setIsPromotional={setIsPromotional}

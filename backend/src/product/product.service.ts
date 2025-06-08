@@ -389,7 +389,7 @@ export class ProductService {
       {
         to: user.email,
         template: "report",
-        subject: "Recuperação de senha",
+        subject: "Relatório de importação de produtos",
       },
       {
         quantityImport: quantityImport.toString(),

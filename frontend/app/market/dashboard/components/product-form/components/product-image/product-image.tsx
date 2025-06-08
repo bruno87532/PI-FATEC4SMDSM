@@ -6,13 +6,21 @@ import { ImageIcon, X } from "lucide-react";
 import { FormItem, FormField, FormControl, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Product } from "../../schema/schema";
 
-export const ProductImage: React.FC<{ productForm: UseFormReturn<Product>, image?: File }> = ({ productForm, image }) => {
+export const ProductImage: React.FC<{ 
+  productForm: UseFormReturn<Product>, 
+  image?: File,
+  imagePreview: string | null,
+  setImagePreview: React.Dispatch<React.SetStateAction<null | string>> 
+}> = ({
+  productForm, 
+  image,
+  imagePreview, 
+  setImagePreview
+}) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
-
   useEffect(() => {
     if (image && fileInputRef.current) {
       productForm.setValue("file", image)

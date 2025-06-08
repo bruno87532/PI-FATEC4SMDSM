@@ -70,22 +70,6 @@ const ProductMarket: React.FC<ProductMarketProps> = ({ market, products, product
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
-
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-2 mt-8" role="navigation" aria-label="Paginação de produtos">
-          {Array.from({ length: totalPages }).map((_, i) => (
-            <button
-              key={i}
-              onClick={() => goToPage(i)}
-              className={`h-3 w-8 rounded-full transition-all duration-300 ${
-                i === currentPage ? "bg-green-600 shadow-lg" : "bg-gray-200 hover:bg-gray-300"
-              }`}
-              aria-label={`Ir para página ${i + 1}`}
-              aria-current={i === currentPage ? "page" : undefined}
-            />
-          ))}
-        </div>
-      )}
     </div>
   )
 }

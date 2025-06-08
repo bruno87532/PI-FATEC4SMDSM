@@ -1,9 +1,16 @@
+"use client"
+
+import { Loader2 } from "lucide-react"
 import Link from "next/link"
 import { CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { useState } from "react"
 
 const PurchaseConfirmation = () => {
+    const [homeIsLoading, setHomeIsLoading] = useState<boolean>(false)
+    const [admIsLoading, setAdmIsLoading] = useState<boolean>(false)
+  
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="max-w-md w-full p-8 border-green-500 border-2">
@@ -19,14 +26,30 @@ const PurchaseConfirmation = () => {
           </p>
 
           <div className="grid gap-4 w-full mt-4">
-            <Button className="bg-green-600 hover:bg-green-700 text-white w-full">Ir para o painel administrativo</Button>
-
-            <Link href="#" className="w-full">
+            <Link href="/market/dashboard" className="w-full">
               <Button
+                disabled={admIsLoading}
+                className="bg-green-600 hover:bg-green-700 text-white w-full"
+                onClick={() => {
+                  setAdmIsLoading(true)
+                  setHomeIsLoading(false)
+                }}
+              >
+                {admIsLoading ? <Loader2 className="animate-spin h-6 w-6" /> : "Ir para o painel administrativo"}
+              </Button>
+            </Link>
+
+            <Link href="/" className="w-full">
+              <Button
+                disabled={homeIsLoading}
                 variant="outline"
                 className="border-gray-900 text-gray-800 hover:bg-gray-900 hover:text-gray-300 w-full"
+                onClick={() => {
+                  setAdmIsLoading(false)
+                  setHomeIsLoading(true)
+                }}
               >
-                Voltar para a página inicial
+                {homeIsLoading ? <Loader2 className="animate-spin h-6 w-6" /> : "Voltar para a página inicial"}
               </Button>
             </Link>
           </div>

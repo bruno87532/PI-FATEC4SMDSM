@@ -68,7 +68,7 @@ export class HighlightProductsService {
         Promise.all(
           subscriptions.map(async subscription => {
             const products = await this.productService.getProductsByIdUser(subscription.idUser);
-            return products.filter(product => product.stock > 0); // filtra os produtos aqui
+            return products.filter(product => product.stock > 0 && product.idDrive !== "1yyqC24eHfXlEq2Ob-ffMPkUkUKk36WAQ"); 
           })
         )
       )
@@ -148,7 +148,7 @@ export class HighlightProductsService {
         Promise.all(
           subscriptions.map(async subscription => {
             const products = await this.productService.getProductsByPartialNameId(subscription.idUser, partialName);
-            return products.filter(product => product.stock > 0); 
+            return products.filter(product => product.stock > 0 && product.idDrive !== "1yyqC24eHfXlEq2Ob-ffMPkUkUKk36WAQ"); 
           })
         )
       )
